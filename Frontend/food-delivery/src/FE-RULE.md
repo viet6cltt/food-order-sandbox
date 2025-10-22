@@ -168,15 +168,7 @@ Snippet `ProtectedRoute` tại `src/routes/ProtectedRoute.tsx`.
 
 ---
 
-# 12. Testing & CI
-
-* Unit: Jest + React Testing Library. Write tests for components, hooks, and utils.
-* E2E: Cypress for end-to-end critical flows (signup, order, owner accept, admin approve).
-* CI: run lint, test, build on PR. Deploy preview to Vercel/Netlify.
-
----
-
-# 13. Accessibility & Performance
+# 12. Accessibility & Performance
 
 * Use `loading="lazy"` for images gallery.
 * Minimize bundle: tree-shaking, dynamic imports for large owner/admin modules.
@@ -184,21 +176,7 @@ Snippet `ProtectedRoute` tại `src/routes/ProtectedRoute.tsx`.
 
 ---
 
-# 14. Developer workflow & PR checklist
-
-* Branch naming: `feature/<ticket>-short-desc`.
-* Commit msg: conventional commits preferred.
-* PR checklist:
-
-  * [ ] Lint pass
-  * [ ] Tests added/updated
-  * [ ] Runs locally
-  * [ ] Accessibility check for new UI
-  * [ ] Update docs if API changes
-
----
-
-# 15. Onboarding & AI Agent guidance
+# 13. Onboarding & AI Agent guidance
 
 **Context for AI Agent:**
 
@@ -216,31 +194,8 @@ Snippet `ProtectedRoute` tại `src/routes/ProtectedRoute.tsx`.
 ```
 You are a frontend developer for our food-order app. Create <component> under src/<path> using React + TypeScript + Tailwind. Use existing api function <apiFn> from <feature>/api.ts. Component must accept props {className?: string, ...} and be accessible (aria). Keep file size <200 LOC. Export default."
 ```
-
 ---
 
-# 16. Roadmap (implement order)
-
-1. Project init (Vite, Tailwind, Router, ESLint, Prettier).
-2. Auth flow + apiClient + AuthContext.
-3. AppLayout + Home + Browse + FoodDetail + Cart minimal flows.
-4. Checkout & Payment (mock integration).
-5. Owner features CRUD.
-6. Admin features & stats.
-7. Realtime (websocket) for live order updates.
-8. Perf & accessibility polish; tests.
-
----
-
-# 17. Deliverables team nên có ngay
-
-* README (setup, env var list)
-* `SCREEN_MAP.md` (mapping screen -> route -> components)
-* `API_CONTRACT.md` or OpenAPI spec (endpoints used by frontend)
-* Component library doc (props & usage)
-
----
-
-# 18. Phiên bản & thay đổi
+# 14. Phiên bản & thay đổi
 
 * Lưu ý cập nhật file này khi có thay đổi lớn trong tech choices (ví dụ: chuyển Redux/ReactQuery, đổi auth storage sang cookie, thêm SSO).
