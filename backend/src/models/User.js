@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const ProviderEnum = ['local', 'google'];
+const ProviderEnum = ['local', 'google', 'firebase'];
 
 const providerSchema = new mongoose.Schema(
   {
@@ -42,16 +42,17 @@ const userSchema = new mongoose.Schema(
     },
     passwordHash: {
       type: String,
+      required: true,
       select: false,
     },
     providers: {
       type: [providerSchema],
       default: [{ provider: 'local' }],
     },
-    roleId: {
-      type: mongoose.Schema.Types.ObjectId,
-      required: true,
-      ref: 'Role',
+    role: {
+      type: String,
+      enum: ['admin', 'customer', 'restaurant_owner', 'brand_admin'],
+      default: 'customer'
     },
     status: {
       type: String,

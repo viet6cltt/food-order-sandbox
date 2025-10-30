@@ -8,6 +8,8 @@ const cookieParser = require('cookie-parser');
 const route = require('./routes');
 const app = express();
 
+
+
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 

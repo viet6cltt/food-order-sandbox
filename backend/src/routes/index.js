@@ -1,11 +1,12 @@
 const express = require('express');
+const authRoutes = require('./auth.routes.js');
 
 function route(app) {
   const apiRouter = express.Router();
 
-  // apiRouter.use('/...', controller);
+  apiRouter.use('/auth', authRoutes);
 
-  app.use('/api', apiRouter);
+  app.use('/api', apiRouter); // add all with /api
 
   // Handler err
   app.use((err, req, res, next) => {

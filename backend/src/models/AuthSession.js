@@ -20,11 +20,11 @@ const authSessionSchema = new mongoose.Schema(
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     lastUsedAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     expiresAt: {
       type: Date,
