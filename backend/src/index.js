@@ -20,7 +20,6 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(morgan('dev')); // Log HTTP requests
 
 // Route init
