@@ -1,19 +1,61 @@
 const AuthService = require('../services/auth.service');
 
-// [GET] /
-async function index(req, res, next) {
+class AuthController {
+  // [GET] /
+  async index(req, res, next) {
 
-}
-// [POST] /register
-async function register(req, res, next) {
-  const { username, password, idToken } = req.body;
+  }
+  // [POST] /register
+  async register(req, res, next) {
+    const { username, password, idToken } = req.body;
 
-  if (!username || !password || !idToken) {
-    return res.status(400).json({ error: 'username, password, and idToken are required' });
+    if (!username || !password || !idToken) {
+      return res.status(400).json({ error: 'username, password, and idToken are required' });
+    }
+
+    try {
+      const result = await AuthService.registerWithFirebase({ username, password, idToken });
+      return res.status(201).json(result);
+    } catch (err) {
+      next(err);
+    }
+    
   }
 
-  const result = await AuthService.registerWithFirebase({ username, password, idToken });
-  return res.status(201).json(result);
+  // [POST] /login
+  async login(req, res, next) {
+    try{
+      const { phone, password } = req.body;
+      const deviceInfo = {
+        userAgent: req.headers['user-agent'] || 'unknown',
+        ipAddress: req.ip,
+        deviceId: null
+      };
+
+      const { user, accessToken, refreshToken } = await AuthService.login(phone, password, deviceInfo);
+
+      return res
+        .cookie('refreshToken', refreshToken, {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === 'production',
+          sameSite: 'strict',
+          maxAge: 7 * 24 * 60 * 60 * 1000
+        })
+        .status(200)
+        .json({
+          message: 'Login successfully',
+          accessToken,
+          user: {
+            id: user._id,
+            name: user.name,
+            phone: user.phone
+          }
+        });
+    } catch {err} {
+      next(err);
+    }
+  }
 }
 
-module.exports = { index, register };
+
+module.exports = new AuthController();
