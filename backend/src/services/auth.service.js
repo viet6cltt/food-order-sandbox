@@ -30,7 +30,7 @@ class AuthService {
     }
 
     // Hash password
-    const passwordHash = await hashPassword.hashPassword(password);
+    const passwordHash = await authHelper.hashPassword(password);
 
     // Tạo user mới (đã verify sẵn số điện thoại)
     const newUser = await UserService.createUser({
@@ -60,7 +60,7 @@ class AuthService {
     }
 
     // Kiem tra mat khau
-    const isMatch = await hashPassword.comparePassword(password, user.passwordHash);
+    const isMatch = await authHelper.comparePassword(password, user.passwordHash);
     if (!isMatch) {
       throw new Error('Wrong password');
     }

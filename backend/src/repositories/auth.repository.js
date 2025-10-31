@@ -14,7 +14,7 @@ class AuthRepository {
   }
 
   async findByPhone(phone) {
-    return await User.findOne({ phone });
+    return await User.findOne({ phone }).select('+passwordHash');
   }
 
   async createUser(data) {
