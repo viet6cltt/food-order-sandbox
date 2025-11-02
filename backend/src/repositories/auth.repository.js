@@ -35,18 +35,19 @@ class AuthRepository {
     return await authSession.save();
   }
 
-  async findValidSessionByUserId(userId) {
+  async findValidSessionByTokenId(refreshTokenId) {
     return await AuthSession.findOne({
-      userId,
+      refreshTokenId,
       revokedAt: null,
       expiresAt: { $gt: new Date() },
     });
   }
 
-  async revokeSession(sessionId) {
-    return await AuthSession.findByIdAndUpdate(sessionId, {
-      revokedAt: new Date(),
-    });
+  async revokeSession(refreshTokenId) {
+    return await AuthSession.findOneAndUpdate(
+      { refreshTokenId },
+      { revokedAt: new Date() }
+    );
   }
 }
 

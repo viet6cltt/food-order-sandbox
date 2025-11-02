@@ -71,6 +71,18 @@ class AuthController {
       return res.status(403).json({ message: err.message });
     }
   }
+
+  // [POST] /logout
+  async logout(req, res, next) {
+    const  refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(400).json({ message: 'No token provided' });
+    }
+
+    await AuthService.logout(refreshToken);
+    res.clearCookie('refreshToken');
+    return res.status(200).json({ message: 'Logged out successfully' });
+  }
 }
 
 

@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const tokenConfig = require('../config/token.config');
 
@@ -33,14 +33,19 @@ async function comparePassword(password, hashedPassword) {
  * @returns {string} Refresh token chưa băm đã được ký
  */
 function generateRefreshToken(userId) {
+  const refreshTokenId = uuidv4(); // sinh ID duy nhất cho mỗi token
+
   const payload = {
-    userId: userId,
-    type: REFRESH_TYPE
-  }
+    userId,
+    type: REFRESH_TYPE,
+    refreshTokenId: refreshTokenId 
+  };
 
-  const token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: tokenConfig.getRefreshTokenExpiry()});
+  const token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { 
+    expiresIn: tokenConfig.getRefreshTokenExpiry()
+  });
 
-  return token;
+  return { refreshToken: token, refreshTokenId };
 }
 
 function generateAccessToken(userId) {
@@ -67,7 +72,7 @@ function verifyRefreshToken(token) {
       throw new Error('Invalid token type');
     }
 
-    return decoded;
+    return decoded; // gồm cả userId + tokenId
   } catch (error) {
     console.error("Refresh Token Verification Failed:", error.message);
     return null;

@@ -67,10 +67,10 @@ class AuthService {
     // Create token
     const accessToken = authHelper.generateAccessToken(user._id);
 
-    const refreshToken = authHelper.generateRefreshToken(user._id);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id);
     await AuthRepository.createAuthSession({
       userId: user._id,
-      refreshTokenHash: refreshToken,
+      refreshTokenId: refreshTokenId,
       device: deviceInfo,
       expiresAt: tokenConfig.calculateExpiresAt(tokenConfig.getRefreshTokenExpiry())
     });
@@ -87,8 +87,9 @@ class AuthService {
   async refreshAccessToken(refreshToken) {
     try {
       const decoded = authHelper.verifyRefreshToken(refreshToken);
+      if (!decoded) throw new Error('Invalid refresh token');
 
-      const session = await AuthRepository.findValidSessionByUserId(decoded.userId);
+      const session = await AuthRepository.findValidSessionByTokenId(decoded.refreshTokenId);
       if (!session) {
         throw new Error('Session expired or revoked');
       }
@@ -100,6 +101,19 @@ class AuthService {
     } catch (err) {
       console.error('Refresh token failed:', err.message);
       throw new Error('Invalid or expired refresh token');
+    }
+  }
+
+  async logout(refreshToken) {
+    try {
+      const decoded = authHelper.verifyRefreshToken(refreshToken);
+      if (!decoded?.refreshTokenId) {
+        throw new Error('Invalid token format');
+      }
+
+      await AuthRepository.revokeSession(decoded.refreshTokenId);
+    } catch (err) {
+      throw new Error('Log out failed!');``
     }
   }
 }
