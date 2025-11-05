@@ -4,6 +4,8 @@ const cors = require('cors');
 const path = require('path');
 const cron = require('node-cron');
 const cookieParser = require('cookie-parser');
+const passport = require('passport');
+require('./config/passport.config');
 
 const route = require('./routes');
 const app = express();
@@ -22,6 +24,8 @@ app.use(
     credentials: true,
   })
 );
+app.use(passport.initialize());
+
 app.use(morgan('dev')); // Log HTTP requests
 
 // Route init

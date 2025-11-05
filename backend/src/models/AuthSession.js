@@ -7,10 +7,10 @@ const authSessionSchema = new mongoose.Schema(
       required: true,
       ref: 'User',
     },
-    refreshTokenHash: {
+    refreshTokenId: {
       type: String,
       required: true,
-      trim: true,
+      unique: true, // mỗi refresh Token Id là duy nhất
     },
     device: {
       userAgent: { type: String, trim: true },

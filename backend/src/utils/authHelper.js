@@ -1,10 +1,7 @@
 const bcrypt = require('bcryptjs');
-const crypto = require('crypto');
+const { v4: uuidv4 } = require('uuid');
 const jwt = require('jsonwebtoken');
 const tokenConfig = require('../config/token.config');
-
-const REFRESH_TYPE = 'refresh';
-const ACCESS_TYPE = 'access';
 
 /**
  * @description Hashing password 
@@ -28,72 +25,120 @@ async function comparePassword(password, hashedPassword) {
 }
 
 /**
- * @description Tạo 1 refresh token dưới dạng JWT
+ * @description Hàm chung để tạo JWT cho mọi mục đích (Access, Refresh, Verify Email, etc.)
  * @param {string} userId - ID của người dùng
- * @returns {string} Refresh token chưa băm đã được ký
+ * @param {object} tokenTypeConfig - Cấu hình token (type, secret, expiry)
+ * @param {object} [additionalPayload={}] - Các trường bổ sung cần thêm vào payload
+ * @returns {string | {token: string, identifier: string}} - Trả về token hoặc object (nếu là Refresh)
  */
-function generateRefreshToken(userId) {
+function generateToken(userId, tokenTypeConfig, additionalPayload = {}) {
   const payload = {
     userId: userId,
-    type: REFRESH_TYPE
+    type: tokenTypeConfig.type,
+    ...additionalPayload,
+  };
+
+  const token = jwt.sign(payload, tokenTypeConfig.secret, { expiresIn: tokenTypeConfig.expiry });
+
+  // Xử lí đặc biệt cho Refresh Token
+  if (tokenTypeConfig.type === 'refresh' && additionalPayload.refreshTokenId) {
+    return { refreshToken: token, refreshTokenId: additionalPayload.refreshTokenId };
   }
-
-  const token = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: tokenConfig.getRefreshTokenExpiry()});
-
-  return token;
-}
-
-function generateAccessToken(userId) {
-  const payload = {
-    userId: userId,
-    type: ACCESS_TYPE
-  }
-
-  const token = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: tokenConfig.getAccessTokenExpiry() });
 
   return token;
 }
 
 /**
- * 
+ * @description Hàm chung để xác minh JWT cho mọi mục đích
  * @param {string} token
- * @returns {string} payload 
+ * @param {object} tokenTypeConfig - Cấu hình token (type, secret)
+ * @returns {object | null} - Payload đã giải mã nếu hợp lệ, ngược lại là null
  */
-function verifyRefreshToken(token) {
+function verifyToken(token, tokenTypeConfig) {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(token, tokenTypeConfig.secret);
 
-    if (decoded.type !== REFRESH_TYPE) {
-      throw new Error('Invalid token type');
+    if (decoded.type !== tokenTypeConfig.type) {
+      throw new Error(`Invalid token type. Expected: ${tokenTypeConfig.type}, Got: ${decoded.type}`);
     }
-
     return decoded;
-  } catch (error) {
-    console.error("Refresh Token Verification Failed:", error.message);
+  } catch (err) {
+    console.error(`${tokenTypeConfig.type.toUpperCase()} Token Verification Failed:`, err.message);
     return null;
   }
 }
 
+function generateRefreshToken(userId) {
+    const refreshTokenId = uuidv4(); 
+    const config = tokenConfig.getTokenConfig().REFRESH;
+
+    return generateToken(userId, config, { refreshTokenId });
+}
+
+function generateAccessToken(userId) {
+    const config = tokenConfig.getTokenConfig().ACCESS;
+    return generateToken(userId, config);
+}
+
+function verifyRefreshToken(token) {
+    const config = tokenConfig.getTokenConfig().REFRESH;
+    return verifyToken(token, config);
+}
+
 function verifyAccessToken(token) {
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const config = tokenConfig.getTokenConfig().ACCESS;
+    return verifyToken(token, config);
+}
 
-    if (decoded.type !== ACCESS_TYPE) {
-      throw new Error('Invalid token type');
-    }
+function generateEmailVerificationToken(userId, email) {
+    const config = tokenConfig.getTokenConfig().EMAIL_VERIFY;
+    return generateToken(userId, config, { email });
+}
 
-    return decoded;
-  } catch (err) {
-    console.error("Access Token Verification Failed:", err.message);
-    return null;
-  }
+function verifyEmailVerificationToken(token) {
+    const config = tokenConfig.getTokenConfig().EMAIL_VERIFY;
+    return verifyToken(token, config);
+}
+
+function generateResetPasswordToken(userId) {
+  const config = tokenConfig.getTokenConfig().RESET_PASSWORD;
+  return generateToken(userId, config);
+}
+
+function verifyResetPasswordToken(token) {
+  const config = tokenConfig.getTokenConfig().RESET_PASSWORD;
+  return verifyToken(token, config);
+}
+
+function generateOauthToken(payloadData) {
+    const config = tokenConfig.getTokenConfig().OAUTH_LINK;
+    
+    const payload = {
+        type: config.type,
+        ...payloadData, 
+    };
+
+    const token = jwt.sign(payload, config.secret, { expiresIn: config.expiry });
+    
+    return token;
+}
+
+function verifyOauthToken(token) {
+    const config = tokenConfig.getTokenConfig().OAUTH_LINK;
+    return verifyToken(token, config);
 }
 
 module.exports = { 
   hashPassword,
   comparePassword, 
-  generateRefreshToken, 
+  generateRefreshToken,
   generateAccessToken,
   verifyRefreshToken,
-  verifyAccessToken
+  verifyAccessToken,
+  generateEmailVerificationToken,
+  verifyEmailVerificationToken,
+  generateResetPasswordToken,
+  verifyResetPasswordToken,
+  generateOauthToken, 
+  verifyOauthToken,
 };

@@ -1,12 +1,14 @@
-const ACCESS_TOKEN_EXPIRY = '15m'; 
-const REFRESH_TOKEN_EXPIRY = '7d';
 
-function getAccessTokenExpiry() {
-  return ACCESS_TOKEN_EXPIRY;
+const TOKEN_CONFIG = {
+  ACCESS: { type: 'access', secret: process.env.JWT_ACCESS_SECRET, expiry: '15m' },
+  REFRESH: { type: 'refresh', secret: process.env.JWT_REFRESH_SECRET, expiry: '7d' },
+  EMAIL_VERIFY: { type: 'verify_email', secret: process.env.JWT_EMAIL_VERIFY_SECRET, expiry: '2h' },
+  RESET_PASSWORD: { type: 'reset_password', secret: process.env.JWT_RESET_PASSWORD_SECRET, expiry: '1h' },
+  OAUTH_LINK : { type: 'oauth_link', secret: process.env.JWT_OAUTH_LINK_SECRET, expiry: '10m' },
 }
 
-function getRefreshTokenExpiry() {
-  return REFRESH_TOKEN_EXPIRY;
+function getTokenConfig() {
+  return TOKEN_CONFIG;
 }
 
 function calculateExpiresAt(expiryString) {
@@ -25,8 +27,34 @@ function calculateExpiresAt(expiryString) {
   return new Date(Date.now() + ms);
 }
 
+function convertExpiryToMinutes(expiryString) {
+  if (!expiryString) return 0;
+  
+  const match = expiryString.match(/^(\d+)([smhd])$/); 
+  if (!match) {
+    console.warn(`Invalid expiry format: ${expiryString}. Assuming minutes.`);
+    return parseInt(expiryString, 10) || 0; 
+  }
+
+  const value = parseInt(match[1], 10);
+  const unit = match[2];
+
+  switch (unit) {
+    case 'm':
+      return value;
+    case 'h':
+      return value * 60;
+    case 'd':
+      return value * 60 * 24;
+    case 's':
+      return Math.ceil(value / 60);
+    default:
+      return value;
+  }
+}
+
 module.exports = {
-  getAccessTokenExpiry,
-  getRefreshTokenExpiry,
+  getTokenConfig,
   calculateExpiresAt,
-};
+  convertExpiryToMinutes,
+}

@@ -26,15 +26,13 @@ class TokenRepository {
   /**
    * ✅ Tiêu thụ token sau khi xác minh
    * @param {ObjectId} userId
-   * @param {String} tokenHash - hash của token trong email
    * @param {String} type
    */
-  async consumeToken(userId, tokenHash, type) {
+  async consumeToken(userId, type) {
     return await VerificationToken.findOneAndUpdate(
       {
         userId,
         type,
-        tokenHash,
         consumedAt: null,
         expiresAt: { $gt: new Date() },
       },
