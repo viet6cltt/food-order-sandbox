@@ -110,6 +110,24 @@ function verifyResetPasswordToken(token) {
   return verifyToken(token, config);
 }
 
+function generateOauthToken(payloadData) {
+    const config = tokenConfig.getTokenConfig().OAUTH_LINK;
+    
+    const payload = {
+        type: config.type,
+        ...payloadData, 
+    };
+
+    const token = jwt.sign(payload, config.secret, { expiresIn: config.expiry });
+    
+    return token;
+}
+
+function verifyOauthToken(token) {
+    const config = tokenConfig.getTokenConfig().OAUTH_LINK;
+    return verifyToken(token, config);
+}
+
 module.exports = { 
   hashPassword,
   comparePassword, 
@@ -121,4 +139,6 @@ module.exports = {
   verifyEmailVerificationToken,
   generateResetPasswordToken,
   verifyResetPasswordToken,
+  generateOauthToken, 
+  verifyOauthToken,
 };

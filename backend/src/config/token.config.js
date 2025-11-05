@@ -4,6 +4,7 @@ const TOKEN_CONFIG = {
   REFRESH: { type: 'refresh', secret: process.env.JWT_REFRESH_SECRET, expiry: '7d' },
   EMAIL_VERIFY: { type: 'verify_email', secret: process.env.JWT_EMAIL_VERIFY_SECRET, expiry: '2h' },
   RESET_PASSWORD: { type: 'reset_password', secret: process.env.JWT_RESET_PASSWORD_SECRET, expiry: '1h' },
+  OAUTH_LINK : { type: 'oauth_link', secret: process.env.JWT_OAUTH_LINK_SECRET, expiry: '10m' },
 }
 
 function getTokenConfig() {

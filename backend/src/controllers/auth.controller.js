@@ -118,7 +118,7 @@ class AuthController {
     }
   }
 
-  // [POST] /api/auth/password-reset-request
+  // [POST] password-reset-request
   async sendPasswordResetRequest(req, res, next) {
     try {
       let { email } = req.body;
@@ -138,7 +138,7 @@ class AuthController {
     }
   }
 
-  // [POST] /api/auth/password-reset
+  // [POST] password-reset
   async resetPassword(req, res, next) {
     try {
       const { token, newPassword } = req.body;
@@ -150,6 +150,21 @@ class AuthController {
       await AuthService.resetPassword(token, newPassword);
 
       return res.status(200).json({ message: 'Password has been reset successfully' });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [GET] /oauth-url?provider=[provider]&returnUrl=[returnUrl]
+  async getOauthUrl(req, res, next) {
+    try { 
+      const { provider, returnUrl } = req.query;
+      if (!provider) return res.status(400).json({ error: 'Missing provider' });
+
+      const { url } = AuthService.getOauthUrl(provider, returnUrl);
+
+      console.log(url);
+      return res.status(200).json({ message: 'Get Oauth Url successfully', url: url });
     } catch (err) {
       next(err);
     }
