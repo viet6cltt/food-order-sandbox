@@ -1,10 +1,13 @@
+import React from 'react';
+import { AuthProvider } from './contexts/AuthContext';
+import AppRoutes from './routes/AppRoutes';
+
 function App() {
-
   return (
-    <h1 className="text-4xl font-bold text-center mt-10">
-      Food Delivery Frontend
-    </h1>
-  )
-}
+    <AuthProvider>
+      <AppRoutes />
+    </AuthProvider>
+  );
+} 
 
-export default App
+export default App;
