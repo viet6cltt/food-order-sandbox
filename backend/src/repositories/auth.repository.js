@@ -21,6 +21,13 @@ class AuthSessionRepository {
     );
   }
 
+  async revokeSessionByUserId(userId) {
+    return await AuthSession.findOneAndUpdate(
+      { userId: userId },
+      { revokedAt: new Date() }
+    );
+  }
+
   async revokeAllSessionsForUser(userId) {
     return await AuthSession.updateMany(
       { userId, revokedAt: null },

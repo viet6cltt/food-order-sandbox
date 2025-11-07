@@ -65,6 +65,8 @@ class AuthService {
     // Create token
     const accessToken = authHelper.generateAccessToken(user._id);
 
+    await AuthRepository.revokeSessionByUserId(user._id);
+
     const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id);
     await AuthRepository.createAuthSession({
       userId: user._id,

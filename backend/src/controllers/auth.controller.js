@@ -46,7 +46,7 @@ class AuthController {
 
       const { user, accessToken, refreshToken } = await AuthService.login(phone, password, deviceInfo);
 
-      res.cookies('refreshToken', refreshToken, {
+      res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'strict',
@@ -55,7 +55,7 @@ class AuthController {
 
       return SUCCESS_RESPONSE.success(res, 'Login successfully', {
         accessToken,
-        user: { id: user._id, username: username, phone: user.phone },
+        user: { id: user._id, username: user.username, phone: user.phone },
       })
     } catch (err) {
       next(err);
@@ -72,7 +72,7 @@ class AuthController {
 
       const accessToken = await AuthService.refreshAccessToken(refreshToken);
 
-      return R.success(res, 'Refresh successful', { accessToken });
+      return SUCCESS_RESPONSE.success(res, 'Refresh successful', { accessToken });
     } catch (err) {
       return res.status(403).json({ message: err.message });
     }
@@ -95,7 +95,7 @@ class AuthController {
   async sendEmailVerification(req, res, next) {
     try {
       const { email } = req.body;
-      const userId = req.user?.userId;
+      const userId = req.userId;
 
       if (!email) {
         throw new HTTP_ERROR.BadRequestError('No email are provided', ERR.AUTH_MISSING_FIELDS);

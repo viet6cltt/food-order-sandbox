@@ -12,22 +12,29 @@ module.exports = {
   REQUIRE_PHONE_USERNAME_PASSWORD: 'REQUIRE_PHONE_USERNAME_PASSWORD',
 
   // --- Lỗi Đăng nhập & Xác thực (Bổ sung/Thay thế) ---
-  AUTH_INVALID_CREDENTIALS: 'AUTH_INVALID_CREDENTIALS', // Đăng nhập sai
-  AUTH_MISSING_FIELDS: 'AUTH_MISSING_FIELDS', // Thiếu trường trong request
-  AUTH_TOKEN_EXPIRED: 'AUTH_TOKEN_EXPIRED', // Access token hết hạn
-  AUTH_INVALID_TOKEN: 'AUTH_INVALID_TOKEN', // Access token không hợp lệ
-  AUTH_EMAIL_NOT_VERIFIED: 'AUTH_EMAIL_NOT_VERIFIED', // khi email chưa đc verify
+  AUTH_INVALID_CREDENTIALS: 'AUTH_INVALID_CREDENTIALS',
+  AUTH_MISSING_FIELDS: 'AUTH_MISSING_FIELDS',
+  AUTH_TOKEN_EXPIRED: 'AUTH_TOKEN_EXPIRED',
+  AUTH_INVALID_TOKEN: 'AUTH_INVALID_TOKEN',
+  AUTH_EMAIL_NOT_VERIFIED: 'AUTH_EMAIL_NOT_VERIFIED',
 
-  // --- Lỗi logic xử lí 
+  // --- Lỗi logic xử lí ---
   USER_HASH_FAILED: 'USER_HASH_FAILED',
 
-  // --- Lỗi Người dùng & Ủy quyền (Bổ sung) ---
+  // --- Lỗi Người dùng & Ủy quyền ---
   AUTH_ACCESS_DENIED: 'AUTH_ACCESS_DENIED', // 403 Forbidden
   USER_INACTIVE: 'USER_INACTIVE',
   USER_ALREADY_EXISTS: 'USER_ALREADY_EXISTS',
   USER_NOT_FOUND: 'USER_NOT_FOUND',
-  VALIDATION_FAILED: 'VALIDATION_FAILED', // Lỗi xác thực dữ liệu
+  VALIDATION_FAILED: 'VALIDATION_FAILED', // dùng khi thiếu thông tin
   RESOURCE_CONFLICT: 'RESOURCE_CONFLICT',
+
+  // --- Lỗi người dùng
+  USER_PROFILE_NOT_FOUND: 'USER_PROFILE_NOT_FOUND',
+  USER_UPDATE_FAILED: 'USER_UPDATE_FAILED', // Cập nhật thất bại
+  USER_DELETE_FAILED: 'USER_DELETE_FAILED', // Xóa tài khoản thất bại
+  USER_PASSWORD_INCORRECT: 'USER_PASSWORD_INCORRECT', // Mật khẩu cũ sai khi đổi mật khẩu
+  USER_UNAUTHORIZED_ACTION: 'USER_UNAUTHORIZED_ACTION', // Không đủ quyền thực hiện hành động
 
   // --- Lỗi Chung (Bổ sung) ---
   SERVER_INTERNAL_ERROR: 'SERVER_INTERNAL_ERROR',

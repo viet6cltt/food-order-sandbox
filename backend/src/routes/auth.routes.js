@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const AuthController = require('../controllers/auth.controller');
-const authMiddleware = require('../middlewares/auth.middleware');
+const { optinalAuth, requireAuth } = require('../middlewares/auth.middleware');
+
 router.get('/', AuthController.index);
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
@@ -9,7 +10,7 @@ router.post('/refresh', AuthController.refreshAccessToken);
 router.post('/logout', AuthController.logout);
 
 // gửi email xác minh đến người dùng
-router.post('/verification-email', authMiddleware, AuthController.sendEmailVerification);
+router.post('/verification-email', requireAuth, AuthController.sendEmailVerification);
 // xác nhận email khi người dùng click vào link trong email
 router.get('/verify-email', AuthController.verifyEmailToken);
 
@@ -23,4 +24,5 @@ router.get('/oauth-url', AuthController.getOauthUrl);
 router.get('/:provider/callback', AuthController.oauthCallback);
 
 router.post('/complete-profile', AuthController.completeProfile);
+
 module.exports = router;
