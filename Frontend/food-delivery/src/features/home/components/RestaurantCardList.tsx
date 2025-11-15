@@ -1,79 +1,104 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import FoodBanner from '../../../assets/picture/Foodbanner_1.png'
-import FoodBanner2 from '../../../assets/picture/Foodbanner_2.png'
+import React, { useEffect, useState } from 'react'
 import RestaurantCard, { type Restaurant } from './RestaurantCard'
+import { getRestaurants } from '../api'
 
-
-{/** Mock Data Configuration, delete this when call API */}
-const TOTAL_MOCK = 20 // total mock restaurants
 const COLUMNS = 4
-const INITIAL_ROWS = 4 // initial 4 rows => 16 items
+const INITIAL_ROWS = 4
+const PAGE_SIZE = COLUMNS * INITIAL_ROWS
 
-function generateMockRestaurants(count = TOTAL_MOCK): Restaurant[] {
-    const banners = [FoodBanner, FoodBanner2]
-    return Array.from({ length: count }).map((_, i) => ({
-        id: i + 1,
-        bannerUrl: banners[i % banners.length],
-        name: `Restaurant ${i + 1}`,
-        address: `Some address ${i + 1}`,
-        rating: Math.round((3 + Math.random() * 2) * 10) / 10,
-    }))
-}
+const RestaurantCardList: React.FC = () => {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
+  const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [total, setTotal] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
-export default function RestaurantCardList() {
-    const [restaurants, setRestaurants] = useState<Restaurant[]>([])
-    const [loading, setLoading] = useState(true)
-    const [rows, setRows] = useState(INITIAL_ROWS)
+  useEffect(() => {
+    let mounted = true
+    setLoading(true)
+    setError(null)
 
-    // simulated fetch
-    useEffect(() => {
-        setLoading(true)
-        const t = setTimeout(() => {
-            setRestaurants(generateMockRestaurants(TOTAL_MOCK))
-            setLoading(false)
-        }, 300)
-        return () => clearTimeout(t)
-    }, [])
-
-    const visibleCount = useMemo(() => Math.max(0, Math.min(restaurants.length, rows * COLUMNS)), [rows, restaurants])
-
-    function handleSeeMore() {
-        // load 4 more rows
-        setRows((r) => r + 4)
+    async function fetchPage(p: number) {
+      try {
+        const { items, meta } = await getRestaurants(p, PAGE_SIZE)
+        if (!mounted) return
+        setTotal(meta?.total ?? null)
+        if (p === 1) {
+          setRestaurants(items)
+        } else {
+          // append next page
+          setRestaurants(prev => [...prev, ...items])
+        }
+      } catch (err: any) {
+        if (!mounted) return
+        setError(err?.message ?? 'Failed to load restaurants')
+      } finally {
+        if (mounted) setLoading(false)
+      }
     }
 
-    function handleShowLess() {
-        setRows(INITIAL_ROWS)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+    fetchPage(page)
+    return () => {
+      mounted = false
     }
+  }, [page])
 
-    if (loading) return <div className="py-8">Loading restaurants...</div>
+  function handleSeeMore() {
+    // nếu đã biết tổng và đủ thì không request thêm
+    if (total !== null && restaurants.length >= total) return
+    setPage(p => p + 1)
+  }
 
-    return (
-        <section>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {restaurants.slice(0, visibleCount).map((r) => (
-                    <RestaurantCard key={r.id} restaurant={r} />
-                ))}
-            </div>
+  function handleShowLess() {
+    // quay về trang 1 (giữ pageSize ban đầu)
+    setPage(1)
+    // khi page change effect sẽ fetch page 1 và replace restaurants
+  }
 
-            <div className="mt-6 flex justify-center">
-                {visibleCount < restaurants.length ? (
-                    <button
-                        onClick={handleSeeMore}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                    >
-                        See more
-                    </button>
-                ) : (
-                    <button
-                        onClick={handleShowLess}
-                        className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
-                    >
-                        Show less
-                    </button>
-                )}
-            </div>
-        </section>
-    )
+  return (
+    <section>
+      {error && (
+        <div className="text-red-500 text-sm mb-4">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {restaurants.map(r => (
+          <RestaurantCard key={r.id} restaurant={r} />
+        ))}
+
+        {/* loading skeleton placeholders when initial load */}
+        {loading && restaurants.length === 0 &&
+          Array.from({ length: PAGE_SIZE }).map((_, i) => (
+            <div key={`skeleton-${i}`} className="bg-white rounded-lg shadow-sm animate-pulse h-56" />
+          ))
+        }
+      </div>
+
+      <div className="mt-6 flex items-center justify-center space-x-4">
+        {loading && restaurants.length > 0 && <div className="text-sm text-gray-500">Loading...</div>}
+
+        {!loading && total !== null && restaurants.length < total && (
+          <button
+            onClick={handleSeeMore}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+          >
+            See more
+          </button>
+        )}
+
+        {!loading && total !== null && restaurants.length >= (total ?? 0) && total > PAGE_SIZE && (
+          <button
+            onClick={handleShowLess}
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+          >
+            Show less
+          </button>
+        )}
+      </div>
+    </section>
+  )
 }
+
+export default RestaurantCardList

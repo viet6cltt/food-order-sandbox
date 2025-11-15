@@ -1,10 +1,12 @@
 const express = require('express');
 const authRoutes = require('./auth.routes.js');
+const restaurantRoutes = require('./restaurant.routes');
 
 function route(app) {
   const apiRouter = express.Router();
 
   apiRouter.use('/auth', authRoutes);
+  apiRouter.use('/restaurants', restaurantRoutes);
 
   app.use('/api', apiRouter); // add all with /api
 
