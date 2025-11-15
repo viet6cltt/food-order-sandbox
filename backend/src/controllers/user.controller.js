@@ -9,6 +9,7 @@ class UserController {
     return SUCCESS_RESPONSE.success(res, 'User API are working well!!!');
   }
 
+  // [GET] /me
   async getMe(req, res, next) {
     try {
       const userId = req.userId;
@@ -32,6 +33,23 @@ class UserController {
       const user = await UserService.findById(userId);
 
       return SUCCESS_RESPONSE.success(res, 'Get user Info successfully', { user });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async updateMe(req, res, next) {
+    try {
+      const userId = req.userId;
+      const data = req.body;
+
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError('Access Token are missing or invalid', ERR.AUTH_INVALID_TOKEN);
+      }
+
+      const updatedUser = await UserService.updateUser(userId, data);
+
+      return SUCCESS_RESPONSE.success(res, 'Update your Info successfully', { updatedUser });
     } catch (err) {
       next(err);
     }

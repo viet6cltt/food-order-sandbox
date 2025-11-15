@@ -31,6 +31,38 @@ class UserService {
     return await UserRepository.findById(userId);
   }
 
+  async updateUserProfile(userId, updates) {
+    if (!updates || typeof updates !== "object") {
+      throw new HTTP_ERROR.BadRequestError('Invalid request body', ERR.USER_INVALID_UPDATE_FIELDS);
+    }
+
+    const allowedFields = [
+      "firstname",
+      "lastname",
+      "avatarUrl",
+      "dateOfBirth",
+      "address",
+    ];
+
+    const cleanUpdates = {};
+
+    for (const key of allowedFields) {
+      if (updates[key] !== undefined) {
+        cleanUpdates[key] = updates[key];
+      }
+    }
+
+    // Validate address.geo (cập nhật sau)
+
+    const updatedUser = await UserRepository.updateUser(userId, cleanUpdates);
+
+    if (!updatedUser) {
+      throw new HTTP_ERROR.NotFoundError('User not found', ERR.USER_NOT_FOUND);
+    }
+
+    return updatedUser;
+
+  }
   async updateUser(userId, data) {
     const updatedUser = await UserRepository.updateUser(userId, data);
     if (!updatedUser)

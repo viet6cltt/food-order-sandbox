@@ -31,7 +31,7 @@ class UserRepository {
   }
 
   async updateUser(userId, updateFields) {
-    return await User.findByIdAndUpdate(userId, updateFields, { new: true });
+    return await User.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: true });
   }
 
   async updateEmail(userId, email) {

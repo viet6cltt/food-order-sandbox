@@ -1,0 +1,108 @@
+[
+  {
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "categoryId": { "$oid": "6740aaa1a1a1a1a1a1a1a1a1" },
+    "name": "Pepperoni Pizza",
+    "description": "12-inch pizza topped with mozzarella cheese and pepperoni.",
+    "price": 159000,
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/thumb/b/bb/Pizza_Vi%E1%BB%87t_Nam_%C4%91%E1%BA%BF_d%C3%A0y%2C_x%C3%BAc_x%C3%ADch_%28SNaT_2018%29_%287%29.jpg/800px-Pizza_Vi%E1%BB%87t_Nam_%C4%91%E1%BA%BF_d%C3%A0y%2C_x%C3%BAc_x%C3%ADch_%28SNaT_2018%29_%287%29.jpg",
+    "isAvailable": true,
+    "rating": 4.7,
+    "optionGroups": [
+      {
+        "name": "Size",
+        "isRequired": true,
+        "maxSelect": 1,
+        "options": [
+          { "name": "Small", "price": 0 },
+          { "name": "Medium", "price": 20000 },
+          { "name": "Large", "price": 40000 }
+        ]
+      },
+      {
+        "name": "Extra Topping",
+        "isRequired": false,
+        "maxSelect": 3,
+        "options": [
+          { "name": "Extra Cheese", "price": 15000 },
+          { "name": "Olives", "price": 10000 },
+          { "name": "Jalapeno", "price": 12000 }
+        ]
+      }
+    ],
+    "totalBuy": 120,
+    "createdAt": { "$date": "2024-10-01T10:00:00Z" },
+    "updatedAt": { "$date": "2024-10-01T10:00:00Z" }
+  },
+
+  {
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "categoryId": { "$oid": "6740aaa1a1a1a1a1a1a1a1a1" },
+    "name": "California Roll",
+    "description": "Sushi roll filled with crab stick, avocado, and cucumber.",
+    "price": 89000,
+    "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/California_Sushi_%2826571101885%29.jpg",
+    "isAvailable": true,
+    "rating": 4.8,
+    "optionGroups": [
+      {
+        "name": "Wasabi",
+        "isRequired": false,
+        "maxSelect": 1,
+        "options": [
+          { "name": "No Wasabi", "price": 0 },
+          { "name": "Normal Wasabi", "price": 0 },
+          { "name": "Extra Wasabi", "price": 5000 }
+        ]
+      },
+      {
+        "name": "Ginger",
+        "isRequired": false,
+        "maxSelect": 1,
+        "options": [
+          { "name": "Less Ginger", "price": 0 },
+          { "name": "Normal Ginger", "price": 0 }
+        ]
+      }
+    ],
+    "totalBuy": 350,
+    "createdAt": { "$date": "2024-11-02T11:00:00Z" },
+    "updatedAt": { "$date": "2024-11-02T11:00:00Z" }
+  },
+
+  {
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "categoryId": { "$oid": "6740aaa1a1a1a1a1a1a1a1a1" },
+    "name": "Cơm Tấm Sườn Bì Chả",
+    "description": "Vietnamese broken rice with grilled pork chop, shredded pork skin, and steamed egg cake.",
+    "price": 65000,
+    "imageUrl": "https://i1-giadinh.vnecdn.net/2024/03/07/7Honthinthnhphm1-1709800144-8583-1709800424.jpg?w=0&h=0&q=100&dpr=2&fit=crop&s=yflkT1zyARjnO_PPyQYBoA",
+    "isAvailable": true,
+    "rating": 4.6,
+    "optionGroups": [
+      {
+        "name": "Add-ons",
+        "isRequired": false,
+        "maxSelect": 3,
+        "options": [
+          { "name": "Thêm trứng ốp la", "price": 7000 },
+          { "name": "Thêm chả", "price": 10000 },
+          { "name": "Thêm bì", "price": 8000 }
+        ]
+      },
+      {
+        "name": "Mức độ nước mắm",
+        "isRequired": false,
+        "maxSelect": 1,
+        "options": [
+          { "name": "Ít mặn", "price": 0 },
+          { "name": "Vừa", "price": 0 },
+          { "name": "Đậm", "price": 0 }
+        ]
+      }
+    ],
+    "totalBuy": 500,
+    "createdAt": { "$date": "2024-10-10T12:00:00Z" },
+    "updatedAt": { "$date": "2024-10-10T12:00:00Z" }
+  }
+]

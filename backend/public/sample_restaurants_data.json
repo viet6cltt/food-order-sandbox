@@ -1,0 +1,65 @@
+[
+  {
+    "name": "Pizza House",
+    "ownerId": { "$oid": "690bb8784dbd8edcae8d1077" },
+    "description": "Authentic Italian pizza made with fresh ingredients",
+    "bannerUrl": "https://jollibee.com.vn/media/wysiwyg/TT1.jpg",
+    "address": {
+      "full": "123 Nguyen Trai, District 1, Ho Chi Minh City",
+      "street": "Nguyen Trai",
+      "ward": "Ward 5",
+      "district": "District 1",
+      "city": "Ho Chi Minh City",
+      "geo": {
+        "type": "Point",
+        "coordinates": [106.6881, 10.7626]
+      }
+    },
+    "phone": "0901234567",
+    "opening_time": "09:00",
+    "closing_time": "22:00",
+    "isActive": true,
+    "rating": 0,
+    "reviewCount": 0,
+    "categoriesId": [],
+    "shippingPolicy": "SELF_SHIP",
+    "baseShippingFee": 10000,
+    "shippingPerKm": 2500,
+    "estimatedDeliveryTime": 25,
+    "createdAt": { "$date": "2024-10-01T10:00:00Z" },
+    "updatedAt": { "$date": "2024-10-01T10:00:00Z" }
+  },
+
+  {
+    "name": "Sushi World",
+    "ownerId": { "$oid": "690bb8784dbd8edcae8d1077" },
+    "description": "Fresh sushi prepared daily",
+    "bannerUrl": "https://example.com/banner-sushi.jpg",
+    "address": {
+      "full": "45 Le Loi, District 1, Ho Chi Minh City",
+      "street": "Le Loi",
+      "ward": "Ben Nghe",
+      "district": "District 1",
+      "city": "Ho Chi Minh City",
+      "geo": {
+        "type": "Point",
+        "coordinates": [106.7009, 10.7769]
+      }
+    },
+    "phone": "0912345678",
+    "opening_time": "10:00",
+    "closing_time": "21:00",
+    "isActive": true,
+    "rating": 4.8,
+    "reviewCount": 320,
+    "categoriesId": [
+      { "$oid": "673ecat00000000000000103" }
+    ],
+    "shippingPolicy": "PARTNER_SHIP",
+    "baseShippingFee": 15000,
+    "shippingPerKm": 3000,
+    "estimatedDeliveryTime": 30,
+    "createdAt": { "$date": "2024-11-02T11:00:00Z" },
+    "updatedAt": { "$date": "2024-11-02T11:00:00Z" }
+  }
+]

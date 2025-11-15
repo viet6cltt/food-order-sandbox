@@ -55,17 +55,13 @@ function generateToken(userId, tokenTypeConfig, additionalPayload = {}) {
  * @returns {object | null} - Payload đã giải mã nếu hợp lệ, ngược lại là null
  */
 function verifyToken(token, tokenTypeConfig) {
-  try {
-    const decoded = jwt.verify(token, tokenTypeConfig.secret);
+  const decoded = jwt.verify(token, tokenTypeConfig.secret);
 
-    if (decoded.type !== tokenTypeConfig.type) {
-      throw new Error(`Invalid token type. Expected: ${tokenTypeConfig.type}, Got: ${decoded.type}`);
-    }
-    return decoded;
-  } catch (err) {
-    console.error(`${tokenTypeConfig.type.toUpperCase()} Token Verification Failed:`, err.message);
-    return null;
+  if (decoded.type !== tokenTypeConfig.type) {
+    throw new Error(`Invalid token type`);
   }
+
+  return decoded;
 }
 
 function generateRefreshToken(userId) {
