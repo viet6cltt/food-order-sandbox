@@ -5,7 +5,7 @@
   "scripts": {
     "format": "prettier --write .",
     "start": "node server.js",
-    "dev:swagger": "npm-run-all --parallel watch:swagger start:dev", 
+    "dev:swagger": "npm-run-all --parallel watch:swagger start:dev",
     "watch:swagger": "chokidar \"src/docs/**/*.yaml\" -c \"npm run bundle:swagger\"",
     "bundle:swagger": "swagger-cli bundle ./src/docs/swagger.yaml --outfile dist/swagger.json --type json",
     "dev": "nodemon server.js"

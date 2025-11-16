@@ -1,20 +1,58 @@
 # Backend (Node.js) — Coding & AI Agent Guidelines
 
-Phiên bản: 1.0
-Ngày sửa đổi: 2025-11-14
+Phiên bản: 1.1  
+Ngày sửa đổi: 2025-11-16
 
-Mục tiêu: Tài liệu này hướng dẫn cách triển khai, tổ chức mã và quy tắc để AI Agent/ dev phát triển backend trong repo `Backend/` một cách nhất quán, an toàn và dễ maintain.
+Mục tiêu: tài liệu này cập nhật BE-rule dựa trên codebase hiện tại (Express v5, Mongoose, Passport, CommonJS). Hướng dẫn rõ ràng cho dev và AI Agent để tạo code tương thích với repo.
 
 ---
 
-## 1. Tổng quan dự án
+## 0. Môi trường & bản nhạc
+- Node.js: repo chạy tốt trên Node 18+; trong môi trường dev hiện tại dùng Node 22.11.0 — test với cùng major khi deploy.
+- Package manager: npm.
+- Frameworks: Express v5, Mongoose (v8), Passport, JWT, Swagger (OpenAPI YAML at `src/docs/swagger.yaml`).
+
+---
+
+## 1. Kiến trúc & pattern cố định
+Giữ pattern existing: routes → controllers → services → repositories → models → utils → middlewares.
+
+- routes: `src/routes/*.routes.js` — export `Router`.
+- controller: `src/controllers/*` — nhẹ, validate input, gọi service, trả response.
+- services: `src/services/*` — business logic, throw `AppError` cho lỗi mong đợi.
+- repositories: `src/repositories/*` — truy vấn DB (Mongoose) hoặc I/O, trả dữ liệu thô.
+- models: `src/models/*.js` — Mongoose schemas.
+- utils/middlewares: tái sử dụng (ví dụ `asyncHandler`, `AppError`, `error.middleware`).
+
+---
+
+## 2. Module system
+- Duy trì CommonJS (require/module.exports). Không convert toàn repo sang ESM trong 1 PR.
+- Nếu cần dùng 1 dependency ESM-only (ví dụ uuid v8+), AI/Dev phải:
+  - Dùng dynamic import() trong runtime hoặc
+  - Dùng fallback (Node `crypto.randomUUID()`), hoặc
+  - Cài phiên bản CommonJS của package (ví dụ `uuid@3`/`uuid@8` với CJS build).
+- Ví dụ fallback cho `uuid`:
+```js
+let uuidv4;
+try {
+  uuidv4 = require('uuid').v4;
+} catch (e) {
+  const { randomUUID } = require('crypto');
+  uuidv4 = () => randomUUID();
+}
+```
+
+---
+
+## 3. Tổng quan dự án
 
 - Tech stack: Node.js (v14+/v16+), Express, Firebase config tồn tại (firebase.json), MongoDB/Mongoose (kiến trúc repo có models), Passport (auth), JWT tokens.
 - Kiến trúc chính: routes -> controllers -> services -> repositories -> models. Có `src/utils/AppError.js` và `src/middlewares/error.middleware.js` để xử lý lỗi chung.
 
 ---
 
-## 2. Mục tiêu tài liệu
+## 4. Mục tiêu tài liệu
 
 - Chuẩn hóa patterns cho API, error handling, auth và token flows.
 - Định nghĩa conventions cho AI Agent để tự động sinh code an toàn, đúng chỗ và dễ review.
@@ -22,7 +60,7 @@ Mục tiêu: Tài liệu này hướng dẫn cách triển khai, tổ chức mã
 
 ---
 
-## 3. Cấu trúc thư mục (hiện có)
+## 5. Cấu trúc thư mục (hiện có)
 
 ```
 src/
@@ -42,7 +80,7 @@ Ghi chú: giữ pattern `routes -> controllers -> services -> repositories` đ�
 
 ---
 
-## 4. Quy ước đặt tên & file
+## 6. Quy ước đặt tên & file
 
 - Files JS: `camelCase` cho functions, `PascalCase` cho model constructors (e.g., `User.js`).
 - Controller file: `<feature>.controller.js` (ví dụ `auth.controller.js`).
@@ -54,7 +92,7 @@ Ghi chú: giữ pattern `routes -> controllers -> services -> repositories` đ�
 
 ---
 
-## 5. Contract API (format response)
+## 7. Contract API (format response)
 
 Luôn trả về JSON theo contract chuẩn:
 
@@ -71,7 +109,7 @@ Luôn trả về JSON theo contract chuẩn:
 
 ---
 
-## 6. Patterns mã mẫu
+## 8. Patterns mã mẫu
 
 - Controller (nhẹ, chỉ validate request body/query/params, gọi service, trả response):
 
@@ -113,14 +151,14 @@ exports.findById = (id) => ExampleModel.findById(id).lean();
 
 ---
 
-## 7. Validation & Sanitation
+## 9. Validation & Sanitation
 
 - Dùng runtime validation cho tất cả input từ client (request body, query, params). Giáo trình hiện tại không bắt buộc thư viện cụ thể, nhưng khuyến nghị dùng `joi` hoặc `zod`.
 - Nếu dùng `joi`, tạo schema trong `src/validators/` hoặc phương thức validate trong `services` trước khi gọi repository.
 
 ---
 
-## 8. Authentication / Authorization
+## 10. Authentication / Authorization
 
 - Dự án có `passport.config.js` và token configs. Tiếp tục dùng Passport + JWT pattern.
 - Token flow:
@@ -130,14 +168,14 @@ exports.findById = (id) => ExampleModel.findById(id).lean();
 
 ---
 
-## 9. Error handling
+## 11. Error handling
 
 - Dùng `AppError` để tạo lỗi tùy chỉnh (message, statusCode).
 - Các controller nên throw lỗi (ví dụ `throw new AppError('Not found', 404)`) và để `error.middleware` xử lý format response và logging.
 
 ---
 
-## 10. Security & secrets
+## 12. Security & secrets
 
 - Đọc secrets từ `process.env` (sử dụng `.env` và `Backend/.env.example`). Không commit `.env` (gitignore đã có).
 - Các biến thường có: `PORT`, `MONGODB_URI`, `JWT_SECRET`, `JWT_EXPIRES_IN`, `REFRESH_TOKEN_EXPIRES_IN`, `SMTP_*`, `FIREBASE_*`.
@@ -145,27 +183,27 @@ exports.findById = (id) => ExampleModel.findById(id).lean();
 
 ---
 
-## 11. Logging & Monitoring
+## 13. Logging & Monitoring
 
 - Dùng console/libraries (winston/pino) để log. Errors đi qua error middleware - log stack trace server-side but return user-friendly message to client.
 
 ---
 
-## 12. Tests
+## 14. Tests
 
 - Unit tests (Jest) cho services & utils.
 - Integration tests cho routes (supertest).
 
 ---
 
-## 13. CI / CD
+## 15. CI / CD
 
 - CI should run: lint, tests, build (if any), and optional static analysis.
 - For deployments: Firebase/Cloud Run/Heroku settings may be used; follow server's `package.json` scripts.
 
 ---
 
-## 14. Code style & conventions
+## 16. Code style & conventions
 
 - Use CommonJS modules (existing code uses `require`/`module.exports`). If migrating to ESM, do it in a single PR.
 - Keep functions small, single responsibility.
@@ -174,7 +212,7 @@ exports.findById = (id) => ExampleModel.findById(id).lean();
 
 ---
 
-## 15. AI Agent instructions / prompt template
+## 17. AI Agent instructions / prompt template
 
 When an AI agent generates code, follow these rules strictly:
 
@@ -195,7 +233,7 @@ You are a backend Node.js developer. Create a new <feature> using Express in thi
 
 ---
 
-## 16. Example: New endpoint skeleton (Create user)
+## 18. Example: New endpoint skeleton (Create user)
 
 Routes:
 ```js
@@ -247,7 +285,7 @@ exports.create = (payload) => User.create(payload)
 
 ---
 
-## 17. Deliverables the backend should keep
+## 19. Deliverables the backend should keep
 
 - `Backend/.env.example` (list env vars, no secrets)
 - `README.md` with setup, run, and test commands
@@ -256,7 +294,7 @@ exports.create = (payload) => User.create(payload)
 
 ---
 
-## 18. Change log
+## 20. Change log
 
 Update this file if you change patterns (migrating to TypeScript, changing auth approach, or switching DB).
 

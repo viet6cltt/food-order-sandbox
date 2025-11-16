@@ -1,5 +1,13 @@
 const bcrypt = require('bcryptjs');
-const { v4: uuidv4 } = require('uuid');
+let uuidv4;
+try {
+  // thử require (works if uuid is CommonJS)
+  uuidv4 = require('uuid').v4;
+} catch (e) {
+  // fallback: uuid v8+ is ESM -> use crypto.randomUUID to keep behaviour
+  const { randomUUID } = require('crypto');
+  uuidv4 = () => randomUUID();
+}
 const jwt = require('jsonwebtoken');
 const tokenConfig = require('../config/token.config');
 
