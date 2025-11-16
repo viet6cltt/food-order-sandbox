@@ -3,6 +3,7 @@ const authRoutes = require('./auth.routes.js');
 const usersRoutes = require('./users.routes.js');
 const restaurantsRoutes = require('./restaurants.routes.js');
 const menuItemRoutes = require('./menuItem.routes.js');
+const cartRoutes = require('./cart.routes.js');
 const errorHandler = require('../middlewares/error.middleware');
 
 function route(app) {
@@ -12,6 +13,7 @@ function route(app) {
   apiRouter.use('/users', usersRoutes);
   apiRouter.use('/restaurants', restaurantsRoutes);
   apiRouter.use('/menu-items', menuItemRoutes);
+  apiRouter.use('/carts', cartRoutes);
 
 
   app.use('/api', apiRouter); // add all with /api
