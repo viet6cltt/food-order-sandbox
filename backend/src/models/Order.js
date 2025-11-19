@@ -1,13 +1,6 @@
 const mongoose = require('mongoose');
 
-const OrderStatus = [
-  "pending",
-  "confirmed",
-  "preparing",
-  "delivering",
-  "completed",
-  "cancelled",
-];
+const { orderStatus } = require('../constants/orderStatus');
 
 const SelectedOptionSchema = new mongoose.Schema(
   {
@@ -75,7 +68,7 @@ const OrderSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: OrderStatus,
+      enum: orderStatus,
       default: "pending" // "pending"
     },
 

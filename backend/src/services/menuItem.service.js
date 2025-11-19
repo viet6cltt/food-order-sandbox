@@ -5,8 +5,8 @@ const ERR = require('../constants/errorCodes');
 
 class MenuItemService {
   // get menu items by restaurantId
-  async getMenuItems(restaunrantId) {
-    return await MenuItemRepository.getByRestaurant(restaunrantId);
+  async getMenuItems(restaurantId) {
+    return await MenuItemRepository.getByRestaurant(restaurantId);
   }
 
   // get menu item info 
@@ -38,7 +38,7 @@ class MenuItemService {
 
   async updateMenuItem(menuItemId, userId, data) {
     // Validate restaurant
-    const restaurant = await RestaurantService.getRestaurantInfo(menuItemId.restaunrantId);
+    const restaurant = await RestaurantService.getRestaurantInfo(menuItemId.restaurantId);
     if (!restaurant) {
       throw new ERR_RESPONSE.NotFoundError('Restaurant not found', ERR.RESTAURANT_NOT_FOUND);
     }
@@ -64,7 +64,7 @@ class MenuItemService {
     }
     // Validate restaurant
     const restaurant = await RestaurantService.getRestaurantInfo(menuItem.restaurantId);
-    console.log(menuItemId.restaunrantId);
+    console.log(menuItemId.restaurantId);
     if (!restaurant) {
       throw new ERR_RESPONSE.NotFoundError('Restaurant not found', ERR.RESTAURANT_NOT_FOUND);
     }
