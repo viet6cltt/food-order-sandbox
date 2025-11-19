@@ -3,6 +3,8 @@ const ERR_RESPONSE = require('../utils/httpErrors.js');
 const ERR = require('../constants/errorCodes');
 const cartRepository = require('../repositories/cart.repository');
 
+const menuItemService = require('./menuItem.service.js');
+
 class CartService {
   /** get Cart Info */
   async getCart(userId) {
@@ -93,7 +95,7 @@ class CartService {
   }
 
   async deleteItem(userId, itemId) {
-    let cart = await CartRepository.findByUserId(userId);
+    const cart = await CartRepository.findByUserId(userId);
     if (!cart) {
       throw new ERR_RESPONSE.NotFoundError('Cart is not exists', ERR.CART_NOT_FOUND);
     }
@@ -104,6 +106,46 @@ class CartService {
     const newCart = await CartRepository.deleteItem(cart._id, item._id);
 
     return newCart;
+  }
+
+  async checkout(userId) {
+    const cart = await CartRepository.findByUserId(userId);
+
+    if (!cart) {
+      throw new ERR_RESPONSE.NotFoundError('Cart is not exists', ERR.CART_NOT_FOUND);
+    }
+
+    const invalidItems = [];
+
+    for (const item of cart.items) {
+      const isAvailable  = await menuItemService.checkAvailable(item.menuItemId);
+      if (!isAvailable ) {
+        invalidItems.push({
+          menuItemId: item.menuItemId,
+          name: item.name
+        });
+      }
+    }
+
+    // handle invalid items
+    if (invalidItems.length > 0) {
+      throw new ERR_RESPONSE.UnprocessableEntityError(
+        'Some items are unavailable',
+        ERR.MENUITEM_UNAVAILABLE,
+        { items: invalidItems }
+      );
+    }
+
+    // if all items is ok
+    const newOrder = await orderService.createOrder(cart);
+
+    await this.clearCart(userId);
+
+    return newOrder;
+  }
+
+  async clearCart(userId) {
+    await cartRepository.clearCart(userId);
   }
 
   // helper: recalculate totalItems + totalPrice

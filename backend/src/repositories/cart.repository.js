@@ -29,6 +29,18 @@ class CartRepository {
 
     return cart;
   }
+
+  async clearCart(userId) {
+    return Cart.findOneAndUpdate(
+      { userId },
+      {
+        items: [],
+        totalItems: 0,
+        totalPrice: 0
+      },
+      { new: true }
+    );
+  }
 }
 
 module.exports = new CartRepository();

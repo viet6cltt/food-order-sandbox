@@ -8,5 +8,6 @@ router.get('/', requireAuth, CartController.getCart);
 router.post('/items', requireAuth, CartController.addItem);
 router.put('/items/:itemId', requireAuth, CartController.updateItem); // itemId này khác menuItem, itemId là _id ấy
 router.delete('/items/:itemId', requireAuth, CartController.deleteItem);
+router.post('/cart/checkout', requireAuth, CartController.checkout);
 
 module.exports = router;
