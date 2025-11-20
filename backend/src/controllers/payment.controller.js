@@ -88,6 +88,24 @@ class PaymentController {
       next(err);
     }
   }
+
+  // [PATCH] /:paymentId/fail
+  async failPayment(req, res, next) {
+    try {
+      const { paymentId } = req.params;
+      const userId = req.userId;
+
+      const payment = await paymentService.failPayment(paymentId, userId);
+
+      return SUCCESS_RESPONSE.success(
+        res,
+        "Payment marked as failed",
+        { payment },
+      )
+    } catch (err) {
+      next(err);
+    }
+  }
 } 
 
 module.exports = new PaymentController();

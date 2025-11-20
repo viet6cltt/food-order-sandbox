@@ -112,7 +112,7 @@ class OrderService {
     }
 
     // dont allow if confirmed
-    if (order.status !== "pending") {
+    if (order.status !== "draft") {
       throw new ERR_RESPONSE.BadRequestError(
         "You can only update order info while the order is pending"
       );
@@ -131,7 +131,7 @@ class OrderService {
       },
       {
         latitude: deliveryAddress.lat,
-        longtitude: deliveryAddress.lng,
+        longitude: deliveryAddress.lng,
       }
     );
 

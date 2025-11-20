@@ -210,7 +210,7 @@ class OrderController {
         paymentMethod,
       });
 
-      return SUCCESS_RESPONSE.success(res, "Update ")
+      return SUCCESS_RESPONSE.success(res, "Update Order Info successfully", { order });
     } catch (err) {
       next(err);
     }

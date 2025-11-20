@@ -98,6 +98,48 @@ class PaymentService {
 
     return payment;
   }
+
+  async failPayment(paymentId, userId) {
+    const payment = await paymentRepository.findById(paymentId);
+
+    if (!payment) {
+      throw new ERR_RESPONSE.NotFoundError("Payment not found", ERR.PAYMENT_NOT_FOUND);
+    }
+
+    const order = await orderService.getOrderById(payment.orderId);
+
+    if (!order) {
+      throw new ERR_RESPONSE.NotFoundError("Order not found", ERR.ORDER_NOT_FOUND);
+    }
+
+    // Only restaurant owner can fail
+    await restaurantService.checkOwner(order.restaurantId, userId);
+
+    // Only BANK_TRANSFER can fail
+    if (payment.method !== "BANK_TRANSFER") {
+      throw new ERR_RESPONSE.BadRequestError("COD payment cannot be failed");
+    }
+
+    // If payment is success, cant fail
+    if (payment.status === 'success') {
+      throw new ERR_RESPONSE.BadRequestError("Cannot fail a successful payment");
+    }
+
+    // Update payment
+    payment.status = "failed";
+    payment.paidAt = null;
+
+    // Update order
+    order.isPaid = false;
+    order.paidAt = null;
+    order.paymentId = null;
+    order.status = "pending";
+
+    await payment.save();
+    await order.save();
+
+    return payment;
+  }
 }
 
 
