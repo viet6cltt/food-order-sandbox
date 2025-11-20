@@ -67,6 +67,13 @@ const restaurantSchema = new mongoose.Schema({
     shippingPerKm: { type: Number, default: 3000 },
 
     estimatedDeliveryTime: { type: Number, default: 20 },
+
+    paymentInfo:{
+      bankName: { type: String, default: null },
+      bankAccountNumber: { type: String, default: null},
+      bankAccountName: { type: String, default: null },
+      qrImageUrl: { type: String, default: null },
+    }
   },
   {
     timestamps: true,

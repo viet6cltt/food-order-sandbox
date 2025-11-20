@@ -1,4 +1,5 @@
 const orderStatus = [
+  "draft",
   "pending",
   "confirmed",
   "preparing",
@@ -8,6 +9,7 @@ const orderStatus = [
 ];
 
 const orderStatusObject = {
+  draft: "draft",
   pending: "pending",
   confirmed: "confirmed",
   preparing: "preparing",
@@ -17,6 +19,7 @@ const orderStatusObject = {
 };
 
 const allowedTransitions = {
+  draft: ["pending"],
   pending: ["confirmed", "cancelled"],
   confirmed: ["preparing", "cancelled"],
   preparing: ["delivering"],

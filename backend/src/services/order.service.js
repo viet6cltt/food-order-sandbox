@@ -1,12 +1,17 @@
 const orderRepository = require('../repositories/order.repository');
-
+const geolib = require('geolib');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const ERR = require('../constants/errorCodes');
 const menuItemService = require('./menuItem.service');
 const restaurantService = require('./restaurant.service');
-const { allowedTransitions } = require('../constants/orderStatus');
+const paymentService = require('./payment.service');
+
+const { orderStatusObject ,allowedTransitions } = require('../constants/orderStatus');
+
+
 class OrderService {
 
+  /**For users */
   async createOrder(cart) {
     const userId = cart.userId;
     const restaurantId = cart.restaurantId;
@@ -71,8 +76,7 @@ class OrderService {
       0
     );
 
-    const shippingFee = 0; // hiện tại chưa xử lí 
-
+    const shippingFee = 0
     // Build order items
     const orderItems = cart.items.map((item)=> ({
       menuItemId: item.menuItemId,
@@ -89,11 +93,61 @@ class OrderService {
       restaurantId,
       items: orderItems,
       totalFoodPrice,
-      shippingFee,
-      discountAmount: 0,
-      status: "pending",
+      status: "draft",
       note: "",
     });
+
+    return order;
+  }
+
+  async updateOrderInfo({ userId, orderId, deliveryAddress, paymentMethod }) {
+    // get order
+    const order = await orderRepository.findByOrderId(orderId);
+    if (!order) {
+      throw new ERR_RESPONSE.NotFoundError("Order not found");
+    }
+
+    if (order.userId.toString() !== userId) {
+      throw new ERR_RESPONSE.ForbiddenError("You do not have permission to access this order", ERR.ORDER_NOT_OWNER);
+    }
+
+    // dont allow if confirmed
+    if (order.status !== "pending") {
+      throw new ERR_RESPONSE.BadRequestError(
+        "You can only update order info while the order is pending"
+      );
+    }
+
+    // Get restaurant info to cal shipping fee
+    const restaurant = await restaurantService.getRestaurantInfo(order.restaurantId);
+    if (!restaurant || !restaurant.address || !restaurant.address.geo) {
+      throw new ERR_RESPONSE.BadRequestError("Restaurant geo location is invalid");
+    }
+
+    const distanceMeters = geolib.getDistance(
+      {
+        latitude: restaurant.address.geo.coordinates[1],
+        longitude: restaurant.address.geo.coordinates[0],
+      },
+      {
+        latitude: deliveryAddress.lat,
+        longtitude: deliveryAddress.lng,
+      }
+    );
+
+    const distanceKm = distanceMeters / 1000;
+
+    const shippingFee = restaurant.baseShippingFee + distanceKm * restaurant.shippingPerKm;
+
+    // update fields
+
+    // now, dont handle discountAmount, note
+    order.status = "pending";
+    order.deliveryAddress = deliveryAddress;
+    order.paymentMethod = paymentMethod;
+    order.shippingFee = Math.round(shippingFee);
+
+    await order.save();
 
     return order;
   }
@@ -104,12 +158,16 @@ class OrderService {
     return orders;
   }
 
+  async getOrderById(orderId) {
+    return await orderRepository.findByOrderId(orderId);
+  }
+
   async getOrder(userId, orderId) {
     const order = await orderRepository.findByOrderId(orderId);
 
     if (!order) {
-    throw new ERR_RESPONSE.NotFoundError("Order not found", ERR.ORDER_NOT_FOUND);
-  }
+      throw new ERR_RESPONSE.NotFoundError("Order not found", ERR.ORDER_NOT_FOUND);
+    }
     if (order.userId.toString() !== userId) {
       throw new ERR_RESPONSE.ForbiddenError("You do not have permission to access this order", ERR.ORDER_NOT_OWNER);
     }
@@ -137,7 +195,7 @@ class OrderService {
     
     // update
     order.status = "cancelled";
-    order.save();
+    await order.save();
 
     return order;
   }
@@ -196,6 +254,18 @@ class OrderService {
 
     // Update
     return await orderRepository.updateOrderStatus(orderId, status);
+  }
+
+  async updateOrderStatusByRestaurantToCompleted({ orderId, restaurantId, userId}) {
+    const order = await this.updateOrderStatusByRestaurant({ orderId, restaurantId, userId, status: orderStatusObject.completed });
+
+    order.isPaid = true;
+    order.paidAt = new Date();
+
+    await order.save();
+
+    const payment = await paymentService.createPaymentCOD(order);
+    return { order, payment };
   }
 
 }

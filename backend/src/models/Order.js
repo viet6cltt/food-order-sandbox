@@ -59,6 +59,12 @@ const OrderSchema = new mongoose.Schema(
     // promotion (later)
 
     discountAmount: { type: Number, default: 0 },
+
+    deliveryAddress: {
+      full: { type: String, default: null },
+      lat: { type: Number, default: null },
+      lng: { type: Number, default: null },
+    },
     
     paymentId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -66,10 +72,26 @@ const OrderSchema = new mongoose.Schema(
       default: null,
     },
 
+    isPaid: {
+      type: Boolean,
+      default: false,
+    },
+
+    paidAt: {
+      type: Date,
+      default: null,
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["COD", "BANK_TRANSFER"],
+      default: "COD",
+    },
+
     status: {
       type: String,
       enum: orderStatus,
-      default: "pending" // "pending"
+      default: "draft"
     },
 
     note: { type: String, default: "" },

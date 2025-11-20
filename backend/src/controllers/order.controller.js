@@ -169,6 +169,53 @@ class OrderController {
       next(err);
     }
   }
+
+  // [PATCH] /restaurants
+  async completeOrderStatus(req, res, next) {
+    try {
+      const userId = req.userId;
+      const { restaurantId, orderId } = req.params;
+
+      const order = await orderService.updateOrderStatusByRestaurantToCompleted({
+        orderId,
+        restaurantId, 
+        userId
+      });
+
+      return SUCCESS_RESPONSE.success(res, "Update Order Status To Completed Successfully", { order });
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /:orderId
+  async updateOrderInfo(req, res, next) {
+    try {
+      const userId = req.userId;
+      const { orderId } = req.params;
+      const { deliveryAddress, paymentMethod } = req.body;
+
+      if (!deliveryAddress || !deliveryAddress.full || !deliveryAddress.lat || !deliveryAddress.lng) {
+        throw new ERR_RESPONSE.BadRequestError("Delivery address is missing", ERR.INVALID_INPUT);
+      }
+
+      if (!paymentMethod || !["COD", "BANK_TRANSFER"].includes(paymentMethod)) {
+        throw new ERR_RESPONSE.BadRequestError("Invalid payment method", ERR.INVALID_INPUT);
+      }
+
+      const order = await orderService.updateOrderInfo({
+        userId, 
+        orderId,
+        deliveryAddress,
+        paymentMethod,
+      });
+
+      return SUCCESS_RESPONSE.success(res, "Update ")
+    } catch (err) {
+      next(err);
+    }
+  }
+
 }
 
 module.exports = new OrderController();
