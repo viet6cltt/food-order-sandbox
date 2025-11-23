@@ -22,17 +22,17 @@ const requireAuth = (req, res, next) => {
 
 const optinalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  if (!authHeader || !authHeader.startsWith('Bearer')) {
-    next();
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
   }
 
   const token = authHeader.split(' ')[1];
-  try{
+  try {
     const decoded = authHelper.verifyAccessToken(token);
     req.userId = decoded.userId;
   } catch (err) {
-    // khi có token nhưng token không hợp lệ
-    next(); // vẫn cho qua
+    // khi có token nhưng token không hợp lệ -> vẫn cho qua nhưng stop further processing here
+    return next();
   }
 }
 

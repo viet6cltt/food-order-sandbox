@@ -57,7 +57,53 @@ async function getAll({ limit = 16, offset = 0 } = {}) {
 }
 
 async function getById(restaurantId) {
-    return await Restaurant.findById(restaurantId);
+  if (RestaurantModel && typeof RestaurantModel.findById === 'function') {
+    // Use mongoose model
+    const restaurant = await RestaurantModel.findById(restaurantId).lean();
+    if (!restaurant) {
+      return null;
+    }
+    // map _id to id string
+    return Object.assign({}, restaurant, { 
+      id: restaurant._id ? String(restaurant._id) : undefined 
+    });
+  }
+
+  // Fallback: read sample file
+  try {
+    const sampleFile = path.join(process.cwd(), 'public', 'sample_restaurants_data.json')
+    const raw = fs.readFileSync(sampleFile, 'utf8')
+    const all = JSON.parse(raw)
+    const found = Array.isArray(all) 
+      ? all.find(item => {
+          const id = item && item._id && item._id.$oid
+            ? String(item._id.$oid)
+            : item && item._id
+            ? String(item._id)
+            : item && item.id
+            ? String(item.id)
+            : null
+          return id === String(restaurantId)
+        })
+      : null
+    
+    if (!found) {
+      return null;
+    }
+
+    const id = found && found._id && found._id.$oid
+      ? String(found._id.$oid)
+      : found && found._id
+      ? String(found._id)
+      : found && found.id
+      ? String(found.id)
+      : String(restaurantId)
+    
+    return Object.assign({}, found, { id })
+  } catch (err) {
+    // On any error, return null
+    return null
+  }
 }
 
 module.exports = { getAll, getById }

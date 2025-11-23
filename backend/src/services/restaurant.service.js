@@ -1,4 +1,6 @@
 const RestaurantRepository = require('../repositories/restaurant.repository');
+const ERR_RESPONSE = require('../utils/httpErrors');
+const ERR = require('../constants/errorCodes');
 
 async function getList({ page = 1, limit = 16 } = {}) {
   const p = Math.max(1, parseInt(page, 10) || 1)
@@ -18,8 +20,17 @@ async function getList({ page = 1, limit = 16 } = {}) {
 }
 
 async function getRestaurantInfo(restaurantId) {
-    const restaurant = await RestaurantRepository.getById(restaurantId);
-    return restaurant;
+  if (!restaurantId) {
+    throw new ERR_RESPONSE.BadRequestError("Missing restaurant ID", ERR.INVALID_INPUT);
+  }
+
+  const restaurant = await RestaurantRepository.getById(restaurantId);
+  
+  if (!restaurant) {
+    throw new ERR_RESPONSE.NotFoundError("Restaurant not found", ERR.RESTAURANT_NOT_FOUND);
+  }
+
+  return restaurant;
 }
 
 module.exports = { getList, getRestaurantInfo }

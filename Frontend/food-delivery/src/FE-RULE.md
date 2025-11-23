@@ -72,13 +72,13 @@ src/
 
 (Mỗi mục gồm screen -> layout -> components chính)
 
-* HomeScreen — AppLayout — HeroSlider, CuisineCategories, RecommendList, RestaurantCard, PromoBanner
+* HomeScreen — AppLayout — SearchBar, HeroSlider, CuisineCategories, RecommendList, RestaurantCard, RestaurantList, PromoBanner
 * SignupScreen — AuthLayout — SignupForm
 * LoginScreen — AuthLayout — LoginForm, ResetPasswordModal
 * Change password — AuthLayout modal — ChangePasswordForm
 * ProfileScreen — AppLayout — ProfileView, ProfileEditForm, OrderSummary
 * OwnerRegisterScreen — AuthLayout — OwnerRegisterForm, UploadDocs
-* BrowseScreen — AppLayout — SearchBar, FilterSidebar (desktop), RestaurantList, FoodList, MapView (optional)
+* RestaurantDetailsScreen — AppLayout — FoodList, MapView (optional)
 * FoodDetailScreen — AppLayout — FoodGallery, FoodInfo, AddToCartBar, ReviewsList, ReviewForm
 * CartScreen — AppLayout — CartList, CheckoutSummary, AddressSelector
 * PaymentScreen — AppLayout — PaymentMethods, OrderSummary, PlaceOrderButton

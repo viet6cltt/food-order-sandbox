@@ -8,17 +8,16 @@ class RestaurantController {
   // [GET] /:restaurantId
   async getInfo(req, res, next) {
     try {
-      console.log(req.userId);
       const { restaurantId } = req.params;
       if (!restaurantId) {
-        throw new ERR_RESPONSE.BadRequestError("Missing id if Restaurant", ERR.INVALID_INPUT);
+        throw new ERR_RESPONSE.BadRequestError("Missing restaurant ID", ERR.INVALID_INPUT);
       }
 
       const restaurantInfo = await RestaurantService.getRestaurantInfo(restaurantId);
 
       return res.json(restaurantInfo);
     } catch (err) {
-      console.error(err);
+      next(err);
     }
   }
 
@@ -30,7 +29,7 @@ class RestaurantController {
       const { items, meta } = await RestaurantService.getList({ page, limit })
       res.json({ success: true, data: items, meta })
     } catch (err) {
-      console.error(err);
+      next(err);
     }
   }
 }
