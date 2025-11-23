@@ -1,4 +1,3 @@
-const asyncHandler = require('../middlewares/asyncHandler');
 const RestaurantService = require('../services/restaurant.service');
 const ERR = require('../constants/errorCodes');
 const ERR_RESPONSE = require('../utils/httpErrors');

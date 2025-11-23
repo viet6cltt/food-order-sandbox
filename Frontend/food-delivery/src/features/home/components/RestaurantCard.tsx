@@ -12,7 +12,8 @@ export type AddressShape = {
 }
 
 export type Restaurant = {
-    id: number | string
+    id?: number | string
+    _id?: string | { $oid?: string } // MongoDB _id field
     bannerUrl?: string
     name: string
     address: string | AddressShape
@@ -23,13 +24,32 @@ export type Restaurant = {
     closing_time?: string
     reviewCount?: number
     estimatedDeliveryTime?: number
+    // Các field khác từ backend
+    isAcceptingOrders?: boolean
+    isActive?: boolean
+    ownerId?: string
+    categoriesId?: string[]
+    shippingPolicy?: string
+    baseShippingFee?: number
+    shippingPerKm?: number
+    paymentInfo?: {
+        bankName?: string
+        bankAccountNumber?: string
+        bankAccountName?: string
+        qrImageUrl?: string
+    }
+    createdAt?: string
+    updatedAt?: string
 }
 
 const RestaurantCard: React.FC<{ restaurant: Restaurant; className?: string }> = ({ restaurant, className = '' }) => {
     const navigate = useNavigate();
 
     const handleClick = () => {
-        navigate(`/restaurant/${restaurant.id}`);
+        const restaurantId = restaurant.id || restaurant._id || (typeof restaurant._id === 'object' ? restaurant._id.$oid : undefined)
+        if (restaurantId) {
+            navigate(`/restaurant/${restaurantId}`);
+        }
     }
 
     return (

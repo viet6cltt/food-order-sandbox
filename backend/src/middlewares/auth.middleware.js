@@ -4,7 +4,6 @@ const ERR = require('../constants/errorCodes');
 
 const requireAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  console.log(authHeader);
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next(new HTTP_ERROR.UnauthorizedError('Missing access Token', ERR.AUTH_MISSING_ACCESS_TOKEN));
   }
@@ -30,8 +29,8 @@ const optinalAuth = (req, res, next) => {
   try {
     const decoded = authHelper.verifyAccessToken(token);
     req.userId = decoded.userId;
+    return next();
   } catch (err) {
-    // khi có token nhưng token không hợp lệ -> vẫn cho qua nhưng stop further processing here
     return next();
   }
 }

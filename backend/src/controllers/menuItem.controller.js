@@ -1,7 +1,6 @@
 const ERR = require('../constants/errorCodes');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const SUCCESS_RESPONSE = require('../utils/successResponse');
-
 const MenuItemService = require('../services/menuItem.service');
 
 class MenuItemController {
@@ -63,7 +62,6 @@ class MenuItemController {
       const { menuItemId } = req.params;
       const data = req.body;
       const userId = req.userId;
-      
 
       if (!menuItemId) {
         throw new ERR_RESPONSE.BadRequestError('Missing menuItemId', ERR.INVALID_INPUT);
@@ -76,13 +74,13 @@ class MenuItemController {
       next(err);
     }
   }
-  
+
   // [DELETE] /:menuItemId
   async deleteMenuItem(req, res, next) {
     try {
       const { menuItemId } = req.params;
       const userId = req.userId;
-      
+
       if (!menuItemId) {
         throw new ERR_RESPONSE.BadRequestError('Missing menuItemId', ERR.INVALID_INPUT);
       }
