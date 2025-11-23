@@ -10,8 +10,9 @@ servers:
     description: Local development server
 
 paths:
-  $ref: "./paths/auth.yaml"
+  $ref: "./paths/index.yaml"
 
+  
 components:
   securitySchemes:
     BearerAuth:
@@ -23,6 +24,40 @@ components:
     User:
       $ref: "./schemas/user.yaml"
 
+    Restaurant:
+      $ref: "./schemas/restaurant.yaml"
+
+    Cart: 
+      $ref: "./schemas/cart.yaml#/Cart"
+    CartItem: 
+      $ref: "./schemas/cart.yaml#/CartItem"
+    CartItemOption:
+      $ref: "./schemas/cart.yaml#/CartItemOption"
+
+    OrderOption: 
+      $ref: "./schemas/order.yaml#/OrderOption"
+    OrderItem:
+      $ref: "./schemas/order.yaml#/OrderItem"
+    OrderDeliveryAddress:
+      $ref: "./schemas/order.yaml#/OrderDeliveryAddress"
+    Order: 
+      $ref: "./schemas/order.yaml#/Order"
+
+    Payment:
+      $ref: "./schemas/payment.yaml"
+
+    MenuItem:
+      $ref: "./schemas/menuItem.yaml#/MenuItem"
+    OptionGroup:
+      $ref: "./schemas/menuItem.yaml#/OptionGroup"
+    Option:
+      $ref: "./schemas/menuItem.yaml#/Option"
+    CreateMenuItemInput:
+      $ref: "./schemas/menuItem.yaml#/CreateMenuItemInput"
+    UpdateMenuItemInput:
+      $ref: "./schemas/menuItem.yaml#/UpdateMenuItemInput"
+
+ 
   responses:
     LoginSuccess:
       $ref: "./responses/auth.yaml#/LoginSuccess"

@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
 
 // Load enviroment variables
-dotenv.config();
+dotenv.config({ path: "./.env"});
 
 
 const morgan = require('morgan');

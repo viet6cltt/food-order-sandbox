@@ -1,0 +1,137 @@
+
+OrderOption:
+  type: object
+  properties:
+    groupName:
+      type: string
+      example: "Topping"
+    optionName:
+      type: string
+      example: "Thêm trứng"
+    price:
+      type: number
+      example: 5000
+
+OrderItem:
+  type: object
+  required:
+    - menuItemId
+    - name
+    - quantity
+    - finalPrice
+  properties:
+    menuItemId:
+      type: string
+      example: "6918b864a1dcc94af903dfa6"
+    name:
+      type: string
+      example: "Cơm Tấm Sườn Bì Chả"
+    imageUrl:
+      type: string
+      example: "https://example.com/img.jpg"
+    quantity:
+      type: number
+      example: 2
+    selectedOptions:
+      type: array
+      items:
+        $ref: "#/OrderOption"
+    finalPrice:
+      type: number
+      example: 150000
+
+OrderDeliveryAddress:
+  type: object
+  properties:
+    full:
+      type: string
+      example: "12 Nguyễn Huệ, Quận 1, HCM"
+    lat:
+      type: number
+      example: 10.776889
+    lng:
+      type: number
+      example: 106.700981
+
+Order:
+  type: object
+  required:
+    - userId
+    - restaurantId
+    - items
+    - totalFoodPrice
+  properties:
+    _id:
+      type: string
+      example: "692abc1234abc00011122233"
+
+    userId:
+      type: string
+      example: "6904923782bcbb1d43986b0c"
+
+    restaurantId:
+      type: string
+      example: "6918b712a1dcc94af903df9d"
+
+    items:
+      type: array
+      items:
+        $ref: "#/OrderItem"
+
+    shippingFee:
+      type: number
+      example: 15000
+
+    totalFoodPrice:
+      type: number
+      example: 178000
+
+    discountAmount:
+      type: number
+      example: 0
+
+    deliveryAddress:
+      $ref: "#/OrderDeliveryAddress"
+
+    paymentId:
+      type: string
+      nullable: true
+      example: "692def1234abc00033344455"
+
+    isPaid:
+      type: boolean
+      example: false
+
+    paidAt:
+      type: string
+      nullable: true
+      format: date-time
+
+    paymentMethod:
+      type: string
+      enum: ["COD", "BANK_TRANSFER"]
+      example: "COD"
+
+    status:
+      type: string
+      enum:
+        - draft
+        - pending
+        - confirmed
+        - preparing
+        - delivering
+        - completed
+        - cancelled
+      example: "pending"
+
+    note:
+      type: string
+      example: "Không hành"
+
+    createdAt:
+      type: string
+      format: date-time
+    
+    updatedAt:
+      type: string
+      format: date-time

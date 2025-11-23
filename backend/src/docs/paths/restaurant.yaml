@@ -1,0 +1,78 @@
+getRestaurantById:
+  get:
+    summary: Get restaurant info
+    tags:
+      - Restaurant
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: ID của restaurant
+    responses:
+      '200':
+        description: Restaurant info
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/restaurant.yaml"
+      '400':
+        description: Missing restaurantId
+      '404':
+        description: Restaurant not found
+
+getMenuItemsByRestaurantId:
+  get:
+    summary: Get menu items by restaurant
+    tags:
+      - Restaurant
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: List of menu items
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "../schemas/menuItem.yaml#/MenuItem"
+
+postMenuItemByRestaurantId:
+  post:
+    summary: Create menu item for a restaurant
+    tags:
+      - Restaurant
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+        schema:
+          type: string
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../schemas/menuItem.yaml#/CreateMenuItemInput"
+    responses:
+      '201':
+        description: Created menu item
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/menuItem.yaml#/MenuItem"
+      '403':
+        description: User is not the restaurant owner
+

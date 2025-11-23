@@ -1,0 +1,128 @@
+createPayment:
+  post:
+    summary: Create payment (Bank transfer only)
+    description: >
+      User initiates a BANK_TRANSFER payment for an order.
+      COD orders should not call this API.
+    tags:
+      - Payment
+    security:
+      - BearerAuth: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - orderId
+            properties:
+              orderId:
+                type: string
+                example: "674abc12f39a123456789000"
+    responses:
+      200:
+        description: Create payment successfully
+      400:
+        description: Invalid data
+      401:
+        description: Unauthorized
+
+
+getMyPayments:
+  get:
+    summary: Get all payments of current user
+    tags:
+      - Payment
+    security:
+      - BearerAuth: []
+    responses:
+      200:
+        description: Get user payments successfully
+      401:
+        description: Unauthorized
+
+
+getPaymentByOrderId:
+  get:
+    summary: Get payment info by orderId
+    tags:
+      - Payment
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Get payment successfully
+      404:
+        description: Payment not found
+
+
+getPaymentByPaymentId:
+  get:
+    summary: Get payment info by paymentId
+    tags:
+      - Payment
+    parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Get payment successfully
+      404:
+        description: Payment not found
+
+
+confirmPayment:
+  patch:
+    summary: Confirm a BANK_TRANSFER payment (restaurant owner only)
+    description: >
+      Mark a pending BANK_TRANSFER payment as success.
+      This also updates the order's isPaid, paidAt, and status.
+    tags:
+      - Payment
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Payment confirmed successfully
+      403:
+        description: Not restaurant owner
+      404:
+        description: Payment not found
+
+
+failPayment:
+  patch:
+    summary: Mark payment as failed (restaurant owner only)
+    description: >
+      Restaurant marks a BANK_TRANSFER payment as failed when transferred incorrectly or invalid proof.
+    tags:
+      - Payment
+    security:
+      - BearerAuth: []
+    parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema:
+          type: string
+    responses:
+      200:
+        description: Payment marked as failed
+      403:
+        description: Not restaurant owner
+      404:
+        description: Payment not found

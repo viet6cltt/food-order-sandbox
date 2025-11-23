@@ -5,7 +5,7 @@
   "scripts": {
     "format": "prettier --write .",
     "start": "node server.js",
-    "dev:swagger": "npm-run-all --parallel watch:swagger start:dev",
+    "dev:swagger": "npm-run-all --parallel watch:swagger dev",
     "watch:swagger": "chokidar \"src/docs/**/*.yaml\" -c \"npm run bundle:swagger\"",
     "bundle:swagger": "swagger-cli bundle ./src/docs/swagger.yaml --outfile dist/swagger.json --type json",
     "dev": "nodemon server.js"
@@ -24,6 +24,7 @@
     "express": "^5.1.0",
     "firebase": "^12.6.0",
     "firebase-admin": "^13.5.0",
+    "geolib": "^3.3.4",
     "i": "^0.3.7",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.19.2",
@@ -45,7 +46,8 @@
     "lint-staged": "^16.2.6",
     "nodemon": "^3.1.10",
     "npm-run-all": "^4.1.5",
-    "prettier": "^3.6.2"
+    "prettier": "^3.6.2",
+    "swagger-cli": "^4.0.4"
   },
   "lint-staged": {
     "*.{js,json,ts,md}": [

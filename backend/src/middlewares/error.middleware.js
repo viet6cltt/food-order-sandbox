@@ -1,9 +1,8 @@
 const AppError = require('../utils/AppError');
 
 function errorHandler(err, req, res, next) {
-  // Log error để debug
-  console.error('Error:', err);
 
+  console.error(err);
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
       success: false,

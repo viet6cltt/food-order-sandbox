@@ -1,0 +1,134 @@
+type: object
+properties:
+  _id:
+    type: string
+    example: "6918b712a1dcc94af903df9d"
+
+  name:
+    type: string
+    example: "Sushi Tokyo"
+
+  ownerId:
+    type: string
+    description: ID of restaurant owner (User)
+    example: "6904923782bcbb1d43986b0c"
+
+  description:
+    type: string
+    nullable: true
+    example: "Authentic Japanese Sushi Restaurant."
+
+  bannerUrl:
+    type: string
+    nullable: true
+    example: "https://example.com/banner.jpg"
+
+  address:
+    type: object
+    required: [full, geo]
+    properties:
+      full:
+        type: string
+        example: "123 Pasteur, District 1, Ho Chi Minh City"
+      street:
+        type: string
+        example: "Pasteur"
+      ward:
+        type: string
+        example: "Ward 12"
+      district:
+        type: string
+        example: "District 1"
+      city:
+        type: string
+        example: "Ho Chi Minh City"
+      geo:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: ["Point"]
+            example: "Point"
+          coordinates:
+            type: array
+            items:
+              type: number
+            description: "[longitude, latitude]"
+            example: [106.700981, 10.776889]
+
+  phone:
+    type: string
+    example: "0909000111"
+
+  isAcceptingOrders:
+    type: boolean
+    default: true
+
+  opening_time:
+    type: string
+    example: "08:00"
+
+  closing_time:
+    type: string
+    example: "22:00"
+
+  isActive:
+    type: boolean
+    default: true
+
+  rating:
+    type: number
+    minimum: 0
+    maximum: 5
+    example: 4.5
+
+  reviewCount:
+    type: number
+    example: 120
+
+  categoriesId:
+    type: array
+    items:
+      type: string
+    example: ["6740aaa1a1a1a1a1a1a1a1a1"]
+
+  shippingPolicy:
+    type: string
+    enum: ["SELF_SHIP", "PARTNER_SHIP", "HYBRID"]
+    example: "SELF_SHIP"
+
+  baseShippingFee:
+    type: number
+    example: 10000
+
+  shippingPerKm:
+    type: number
+    example: 3000
+
+  estimatedDeliveryTime:
+    type: number
+    example: 25
+
+  paymentInfo:
+    type: object
+    properties:
+      bankName:
+        type: string
+        example: "Vietcombank"
+      bankAccountNumber:
+        type: string
+        example: "0123456789"
+      bankAccountName:
+        type: string
+        example: "TRAN VAN A"
+      qrImageUrl:
+        type: string
+        example: "https://example.com/qr-bank.png"
+
+  createdAt:
+    type: string
+    format: date-time
+
+  updatedAt:
+    type: string
+    format: date-time

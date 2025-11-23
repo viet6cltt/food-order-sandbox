@@ -1,0 +1,142 @@
+orders:
+  get:
+    summary: Get all orders of the current user
+    tags:
+      - Order (User)
+    security:
+      - BearerAuth: [ ]
+    responses:
+      '200':
+        description: Get user's orders successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Get Orders Successfully
+                data:
+                  type: object
+                  properties:
+                    orders:
+                      type: array
+                      items:
+                        $ref: "../schemas/order.yaml#/Order"
+
+  patch:
+    summary: Update order info (delivery address, payment method)
+    tags:
+      - Order (User)
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - in: path
+        name: orderId
+        required: true
+        schema:
+          type: string
+        description: Order ID
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              deliveryAddress:
+                type: object
+                properties:
+                  full: { type: string, example: "123 CMT8, Q3, HCM" }
+                  lat: { type: number, example: 10.7626 }
+                  lng: { type: number, example: 106.6822 }
+              paymentMethod:
+                type: string
+                enum: [COD, BANK_TRANSFER]
+                example: BANK_TRANSFER
+    responses:
+      '200':
+        description: Update Order Info successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: { type: boolean }
+                message:
+                  type: string
+                  example: Update Order Info successfully
+                data:
+                  type: object
+                  properties:
+                    order:
+                      $ref: "../schemas/order.yaml#/Order"
+
+order:
+  get:
+    summary: Get details of a user's order
+    tags:
+      - Order (User)
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - in: path
+        name: orderId
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Get Order Successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: { type: boolean }
+                message:
+                  type: string
+                  example: Get Order Successfully
+                data:
+                  type: object
+                  properties:
+                    order:
+                      $ref: "../schemas/order.yaml#/Order"
+
+  post:
+    summary: Cancel user order
+    tags:
+      - Order (User)
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - in: path
+        name: orderId
+        required: true
+        schema:
+          type: string
+    responses:
+      '200':
+        description: Cancel Order Successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success: { type: boolean }
+                message:
+                  type: string
+                  example: Cancel Order Successfully
+                data:
+                  type: object
+                  properties:
+                    order:
+                      $ref: "../schemas/order.yaml#/Order"
+
+########################################################################
+# RESTAURANT ORDER MANAGEMENT
+########################################################################
+

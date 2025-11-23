@@ -1,0 +1,71 @@
+type: object
+required:
+  - orderId
+  - userId
+  - restaurantId
+  - method
+  - amount
+properties:
+  _id:
+    type: string
+    example: "6a123bc4def5678901234567"
+
+  orderId:
+    type: string
+    example: "6912aa47d8a7a84bcd9231ff"
+
+  userId:
+    type: string
+    example: "6904923782bcbb1d43986b0c"
+
+  restaurantId:
+    type: string
+    example: "6918b712a1dcc94af903df9d"
+
+  method:
+    type: string
+    enum:
+      - COD
+      - BANK_TRANSFER
+    example: "BANK_TRANSFER"
+
+  amount:
+    type: number
+    example: 195000
+
+  status:
+    type: string
+    enum:
+      - pending
+      - success
+      - failed
+    example: "pending"
+
+  transactionId:
+    type: string
+    nullable: true
+    example: "VCB123456789"
+
+  bankInfo:
+    type: string
+    nullable: true
+    example: "VCB - 0123456789 - TRAN VAN A"
+
+  transferProofImage:
+    type: string
+    nullable: true
+    example: "https://example.com/upload/transfer.png"
+
+  note:
+    type: string
+    example: "Chuyển khoản thiếu 5000đ"
+
+  createdAt:
+    type: string
+    format: date-time
+    example: "2024-12-01T10:00:00.000Z"
+
+  updatedAt:
+    type: string
+    format: date-time
+    example: "2024-12-01T10:05:00.000Z"

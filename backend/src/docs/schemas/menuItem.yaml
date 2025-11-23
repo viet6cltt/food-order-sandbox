@@ -1,0 +1,128 @@
+
+MenuItem:
+  type: object
+  properties:
+    _id:
+      type: string
+      example: "6750abc123f9ab0012345678"
+
+    restaurantId:
+      type: string
+      example: "674fff12399bb11223344556"
+
+    categoryId:
+      type: string
+      example: "673aaa1299cc112233dd4455"
+
+    name:
+      type: string
+      example: "Cơm Tấm Sườn Bì"
+
+    description:
+      type: string
+      nullable: true
+      example: "Cơm tấm với sườn nướng, bì và chả"
+
+    price:
+      type: number
+      example: 45000
+
+    imageUrl:
+      type: string
+      example: "https://example.com/images/com-tam.jpg"
+
+    isAvailable:
+      type: boolean
+      example: true
+
+    rating:
+      type: number
+      example: 4.5
+
+    totalBuy:
+      type: number
+      example: 120
+
+    optionGroups:
+      type: array
+      items:
+        $ref: "#/OptionGroup"
+
+    createdAt:
+      type: string
+      format: date-time
+
+    updatedAt:
+      type: string
+      format: date-time
+
+OptionGroup:
+  type: object
+  properties:
+    name:
+      type: string
+      example: "Size"
+    isRequired:
+      type: boolean
+      example: false
+    maxSelect:
+      type: number
+      example: 1
+    options:
+      type: array
+      items:
+        $ref: "#/Option"
+
+Option:
+  type: object
+  properties:
+    name:
+      type: string
+      example: "Size L"
+    price:
+      type: number
+      example: 5000
+
+CreateMenuItemInput:
+  type: object
+  required:
+    - categoryId
+    - name
+    - price
+    - imageUrl
+  properties:
+    categoryId:
+      type: string
+    name:
+      type: string
+    description:
+      type: string
+      nullable: true
+    price:
+      type: number
+    imageUrl:
+      type: string
+    isAvailable:
+      type: boolean
+    optionGroups:
+      type: array
+      items:
+        $ref: "#/OptionGroup"
+
+UpdateMenuItemInput:
+  type: object
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+    price:
+      type: number
+    imageUrl:
+      type: string
+    isAvailable:
+      type: boolean
+    optionGroups:
+      type: array
+      items:
+        $ref: "#/OptionGroup"

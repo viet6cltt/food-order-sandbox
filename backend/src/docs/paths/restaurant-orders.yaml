@@ -1,0 +1,163 @@
+getOrdersByRestaurants:
+  get:
+    summary: Get all orders of a restaurant (owner only)
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date
+    responses:
+      '200':
+        description: Paginated orders
+      '403':
+        description: User is not owner
+
+getOrderByRestaurants:
+  get:
+    summary: Get one order of restaurant (owner only)
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: orderId
+        in: path
+        required: true
+    responses:
+      '200':
+        description: Order detail
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/order.yaml#/Order"
+      '403':
+        description: Not owner
+      '404':
+        description: Order not found
+
+confirmOrder:
+  patch:
+    summary: Confirm order
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: orderId
+        in: path
+        required: true
+    responses:
+      '200':
+        description: Updated order
+        content:
+          application/json:
+            schema:
+              $ref: "../schemas/order.yaml#/Order"
+
+prepareOrder:
+  patch:
+    summary: Mark order as preparing
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: orderId
+        in: path
+        required: true
+    responses:
+      '200':
+        description: Updated order
+
+deliverOrder:
+  patch:
+    summary: Mark order as delivering
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: orderId
+        in: path
+        required: true
+    responses:
+      '200':
+        description: Updated order
+
+cancelOrder:
+  patch:
+    summary: Cancel order (owner)
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: orderId
+        in: path
+        required: true
+    responses:
+      '200':
+        description: Cancelled order
+
+completeOrder:
+  patch:
+    summary: Complete order (COD payment auto-created)
+    tags:
+      - Restaurant Orders
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: restaurantId
+        in: path
+        required: true
+      - name: orderId
+        in: path
+        required: true
+    responses:
+      '200':
+        description: Order completed with COD payment created

@@ -1,0 +1,208 @@
+[
+  {
+    "userId": { "$oid": "6904923782bcbb1d43986b0c" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa6" },
+        "name": "California Roll",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/California_Sushi_%2826571101885%29.jpg",
+        "quantity": 2,
+        "finalPrice": 178000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 15000,
+    "totalFoodPrice": 178000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "pending",
+    "note": "",
+    "createdAt": { "$date": "2024-11-02T11:00:00.000Z" },
+    "updatedAt": { "$date": "2024-11-02T11:00:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "6904923782bcbb1d43986b0c" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa7" },
+        "name": "Cơm Tấm Sườn Bì Chả",
+        "imageUrl": "https://i1-giadinh.vnecdn.net/2024/03/07/7Honthinthnhphm1-1709800144-8…",
+        "quantity": 1,
+        "finalPrice": 65000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 10000,
+    "totalFoodPrice": 65000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "confirmed",
+    "note": "",
+    "createdAt": { "$date": "2024-10-10T12:00:00.000Z" },
+    "updatedAt": { "$date": "2024-10-10T12:00:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "6904923782bcbb1d43986b0c" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa6" },
+        "name": "California Roll",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/California_Sushi_%2826571101885%29.jpg",
+        "quantity": 3,
+        "finalPrice": 267000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 20000,
+    "totalFoodPrice": 267000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "preparing",
+    "note": "Không gừng",
+    "createdAt": { "$date": "2024-11-05T09:30:00.000Z" },
+    "updatedAt": { "$date": "2024-11-05T09:30:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "6904923782bcbb1d43986b0c" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa7" },
+        "name": "Cơm Tấm Sườn Bì Chả",
+        "imageUrl": "https://i1-giadinh.vnecdn.net/2024/03/07/7Honthinthnhphm1-1709800144-8…",
+        "quantity": 2,
+        "finalPrice": 130000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 12000,
+    "totalFoodPrice": 130000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "delivering",
+    "note": "Thêm đồ chua",
+    "createdAt": { "$date": "2024-11-07T14:20:00.000Z" },
+    "updatedAt": { "$date": "2024-11-07T14:20:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "690bb8784dbd8edcae8d1077" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa6" },
+        "name": "California Roll",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/California_Sushi_%2826571101885%29.jpg",
+        "quantity": 1,
+        "finalPrice": 89000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 8000,
+    "totalFoodPrice": 89000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "completed",
+    "note": "",
+    "createdAt": { "$date": "2024-11-09T16:45:00.000Z" },
+    "updatedAt": { "$date": "2024-11-09T16:45:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "690bb8784dbd8edcae8d1077" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa7" },
+        "name": "Cơm Tấm Sườn Bì Chả",
+        "imageUrl": "https://i1-giadinh.vnecdn.net/2024/03/07/7Honthinthnhphm1-1709800144-8…",
+        "quantity": 3,
+        "finalPrice": 195000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 15000,
+    "totalFoodPrice": 195000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "cancelled",
+    "note": "Đặt nhầm",
+    "createdAt": { "$date": "2024-11-03T13:00:00.000Z" },
+    "updatedAt": { "$date": "2024-11-03T13:00:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "690bb8784dbd8edcae8d1077" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa6" },
+        "name": "California Roll",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/California_Sushi_%2826571101885%29.jpg",
+        "quantity": 1,
+        "finalPrice": 89000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 9000,
+    "totalFoodPrice": 89000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "pending",
+    "note": "",
+    "createdAt": { "$date": "2024-11-10T11:30:00.000Z" },
+    "updatedAt": { "$date": "2024-11-10T11:30:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "690bb8784dbd8edcae8d1077" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa7" },
+        "name": "Cơm Tấm Sườn Bì Chả",
+        "imageUrl": "https://i1-giadinh.vnecdn.net/2024/03/07/7Honthinthnhphm1-1709800144-8…",
+        "quantity": 4,
+        "finalPrice": 260000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 20000,
+    "totalFoodPrice": 260000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "completed",
+    "note": "",
+    "createdAt": { "$date": "2024-11-11T09:00:00.000Z" },
+    "updatedAt": { "$date": "2024-11-11T09:00:00.000Z" }
+  },
+
+  {
+    "userId": { "$oid": "6904923782bcbb1d43986b0c" },
+    "restaurantId": { "$oid": "6918b712a1dcc94af903df9d" },
+    "items": [
+      {
+        "menuItemId": { "$oid": "6918b864a1dcc94af903dfa6" },
+        "name": "California Roll",
+        "imageUrl": "https://upload.wikimedia.org/wikipedia/commons/9/9f/California_Sushi_%2826571101885%29.jpg",
+        "quantity": 2,
+        "finalPrice": 178000,
+        "selectedOptions": []
+      }
+    ],
+    "shippingFee": 10000,
+    "totalFoodPrice": 178000,
+    "discountAmount": 0,
+    "paymentId": null,
+    "status": "confirmed",
+    "note": "",
+    "createdAt": { "$date": "2024-11-12T08:00:00.000Z" },
+    "updatedAt": { "$date": "2024-11-12T08:00:00.000Z" }
+  }
+]

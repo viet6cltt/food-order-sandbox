@@ -40,7 +40,6 @@ const cartSchema = new mongoose.Schema(
       ref: "User",
       unique: true,
       required: true,
-      index: true,
     },
 
     restaurantId: {
@@ -59,8 +58,6 @@ const cartSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-cartSchema.index({ userId: 1 });
 
 module.exports = mongoose.model("Cart", cartSchema);
 

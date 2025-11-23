@@ -1,0 +1,202 @@
+getCarts:
+  get:
+    summary: Get current user's cart
+    tags:
+      - Cart
+    security:
+      - BearerAuth: [ ]
+    responses:
+      '200':
+        description: Get cart successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Get cart info successfully
+                data:
+                  type: object
+                  properties:
+                    cart:
+                      $ref: "../schemas/cart.yaml#/Cart"
+
+addItemsToCart:
+  post:
+    summary: Add item to cart
+    tags:
+      - Cart
+    security:
+      - BearerAuth: [ ]
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              restaurantId:
+                type: string
+                example: "6918b712a1dcc94af903df9d"
+              menuItemId:
+                type: string
+                example: "6918b864a1dcc94af903dfa6"
+              name:
+                type: string
+                example: "Cơm Tấm Sườn Bì Chả"
+              imageUrl:
+                type: string
+                example: "https://example.com/img.jpg"
+              basePrice:
+                type: number
+                example: 65000
+              qty:
+                type: number
+                example: 1
+              selectedOptions:
+                type: array
+                items:
+                  $ref: "../schemas/cart.yaml#/CartItemOption"
+            required:
+              - restaurantId
+              - menuItemId
+              - name
+              - basePrice
+              - qty
+    responses:
+      '200':
+        description: Add item to cart successfully
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                message:
+                  type: string
+                  example: post cart item successfully
+                data:
+                  type: object
+                  properties:
+                    cart:
+                      $ref: "../schemas/cart.yaml#/Cart"
+
+updateAndDeleteCartItem:
+  put:
+    summary: Update cart item
+    tags:
+      - Cart
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Cart item _id
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              qty:
+                type: number
+                example: 2
+              selectedOptions:
+                type: array
+                items:
+                  $ref: "../schemas/cart.yaml#/CartItemOption"
+    responses:
+      '200':
+        description: Cart item updated
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Update cart item successfully
+                data:
+                  type: object
+                  properties:
+                    cart:
+                      $ref: "../schemas/cart.yaml#/Cart"
+      '404':
+        description: Item not found
+
+
+  delete:
+    summary: Remove item from cart
+    tags:
+      - Cart
+    security:
+      - BearerAuth: [ ]
+    parameters:
+      - name: itemId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Cart item _id
+    responses:
+      '200':
+        description: Item removed from cart
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Delete cart item successfully
+                data:
+                  type: object
+                  properties:
+                    cart:
+                      $ref: "../schemas/cart.yaml#/Cart"
+
+checkoutCart:
+  post:
+    summary: Checkout current cart → create order
+    tags:
+      - Cart
+    security:
+      - BearerAuth: [ ]
+    responses:
+      '200':
+        description: Checkout successfully (draft order created)
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                success:
+                  type: boolean
+                  example: true
+                message:
+                  type: string
+                  example: Check out successfully
+                data:
+                  type: object
+                  properties:
+                    order:
+                      $ref: "../schemas/order.yaml#/Order"
+      '400':
+        description: Cart is empty
+      '404':
+        description: Menu item unavailable

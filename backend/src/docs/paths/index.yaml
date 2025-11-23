@@ -1,0 +1,90 @@
+/auth/login:
+  $ref: "./auth.yaml#/login"
+/auth/refresh:
+  $ref: "./auth.yaml#/refresh"
+/auth/logout:
+  $ref: "./auth.yaml#/logout"
+/auth/verification-email:
+  $ref: "./auth.yaml#/verification-email"
+
+/auth/verify-email:
+  $ref: "./auth.yaml#/verify-email"
+
+/auth/password-reset-request:
+  $ref: "./auth.yaml#/password-reset-request"
+
+/auth/password-reset:
+  $ref: "./auth.yaml#/password-reset"
+
+/auth/oauth-url:
+  $ref: "./auth.yaml#/oauth-url"
+
+/auth/{provider}/callback:
+  $ref: "./auth.yaml#/oauth-callback"
+
+/auth/complete-profile:
+  $ref: "./auth.yaml#/complete-profile"
+
+
+#############################################
+/restaurants/{restaurantId}: 
+  $ref: "./restaurant.yaml#/getRestaurantById"
+
+/restaurants/{restaurantId}/menu-items:
+  $ref: "./restaurant.yaml#/getMenuItemsByRestaurantId"
+
+/restaurants/{restaurantId}/menu-item:
+  $ref: "./restaurant.yaml#/postMenuItemByRestaurantId"
+
+
+
+################################################
+/carts:
+  $ref: "./cart.yaml#/getCarts"
+/carts/items:
+  $ref: "./cart.yaml#/addItemsToCart"
+/carts/items/{itemId}:
+  $ref: "./cart.yaml#/updateAndDeleteCartItem"
+/carts/checkout:
+  $ref: "./cart.yaml#/checkoutCart"
+
+################################################
+/menu-items/{menuItemId}:
+  $ref: "./menu-item.yaml#/updateAndDeleteMenuItem"
+
+
+################################################
+/orders:
+  $ref: "./order.yaml#/orders"
+/orders/{orderId}:
+  $ref: "./order.yaml#/order"
+
+################################################
+/restaurants/{restaurantId}/orders:
+  $ref: "./restaurant-orders.yaml#/getOrdersByRestaurants"
+/restaurants/{restaurantId}/orders/{orderId}:
+  $ref: "./restaurant-orders.yaml#/getOrderByRestaurants"
+/restaurants/{restaurantId}/orders/{orderId}/confirm:
+  $ref: "./restaurant-orders.yaml#/confirmOrder"
+/restaurants/{restaurantId}/orders/{orderId}/prepare:
+  $ref: "./restaurant-orders.yaml#/prepareOrder"
+/restaurant/{restaurantId}/orders/{orderId}/deliver: 
+  $ref: "./restaurant-orders.yaml#/deliverOrder"
+/restaurant/{restaurantId}/orders/{orderId}/cancel:
+  $ref: "./restaurant-orders.yaml#/cancelOrder"
+/restaurant/{restaurantId}/orders/{orderId}/complete:
+  $ref: "./restaurant-orders.yaml#/completeOrder"
+
+################################################
+/payments:
+  $ref: "./payment.yaml#/createPayment"
+/payments/my:
+  $ref: "./payment.yaml#/getMyPayments"
+/payments/order/{orderId}:
+  $ref: "./payment.yaml#/getPaymentByOrderId"
+/payments/{paymentId}:
+  $ref: "./payment.yaml#/getPaymentByPaymentId"
+/payments/{paymentId}/confirm:
+  $ref: "./payment.yaml#/confirmPayment"
+/payments/{paymentId}/fail:
+  $ref: "./payment.yaml#/failPayment"
