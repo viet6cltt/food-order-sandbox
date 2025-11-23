@@ -64,7 +64,7 @@ const FoodItem: React.FC<FoodItemProps> = ({
             <button
               type="button"
               onClick={() => onAdd && onAdd({ itemId: item._id, qty: 1 })}
-              className="inline-flex items-center px-3 py-1 rounded bg-blue-600 text-white text-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-300"
+              className="inline-flex items-center px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
             >
               <PlusIcon className="w-4 h-4 mr-1" /> Add
             </button>

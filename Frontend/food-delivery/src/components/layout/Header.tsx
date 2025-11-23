@@ -32,12 +32,17 @@ const Header: React.FC<Props> = ({ className = '' }) => {
     navigate('/login');
   }
 
+  const handleOnClickHome = () => {
+    // Logic for home click
+    navigate('/');
+  }
+
   return (
     <header className={`sticky top-0 z-30 bg-white/50 backdrop-blur-sm shadow-sm ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-left space-x-4">
-            <a href="/" className="text-xl font-semibold text-indigo-600">Food Delivery</a>
+            <button className="text-xl font-semibold text-green-600" type="button" onClick={handleOnClickHome}>Food Delivery</button>
           </div>
 
           <div>

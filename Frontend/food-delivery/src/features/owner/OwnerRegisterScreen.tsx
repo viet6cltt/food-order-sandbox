@@ -141,18 +141,18 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                     {/* Progress indicator */}
                     <div className="mb-8">
                         <div className="flex items-center justify-center space-x-4">
-                            <div className={`flex items-center ${step >= 1 ? 'text-indigo-600' : 'text-gray-400'}`}>
+                            <div className={`flex items-center ${step >= 1 ? 'text-green-600' : 'text-gray-400'}`}>
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                                    step >= 1 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300'
+                                    step >= 1 ? 'bg-green-600 border-green-600 text-white' : 'border-gray-300'
                                 }`}>
                                     {step > 1 ? '✓' : '1'}
                                 </div>
                                 <span className="ml-2 font-medium">Thông tin chủ nhà hàng</span>
                             </div>
-                            <div className={`w-16 h-0.5 ${step >= 2 ? 'bg-indigo-600' : 'bg-gray-300'}`}></div>
-                            <div className={`flex items-center ${step >= 2 ? 'text-indigo-600' : 'text-gray-400'}`}>
+                            <div className={`w-16 h-0.5 ${step >= 2 ? 'bg-green-600' : 'bg-gray-300'}`}></div>
+                            <div className={`flex items-center ${step >= 2 ? 'text-green-600' : 'text-gray-400'}`}>
                                 <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                                    step >= 2 ? 'bg-indigo-600 border-indigo-600 text-white' : 'border-gray-300'
+                                    step >= 2 ? 'bg-green-600 border-green-600 text-white' : 'border-gray-300'
                                 }`}>
                                     2
                                 </div>
@@ -186,7 +186,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                                 <button
                                     type="button"
                                     onClick={handleNext}
-                                    className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center"
+                                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center"
                                 >
                                     Tiếp theo
                                     <ChevronRightIcon className="ml-2 h-5 w-5" />
@@ -229,7 +229,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                                     type="button"
                                     onClick={handleSubmit}
                                     disabled={loading}
-                                    className="px-6 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500"
                                 >
                                     {loading ? 'Đang xử lý...' : 'Hoàn tất đăng ký'}
                                 </button>
