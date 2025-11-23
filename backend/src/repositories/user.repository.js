@@ -11,7 +11,23 @@ class UserRepository {
   }
 
   async findByPhone(phone) {
-    return await User.findOne({ phone }).select('+passwordHash');
+    if (!phone) return null;
+    
+    // Tìm với số điện thoại chính xác
+    let user = await User.findOne({ phone }).select('+passwordHash');
+    if (user) return user;
+    
+    // Nếu không tìm thấy, thử format khác (hỗ trợ cả +84 và 0)
+    const normalized = phone.trim();
+    if (normalized.startsWith('+84')) {
+      const altFormat = normalized.replace('+84', '0');
+      user = await User.findOne({ phone: altFormat }).select('+passwordHash');
+    } else if (normalized.startsWith('0')) {
+      const altFormat = `+84${normalized.substring(1)}`;
+      user = await User.findOne({ phone: altFormat }).select('+passwordHash');
+    }
+    
+    return user;
   }
 
   async findById(userId) {

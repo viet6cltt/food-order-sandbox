@@ -5,6 +5,7 @@ import LoginScreen from '../features/auth/LoginScreen';
 import SignupScreen from '../features/auth/SignupScreen';
 import OwnerRegisterScreen from '../features/owner/OwnerRegisterScreen';
 import RestaurantDetailScreen from '../features/restaurant/RestaurantDetailScreen';
+import CartScreen from '../features/cart/CartScreen';
 
 const AppRoutes: React.FC = () => {
 	return (
@@ -13,6 +14,7 @@ const AppRoutes: React.FC = () => {
 				<Route path="/" element={<HomeScreen />} />
 				<Route path="/login" element={<LoginScreen />} />
 				<Route path="/signup" element={<SignupScreen />} />
+				<Route path="/cart" element={<CartScreen />} />
 				<Route path="/restaurant/:restaurantId/*" element={<RestaurantDetailScreen />} />
 				<Route path="/owner/register" element={<OwnerRegisterScreen />} />
 				<Route path="*" element={<Navigate to="/" replace />} />

@@ -1,6 +1,8 @@
 const AppError = require('../utils/AppError');
 
 function errorHandler(err, req, res, next) {
+  // Log error để debug
+  console.error('Error:', err);
 
   if (err instanceof AppError) {
     return res.status(err.statusCode).json({
@@ -11,6 +13,7 @@ function errorHandler(err, req, res, next) {
   }
 
   // những lỗi k mong muốn
+  console.error('Unhandled error:', err);
   return res.status(500).json({
     success: false,
     error: 'Internal server error',

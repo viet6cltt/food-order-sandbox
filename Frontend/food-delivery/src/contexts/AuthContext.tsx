@@ -12,8 +12,8 @@ type AuthContextValue = {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string, role?: 'customer' | 'owner') => Promise<void>;
+  login: (phone: string, password: string) => Promise<void>;
+  register: (username: string, password: string, idToken: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -30,24 +30,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [token]);
 
-  const login = async (email: string, password: string) => {
-    const data = await apiLogin({ email, password });
-    const t = data.token ?? data.accessToken ?? null;
+  const login = async (phone: string, password: string) => {
+    const data = await apiLogin({ phone, password });
+    const t = data.data?.accessToken ?? data.accessToken ?? null;
     if (t) {
       localStorage.setItem('token', t);
       setToken(t);
     }
-    setUser(data.user ?? null);
+    const userData = data.data?.user ?? data.user ?? null;
+    if (userData) {
+      setUser({
+        id: userData.id ?? String(userData._id),
+        name: userData.username,
+        email: userData.email,
+        role: userData.role,
+      });
+    }
   };
 
-  const register = async (name: string, email: string, password: string, role?: 'customer' | 'owner') => {
-    const data = await apiRegister({ name, email, password, role });
-    const t = data.token ?? data.accessToken ?? null;
+  const register = async (username: string, password: string, idToken: string) => {
+    const data = await apiRegister({ username, password, idToken });
+    const t = data.data?.accessToken ?? data.accessToken ?? null;
     if (t) {
       localStorage.setItem('token', t);
       setToken(t);
     }
-    setUser(data.user ?? null);
+    const userData = data.data?.user ?? data.user ?? null;
+    if (userData) {
+      setUser({
+        id: userData.id ?? String(userData._id),
+        name: userData.username,
+        email: userData.email,
+        role: userData.role,
+      });
+    }
   };
 
   const logout = () => {

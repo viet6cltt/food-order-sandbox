@@ -2,19 +2,10 @@ import React from 'react'
 import useAuth from '../../hooks/useAuth'
 import SearchButton from '../ui/SearchButton'
 import { useNavigate } from 'react-router-dom'
+import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
 
 type Props = {
   className?: string
-}
-
-function getInitials(name?: string, email?: string) {
-  if (name) {
-    const parts = name.trim().split(' ')
-    if (parts.length === 1) return parts[0].slice(0, 1).toUpperCase()
-    return (parts[0].slice(0, 1) + parts[parts.length - 1].slice(0, 1)).toUpperCase()
-  }
-  if (email) return email.slice(0, 1).toUpperCase()
-  return '?' 
 }
 
 const Header: React.FC<Props> = ({ className = '' }) => {
@@ -24,6 +15,21 @@ const Header: React.FC<Props> = ({ className = '' }) => {
   const handleOnClickOwnerRegistration = () => {
     // Logic for owner registration click
     navigate('/owner/register');
+  }
+
+  const handleOnClickCartIcon = () => {
+    // Logic for cart icon click
+    navigate('/cart');
+  }
+
+  const handleOnClickProfile = () => {
+    // Logic for profile click
+    navigate('/profile');
+  }
+
+  const handleOnClickLogin = () => {
+    // Logic for login click
+    navigate('/login');
   }
 
   return (
@@ -50,18 +56,24 @@ const Header: React.FC<Props> = ({ className = '' }) => {
 
               <div className="flex items-center space-x-4">
                 {isAuthenticated && user ? (
-                  <a
-                    href="/profile"
-                    aria-label="Profile"
-                    className="flex items-center space-x-2"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-sm font-medium">
-                      {getInitials(user.name, user.email)}
-                    </div>
-                    <span className="hidden sm:inline text-sm text-gray-700">{user.name ?? 'Profile'}</span>
-                  </a>
+                  <div className='flex flex-row items-center space-x-4'>
+                    <button type="button" 
+                        className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
+                        aria-label="Cart Icon"
+                        onClick={handleOnClickCartIcon}>
+                        <ShoppingCartIcon className="h-5 w-5" />
+                    </button>
+                    <button type='button' 
+                        className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
+                        aria-label="Profile"
+                        onClick={handleOnClickProfile}>
+                      <UserIcon className="h-5 w-5" />
+                    </button>
+                  </div>
                 ) : (
-                  <a href="/login" className="text-sm text-gray-700 hover:text-gray-900">Login</a>
+                  <button type='button' onClick={handleOnClickLogin}>
+                    <span className="text-sm text-gray-700 hover:text-gray-900">Login</span>
+                  </button>
                 )}
               </div>
           </div>

@@ -12,22 +12,25 @@ class AuthController {
   }
   // [POST] /register
   async register(req, res, next) {
-    // chưa rõ logic với firebase - đợi fe
-    const { username, password, idToken } = req.body;
-
-    if (!username || !password || !idToken) {
-      return res.status(400).json({});
-    }
-
     try {
-      const user = await AuthService.registerWithFirebase({ username, password, idToken });
-      return {
-        user
+      const { username, password, idToken } = req.body;
+
+      if (!username || !password || !idToken) {
+        throw new HTTP_ERROR.BadRequestError('Missing username, password or idToken', ERR.AUTH_MISSING_FIELDS);
       }
+
+      const user = await AuthService.registerWithFirebase({ username, password, idToken });
+      
+      return SUCCESS_RESPONSE.created(res, 'User registered successfully', {
+        user: {
+          id: user._id,
+          username: user.username,
+          phone: user.phone,
+        }
+      });
     } catch (err) {
       next(err);
     }
-    
   }
 
   // [POST] /login

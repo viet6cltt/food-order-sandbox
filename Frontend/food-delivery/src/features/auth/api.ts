@@ -1,25 +1,52 @@
-// Template file -> fix to finish
-
 import api from "../../services/apiClient";
 
 export type LoginPayload = {
-    email: string;
+    phone: string;
     password: string;
 };
 
 export type RegisterPayload = {
-    name: string;
-    email: string;
+    username: string;
     password: string;
-    role?: 'customer' | 'owner';
+    idToken: string; // Firebase ID Token
 };
 
-export async function login(payload: LoginPayload) {
-    const res = await api.post('/api/login', payload);
+export type LoginResponse = {
+    success: boolean;
+    message: string;
+    data: {
+        accessToken: string;
+        user: {
+            id: string;
+            username: string;
+            phone: string;
+        };
+    };
+};
+
+export type RegisterResponse = {
+    success?: boolean;
+    message?: string;
+    data?: {
+        user: {
+            id: string;
+            username: string;
+            phone: string;
+        };
+    };
+    user?: {
+        _id: string;
+        username: string;
+        phone: string;
+    };
+};
+
+export async function login(payload: LoginPayload): Promise<LoginResponse> {
+    const res = await api.post('/auth/login', payload);
     return res.data;
 }
 
-export async function register(payload: RegisterPayload) {
-    const res = await api.post('/api/register', payload);
+export async function register(payload: RegisterPayload): Promise<RegisterResponse> {
+    const res = await api.post('/auth/register', payload);
     return res.data;
 }
