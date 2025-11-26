@@ -60,7 +60,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                         value={name}
                         onChange={(e) => onNameChange(e.target.value)}
                         required
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
                             errors.name ? 'border-red-500' : 'border-gray-300'
                         }`}
                     />
@@ -78,7 +78,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                         value={description}
                         onChange={(e) => onDescriptionChange(e.target.value)}
                         rows={4}
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
                             errors.description ? 'border-red-500' : 'border-gray-300'
                         }`}
                     />
@@ -97,7 +97,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                         value={address.full}
                         onChange={(e) => onAddressChange('full', e.target.value)}
                         required
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
                             errors.address ? 'border-red-500' : 'border-gray-300'
                         }`}
                     />
@@ -116,7 +116,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                         value={phone}
                         onChange={(e) => onPhoneChange(e.target.value)}
                         required
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
                             errors.phone ? 'border-red-500' : 'border-gray-300'
                         }`}
                     />
@@ -134,7 +134,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                             id="opening-time"
                             value={openingTime}
                             onChange={(e) => onOpeningTimeChange(e.target.value)}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
                                 errors.openingTime ? 'border-red-500' : 'border-gray-300'
                             }`}
                         />
@@ -151,7 +151,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                             id="closing-time"
                             value={closingTime}
                             onChange={(e) => onClosingTimeChange(e.target.value)}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 ${
+                                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
                                 errors.closingTime ? 'border-red-500' : 'border-gray-300'
                             }`}
                         />

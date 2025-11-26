@@ -16,7 +16,7 @@ function renderAddress(a: string | Restaurant['address'] | undefined) {
 
 const RestaurantInfo: React.FC<{ data: Restaurant }> = ({ data }) => {
     return (
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6 w-full">
             {data.description && (
                 <div className="mb-6">
                     <h2 className="text-lg font-semibold text-gray-900 mb-2">Mô tả</h2>

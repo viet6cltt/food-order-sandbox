@@ -69,9 +69,11 @@ const RestaurantDetailScreen: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="max-w-5xl mx-auto px-4 py-6">
-        <RestaurantHeader data={restaurant} />
-        <RestaurantInfo data={restaurant} />
+      <div className="max-w-7xl mx-auto px-4 py-6 pb-24 md:pb-6">
+        <div className='flex flex-row gap-4'>
+          <RestaurantHeader data={restaurant} />
+          <RestaurantInfo data={restaurant} />
+        </div>
 
         <section className="mt-6">
           <h3 className="text-xl font-semibold mb-4">Menu</h3>

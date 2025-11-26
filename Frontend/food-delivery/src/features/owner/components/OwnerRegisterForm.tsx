@@ -77,7 +77,7 @@ const OwnerRegisterForm: React.FC<OwnerRegisterFormProps> = ({
                         value={phone}
                         onChange={(e) => onPhoneChange(e.target.value)}
                         required
-                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70 ${
                             errors.phone ? 'border-red-500' : 'border-gray-300'
                         }`}
                     />
