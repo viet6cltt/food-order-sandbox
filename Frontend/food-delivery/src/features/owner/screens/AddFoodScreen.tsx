@@ -1,31 +1,25 @@
 // src/features/food/screens/AddFoodScreen.tsx
 import React from 'react';
-import OwnerDashboardLayout from '../../owner/OwnerDashboardLayout';
-import { PlusIcon } from '@heroicons/react/24/outline';
+// import OwnerDashboardLayout from '../../owner/OwnerDashboardLayout'; // Nếu có layout
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import FoodForm from '../../food/components/FoodForm';
 
 const AddFoodScreen: React.FC = () => {
     return (
-        <OwnerDashboardLayout>
-            <div className="p-4 pt-8 max-w-2xl mx-auto pb-20 md:pb-4 bg-white rounded-xl shadow-lg">
-                <h1 className="text-2xl font-bold text-gray-900 mb-6 flex items-center">
-                    <PlusIcon className="w-6 h-6 mr-2" />
-                    Thêm Món Ăn Mới
-                </h1>
-
-                {/* Form Placeholder */}
-                <form className="space-y-6">
-                    <input type="text" placeholder="Tên món ăn" className="w-full p-3 border rounded-lg" />
-                    <textarea placeholder="Mô tả" className="w-full p-3 border rounded-lg h-24"></textarea>
-                    <input type="number" placeholder="Giá (VND)" className="w-full p-3 border rounded-lg" />
-                    <div className="h-24 bg-gray-100 rounded-lg flex items-center justify-center border-dashed border-2">
-                        [Image Uploader Placeholder]
-                    </div>
-                    <button type="submit" className="w-full p-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700">
-                        Lưu Món Ăn
+        <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+            <div className="max-w-3xl mx-auto">
+                {/* Header điều hướng */}
+                <div className="mb-6 flex items-center">
+                    <button className="mr-4 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 text-gray-600">
+                        <ChevronLeftIcon className="w-5 h-5" />
                     </button>
-                </form>
+                    <h1 className="text-2xl font-bold text-gray-900">Thêm Món Mới</h1>
+                </div>
+
+                {/* Form chính */}
+                <FoodForm />
             </div>
-        </OwnerDashboardLayout>
+        </div>
     );
 };
 
