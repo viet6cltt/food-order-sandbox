@@ -8,6 +8,7 @@ import RestaurantDetailScreen from '../features/restaurant/RestaurantDetailScree
 import CartScreen from '../features/cart/CartScreen';
 import FoodDetailScreen from '../features/food/FoodDetailScreen';
 import PaymentScreen from '../features/payment/PaymentScreen';
+import OrderListScreen from '../features/order/OrderListScreen';
 
 const AppRoutes: React.FC = () => {
 	return (
@@ -21,6 +22,7 @@ const AppRoutes: React.FC = () => {
 				<Route path="/restaurant/:restaurantId/*" element={<RestaurantDetailScreen />} />
 				<Route path="/food/:foodId" element={<FoodDetailScreen />} />
 				<Route path="/owner/register" element={<OwnerRegisterScreen />} />
+				<Route path="/orders" element={<OrderListScreen />} />
 				<Route path="*" element={<Navigate to="/" replace />} />
 			</Routes>
 		</BrowserRouter>

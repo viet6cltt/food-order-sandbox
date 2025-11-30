@@ -34,7 +34,7 @@ const PaymentMethod: React.FC<{className? : string}> = ({className = ''}) => {
             </div>
             <div className="mt-4">
                 {page === 0 && (
-                    <div className="p-6 text-sm bg-white">
+                    <div className="p-6 mb-4 text-sm bg-white">
                         <p>Thanh toán khi nhận hàng - hãy thanh toán khi shipper giao hàng tới</p>
                     </div> 
                 )}
