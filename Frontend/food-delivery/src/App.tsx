@@ -8,6 +8,7 @@ function App() {
       <AppRoutes />
     </AuthProvider>
   );
-} 
+}
 
 export default App;
+
