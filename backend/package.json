@@ -32,7 +32,7 @@
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1",
     "twilio": "^4.21.0",
-    "uuid": "^13.0.0"
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "husky": "^9.1.7",
