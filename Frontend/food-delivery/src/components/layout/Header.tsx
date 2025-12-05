@@ -16,7 +16,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
     // Logic for owner registration click
     navigate('/owner/register');
   }
-
+  
   const handleOnClickCartIcon = () => {
     // Logic for cart icon click
     navigate('/cart');
