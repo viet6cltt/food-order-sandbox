@@ -1,25 +1,20 @@
 // src/features/promotion/components/PromotionList.tsx
 import React from 'react';
-import { TagIcon, PencilSquareIcon, TrashIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 import type { Promotion } from '../../../types/promotion';
-
-// Mock Data
-const MOCK_PROMOTIONS: Promotion[] = [
-    { id: '1', code: 'CHAOMOI', name: 'Chào bạn mới', type: 'amount', value: 20000, startDate: '2025-01-01', endDate: '2025-12-31', isActive: true, description: 'Giảm 20k cho đơn đầu tiên' },
-    { id: '2', code: 'FREESHIP', name: 'Mã Freeship', type: 'amount', value: 15000, startDate: '2025-02-01', endDate: '2025-02-28', isActive: true, description: 'Miễn phí vận chuyển dưới 3km' },
-    { id: '3', code: 'GIAM50', name: 'Giảm 50%', type: 'percent', value: 50, startDate: '2025-03-08', endDate: '2025-03-08', isActive: false, description: 'Flash sale ngày 8/3' },
-];
+import { PencilSquareIcon, TrashIcon, CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 interface Props {
+    promotions: Promotion[];           // Nhận danh sách từ cha
     onEdit: (promo: Promotion) => void;
+    onDelete: (id: string) => void;    // Nhận hàm xóa từ cha
 }
 
-const PromotionList: React.FC<Props> = ({ onEdit }) => {
+const PromotionList: React.FC<Props> = ({ promotions, onEdit, onDelete }) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {MOCK_PROMOTIONS.map((promo) => (
-                <div key={promo.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition relative overflow-hidden">
-                    {/* Dải màu trạng thái bên trái */}
+            {promotions.map((promo) => (
+                <div key={promo.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition relative overflow-hidden group">
+                    {/* Dải màu trạng thái */}
                     <div className={`absolute left-0 top-0 bottom-0 w-1.5 ${promo.isActive ? 'bg-green-500' : 'bg-gray-300'}`}></div>
 
                     <div className="flex justify-between items-start pl-2">
@@ -45,11 +40,20 @@ const PromotionList: React.FC<Props> = ({ onEdit }) => {
                             </p>
                             <p className="text-xs text-gray-400 uppercase">Giảm</p>
 
-                            <div className="flex space-x-2 mt-3 justify-end">
-                                <button onClick={() => onEdit(promo)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full">
+                            <div className="flex space-x-2 mt-3 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => onEdit(promo)}
+                                    className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-full"
+                                    title="Chỉnh sửa"
+                                >
                                     <PencilSquareIcon className="w-5 h-5" />
                                 </button>
-                                <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-full">
+                                <button
+                                    // GẮN SỰ KIỆN XÓA TẠI ĐÂY
+                                    onClick={() => onDelete(promo.id)}
+                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded-full"
+                                    title="Xóa khuyến mãi"
+                                >
                                     <TrashIcon className="w-5 h-5" />
                                 </button>
                             </div>
