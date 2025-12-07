@@ -5,7 +5,6 @@ import PromotionForm from '../components/PromotionForm';
 import { TagIcon, PlusIcon } from '@heroicons/react/24/outline';
 import type { Promotion } from '../../../types/promotion';
 
-// 1. Mang dữ liệu giả về đây quản lý
 const MOCK_DATA: Promotion[] = [
     { id: '1', code: 'CHAOMOI', name: 'Chào bạn mới', type: 'amount', value: 20000, startDate: '2025-01-01', endDate: '2025-12-31', isActive: true, description: 'Giảm 20k cho đơn đầu tiên' },
     { id: '2', code: 'FREESHIP', name: 'Mã Freeship', type: 'amount', value: 15000, startDate: '2025-02-01', endDate: '2025-02-28', isActive: true, description: 'Miễn phí vận chuyển dưới 3km' },
@@ -14,24 +13,35 @@ const MOCK_DATA: Promotion[] = [
 
 const PromotionManagerScreen: React.FC = () => {
     const [viewMode, setViewMode] = useState<'list' | 'create' | 'edit'>('list');
-
-    // 2. Tạo State để lưu danh sách khuyến mãi (để còn xóa được)
     const [promotions, setPromotions] = useState<Promotion[]>(MOCK_DATA);
     const [editingPromo, setEditingPromo] = useState<Promotion | null>(null);
 
-    // Chuyển sang chế độ sửa
     const handleEdit = (promo: Promotion) => {
         setEditingPromo(promo);
         setViewMode('edit');
     };
 
-    // 3. Hàm Xử lý Xóa (QUAN TRỌNG)
     const handleDelete = (id: string) => {
-        // Dùng window.confirm cho nhanh gọn (hoặc dùng Modal xịn sau này)
         if (window.confirm('Bạn có chắc chắn muốn xóa mã khuyến mãi này không?')) {
             const newList = promotions.filter(p => p.id !== id);
             setPromotions(newList);
         }
+    };
+
+    // --- HÀM MỚI: Xử lý lưu dữ liệu ---
+    const handleSave = (data: Promotion) => {
+        if (viewMode === 'create') {
+            // Trường hợp TẠO MỚI: Thêm vào mảng
+            setPromotions([...promotions, data]);
+        } else {
+            // Trường hợp SỬA: Tìm và thay thế
+            const newList = promotions.map(p => p.id === data.id ? data : p);
+            setPromotions(newList);
+        }
+
+        // Lưu xong thì quay về danh sách
+        setViewMode('list');
+        setEditingPromo(null);
     };
 
     const handleCancel = () => {
@@ -53,7 +63,10 @@ const PromotionManagerScreen: React.FC = () => {
 
                     {viewMode === 'list' && (
                         <button
-                            onClick={() => setViewMode('create')}
+                            onClick={() => {
+                                setEditingPromo(null); // Reset dữ liệu cũ nếu có
+                                setViewMode('create');
+                            }}
                             className="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition shadow-sm font-medium"
                         >
                             <PlusIcon className="w-5 h-5 mr-1" />
@@ -63,7 +76,6 @@ const PromotionManagerScreen: React.FC = () => {
                 </div>
 
                 {viewMode === 'list' ? (
-                    // 4. Truyền dữ liệu và hàm xóa xuống cho con
                     <PromotionList
                         promotions={promotions}
                         onEdit={handleEdit}
@@ -71,8 +83,9 @@ const PromotionManagerScreen: React.FC = () => {
                     />
                 ) : (
                     <PromotionForm
-                        initialData={viewMode === 'edit' ? editingPromo : null}
+                        initialData={editingPromo} // Truyền dữ liệu cũ (nếu có) vào form
                         onCancel={handleCancel}
+                        onSave={handleSave} // Truyền hàm lưu xuống
                     />
                 )}
             </div>

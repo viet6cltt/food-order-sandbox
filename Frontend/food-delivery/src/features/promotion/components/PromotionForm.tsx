@@ -5,10 +5,13 @@ import type { Promotion } from '../../../types/promotion';
 interface Props {
     initialData?: Promotion | null;
     onCancel: () => void;
+    // Thêm hàm này để gửi dữ liệu về cho cha
+    onSave: (data: Promotion) => void;
 }
 
-const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
-    // Nếu có initialData thì là Chỉnh sửa, không thì là Tạo mới
+const PromotionForm: React.FC<Props> = ({ initialData, onCancel, onSave }) => {
+
+    // Khởi tạo state
     const [formData, setFormData] = useState<Partial<Promotion>>(initialData || {
         code: '',
         name: '',
@@ -22,7 +25,35 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        // Xử lý riêng cho trường 'value' để đảm bảo nó là số
+        const finalValue = name === 'value' ? Number(value) : value;
+        setFormData({ ...formData, [name]: finalValue });
+    };
+
+    // Hàm xử lý khi bấm Lưu
+    const handleSubmit = () => {
+        // 1. Validate sơ bộ (bắt buộc phải có mã và tên)
+        if (!formData.code || !formData.name) {
+            alert("Vui lòng nhập Mã khuyến mãi và Tên chương trình!");
+            return;
+        }
+
+        // 2. Tạo object hoàn chỉnh
+        const finalData: Promotion = {
+            // Nếu sửa thì giữ ID cũ, nếu mới thì tạo ID ngẫu nhiên bằng thời gian hiện tại
+            id: initialData?.id || Date.now().toString(),
+            code: formData.code!,
+            name: formData.name!,
+            type: formData.type as 'percent' | 'amount' || 'amount',
+            value: Number(formData.value) || 0,
+            startDate: formData.startDate || '',
+            endDate: formData.endDate || '',
+            isActive: formData.isActive !== undefined ? formData.isActive : true,
+            description: formData.description || ''
+        };
+
+        // 3. Gửi lên cho cha
+        onSave(finalData);
     };
 
     return (
@@ -32,8 +63,8 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
             </h2>
 
             <form className="space-y-5">
+                {/* Các trường nhập liệu giữ nguyên như cũ */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Mã Code */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Mã khuyến mãi</label>
                         <input
@@ -45,7 +76,6 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
                             className="mt-1 block w-full border-gray-300 rounded-md shadow-sm p-3 border focus:ring-green-500 focus:border-green-500 uppercase"
                         />
                     </div>
-                    {/* Tên chương trình */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Tên chương trình</label>
                         <input
@@ -60,7 +90,6 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    {/* Loại giảm giá */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Loại giảm giá</label>
                         <select
@@ -74,7 +103,6 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
                             <option value="percent">Phần trăm (%)</option>
                         </select>
                     </div>
-                    {/* Giá trị */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Giá trị giảm</label>
                         <input
@@ -87,7 +115,6 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
                     </div>
                 </div>
 
-                {/* Thời gian */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Ngày bắt đầu</label>
@@ -99,7 +126,6 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
                     </div>
                 </div>
 
-                {/* Mô tả */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700">Mô tả chi tiết</label>
                     <textarea
@@ -111,12 +137,12 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel }) => {
                     ></textarea>
                 </div>
 
-                {/* Nút bấm */}
                 <div className="flex justify-end pt-4 border-t space-x-3">
                     <button type="button" onClick={onCancel} className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                         Hủy bỏ
                     </button>
-                    <button type="button" onClick={() => alert('Đã lưu khuyến mãi!')} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium">
+                    {/* Sửa onClick thành handleSubmit */}
+                    <button type="button" onClick={handleSubmit} className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-medium">
                         {initialData ? 'Cập nhật' : 'Tạo mới'}
                     </button>
                 </div>
