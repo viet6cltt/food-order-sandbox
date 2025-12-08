@@ -17,15 +17,12 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   const [error, setError] = useState<string | null>(null);
   const [idToken, setIdToken] = useState<string | null>(null);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       firebaseAuth.reset();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Handle Firebase auth errors
   useEffect(() => {
     if (firebaseAuth.error) {
       setError(firebaseAuth.error);
@@ -44,14 +41,12 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
     try {
       await firebaseAuth.sendOTP(phone);
-      // Chỉ chuyển step khi sendOTP thành công và không có lỗi
       if (!firebaseAuth.error) {
         setStep('otp');
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Không thể gửi mã OTP. Vui lòng thử lại.';
       setError(errorMessage);
-      // Đảm bảo ở lại step phone nếu có lỗi
       setStep('phone');
     } finally {
       setLoading(false);
@@ -65,7 +60,6 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
       return;
     }
 
-    // Kiểm tra trước khi verify
     if (!firebaseAuth.hasConfirmationResult) {
       setStep('phone');
       setOtpCode('');
@@ -83,14 +77,12 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Mã OTP không đúng. Vui lòng thử lại.';
       
-      // Nếu lỗi là "Chưa gửi mã OTP", quay lại step phone và reset
       if (errorMessage.includes('Chưa gửi mã OTP') || errorMessage.includes('gửi mã OTP trước')) {
         setStep('phone');
         setOtpCode('');
         setError('Vui lòng gửi mã OTP trước khi xác minh.');
         firebaseAuth.reset();
       } else {
-        // Các lỗi khác (OTP sai, expired, etc.) - giữ ở step OTP
         setError(errorMessage);
       }
     } finally {
@@ -133,127 +125,170 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   };
 
   return (
-    <div className={`max-w-md mx-auto p-6 bg-white rounded shadow ${className}`}>
-      <h2 className="text-2xl font-semibold mb-4">Đăng ký</h2>
-
-      {/* reCAPTCHA container - ẩn, sẽ được Firebase tự động tạo */}
-      <div id="recaptcha-container"></div>
-
-      {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded">
-          {error}
+    <div className={`min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center p-4 ${className}`}>
+      <div className="w-full max-w-md">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="inline-block bg-emerald-600 text-white rounded-full p-3 mb-4">
+            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L9 5.414V16a1 1 0 102 0V5.414l6.293 6.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Tạo tài khoản</h1>
+          <p className="text-gray-600">Đăng ký để bắt đầu đặt hàng</p>
         </div>
-      )}
 
-      {/* Step 1: Nhập số điện thoại */}
-      {step === 'phone' && (
-        <form onSubmit={handleSendOTP}>
-          <label className="block mb-4">
-            <span className="text-sm font-medium text-gray-700">Số điện thoại</span>
-            <input 
-              type="tel" 
-              required 
-              value={phone} 
-              onChange={e => setPhone(e.target.value)} 
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-            />
-            <p className="mt-1 text-xs text-gray-500">
-              Chúng tôi sẽ gửi mã OTP đến số điện thoại này để xác minh
-            </p>
-          </label>
+        {/* Form Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+          {/* reCAPTCHA container */}
+          <div id="recaptcha-container" className="hidden"></div>
 
-          <button 
-            type="submit" 
-            disabled={loading || firebaseAuth.loading} 
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading || firebaseAuth.loading ? 'Đang gửi mã OTP...' : 'Gửi mã OTP'}
-          </button>
-        </form>
-      )}
+          {/* Error Message */}
+          {error && (
+            <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+              <div className="flex items-center gap-2">
+                <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" />
+                </svg>
+                <span>{error}</span>
+              </div>
+            </div>
+          )}
 
-      {/* Step 2: Nhập mã OTP */}
-      {step === 'otp' && (
-        <form onSubmit={handleVerifyOTP}>
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">
-              Mã OTP đã được gửi đến số điện thoại <strong>{phone}</strong>
-            </p>
-            <button
-              type="button"
-              onClick={handleBack}
-              className="text-sm text-blue-600 hover:underline"
-            >
-              ← Đổi số điện thoại
-            </button>
+          {/* Step Indicator */}
+          <div className="flex gap-1 mb-8">
+            <div className={`flex-1 h-2 rounded-full ${step === 'phone' || step === 'otp' || step === 'register' ? 'bg-emerald-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex-1 h-2 rounded-full ${step === 'otp' || step === 'register' ? 'bg-emerald-600' : 'bg-gray-200'}`}></div>
+            <div className={`flex-1 h-2 rounded-full ${step === 'register' ? 'bg-emerald-600' : 'bg-gray-200'}`}></div>
           </div>
 
-          <label className="block mb-4">
-            <span className="text-sm font-medium text-gray-700">Mã OTP</span>
-            <input 
-              type="text" 
-              required 
-              value={otpCode} 
-              onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))} 
-              maxLength={6}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 text-center text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-            />
-          </label>
+          {/* Step 1: Phone */}
+          {step === 'phone' && (
+            <form onSubmit={handleSendOTP}>
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
+                <input 
+                  type="tel" 
+                  required 
+                  value={phone} 
+                  onChange={e => setPhone(e.target.value)} 
+                  placeholder="09xx xxx xxx"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Chúng tôi sẽ gửi mã OTP đến số điện thoại này để xác minh
+                </p>
+              </div>
 
-          <button 
-            type="submit" 
-            disabled={loading || firebaseAuth.loading} 
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading || firebaseAuth.loading ? 'Đang xác minh...' : 'Xác minh OTP'}
-          </button>
-        </form>
-      )}
+              <button 
+                type="submit" 
+                disabled={loading || firebaseAuth.loading} 
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading || firebaseAuth.loading && <svg className="animate-spin w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0A7 7 0 0014.707 14.707a1 1 0 01-1.414 1.414A9 9 0 014.293 4.293zM15.71 2.29a1 1 0 011.414 1.414A9 9 0 005.707 16.707a1 1 0 01-1.414-1.414A7 7 0 0115.71 2.29z" /></svg>}
+                {loading || firebaseAuth.loading ? 'Đang gửi mã OTP...' : 'Gửi mã OTP'}
+              </button>
+            </form>
+          )}
 
-      {/* Step 3: Điền thông tin đăng ký */}
-      {step === 'register' && (
-        <form onSubmit={handleRegister}>
-          <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded text-sm">
-            <p className="font-medium">✓ Số điện thoại đã được xác minh: <strong>{phone}</strong></p>
-          </div>
+          {/* Step 2: OTP */}
+          {step === 'otp' && (
+            <form onSubmit={handleVerifyOTP}>
+              <div className="mb-6">
+                <p className="text-sm text-gray-600 mb-3">
+                  Mã OTP đã được gửi đến số điện thoại <strong className="text-gray-800">{phone}</strong>
+                </p>
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="text-sm text-emerald-600 hover:text-emerald-700 font-semibold flex items-center gap-1 mb-4"
+                >
+                  ← Đổi số điện thoại
+                </button>
+              </div>
 
-          <label className="block mb-2">
-            <span className="text-sm font-medium text-gray-700">Tên người dùng</span>
-            <input 
-              type="text" 
-              required 
-              value={username} 
-              onChange={e => setUsername(e.target.value)} 
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-            />
-          </label>
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Mã OTP</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={otpCode} 
+                  onChange={e => setOtpCode(e.target.value.replace(/\D/g, ''))} 
+                  maxLength={6}
+                  placeholder="000000"
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-lg text-center text-2xl font-bold tracking-widest focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+                />
+              </div>
 
-          <label className="block mb-4">
-            <span className="text-sm font-medium text-gray-700">Mật khẩu</span>
-            <input 
-              type="password" 
-              required 
-              value={password} 
-              onChange={e => setPassword(e.target.value)} 
-              minLength={6}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent" 
-            />
-          </label>
+              <button 
+                type="submit" 
+                disabled={loading || firebaseAuth.loading} 
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading || firebaseAuth.loading && <svg className="animate-spin w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0A7 7 0 0114.707 14.707a1 1 0 01-1.414 1.414A9 9 0 014.293 4.293zM15.71 2.29a1 1 0 011.414 1.414A9 9 0 005.707 16.707a1 1 0 01-1.414-1.414A7 7 0 0115.71 2.29z" /></svg>}
+                {loading || firebaseAuth.loading ? 'Đang xác minh...' : 'Xác minh OTP'}
+              </button>
+            </form>
+          )}
 
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? 'Đang đăng ký...' : 'Hoàn tất đăng ký'}
-          </button>
-        </form>
-      )}
+          {/* Step 3: Register */}
+          {step === 'register' && (
+            <form onSubmit={handleRegister}>
+              <div className="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-600 text-emerald-800 rounded">
+                <p className="font-medium flex items-center gap-2">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" />
+                  </svg>
+                  Số điện thoại đã xác minh: <strong>{phone}</strong>
+                </p>
+              </div>
 
-      <div className="mt-4 text-center">
-        <Link to="/login" className="text-green-600 hover:underline">
-          Đã có tài khoản? Đăng nhập
-        </Link>
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tên người dùng</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={username} 
+                  onChange={e => setUsername(e.target.value)} 
+                  placeholder="Nhập tên người dùng"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+                />
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Mật khẩu</label>
+                <input 
+                  type="password" 
+                  required 
+                  value={password} 
+                  onChange={e => setPassword(e.target.value)} 
+                  minLength={6}
+                  placeholder="Tối thiểu 6 ký tự"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+                />
+              </div>
+
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && <svg className="animate-spin w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0A7 7 0 0114.707 14.707a1 1 0 01-1.414 1.414A9 9 0 014.293 4.293zM15.71 2.29a1 1 0 011.414 1.414A9 9 0 005.707 16.707a1 1 0 01-1.414-1.414A7 7 0 0115.71 2.29z" /></svg>}
+                {loading ? 'Đang đăng ký...' : 'Hoàn tất đăng ký'}
+              </button>
+            </form>
+          )}
+        </div>
+
+        {/* Footer Link */}
+        <div className="text-center">
+          <p className="text-gray-600">
+            Đã có tài khoản?{' '}
+            <Link to="/login" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+              Đăng nhập
+            </Link>
+          </p>
+        </div>
       </div>
     </div>
   );
