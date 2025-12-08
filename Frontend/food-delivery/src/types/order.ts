@@ -1,4 +1,4 @@
-export type OrderStatus = 'pending' | 'confirmed' | 'delivering' | 'completed' | 'canceled' | 'refunded'
+export type OrderStatus = 'pending' | 'confirmed' | 'delivering' | 'completed' | 'canceled' | 'refunded' | 'cooking';
 
 export interface OrderItem {
   menuItemId: string
@@ -19,6 +19,8 @@ export interface Order {
   updatedAt: string
   deliveryAddress?: string
   paymentMethod?: string
+
+  customerName?: string;
 }
 
 export interface OrdersResponse {
