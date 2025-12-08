@@ -18,6 +18,7 @@ const AppRoutes: React.FC = () => {
 				<Route path="/" element={<HomeScreen />} />
 				<Route path="/login" element={<LoginScreen />} />
 				<Route path="/signup" element={<SignupScreen />} />
+				<Route path="/order-list" element={<OrderListScreen />} />
 				<Route path="/reset-password" element={<ResetPasswordScreen />} />
 				<Route path="/cart" element={<CartScreen />} />
 				<Route path="/payment" element={<PaymentScreen />} />
