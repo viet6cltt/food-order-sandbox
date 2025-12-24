@@ -3,6 +3,7 @@ import useAuth from '../../hooks/useAuth'
 import SearchButton from '../ui/SearchButton'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
+import useUser from '../../hooks/useUser'
 
 type Props = {
   className?: string
@@ -11,6 +12,7 @@ type Props = {
 const Header: React.FC<Props> = ({ className = '' }) => {
   const { user, isAuthenticated } = useAuth()
   const navigate = useNavigate();
+  const userProfile = useUser();
 
   const handleOnClickOwnerRegistration = () => {
     // Logic for owner registration click
@@ -20,7 +22,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
   const handleOnClickCartIcon = () => {
     // Logic for cart icon click
     navigate('/cart');
-  }
+  } 
 
   const handleOnClickProfile = () => {
     // Logic for profile click
@@ -45,14 +47,47 @@ const Header: React.FC<Props> = ({ className = '' }) => {
             <button className="text-xl font-semibold text-green-600" type="button" onClick={handleOnClickHome}>Food Delivery</button>
           </div>
 
-          <div>
-            <button type="button" 
-                    className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
-                    aria-label="Owner registration"
-                    onClick={handleOnClickOwnerRegistration}>
-              Owner Registration
-            </button>
-          </div>
+          {userProfile.getRole() === 'customer' && (
+            <div>
+              <button type="button" 
+                      className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
+                      aria-label="Owner registration"
+                      onClick={handleOnClickOwnerRegistration}>
+                Owner Registration
+              </button>
+            </div>
+          )}
+
+          {
+            userProfile.getRole() === 'restaurant_owner' && (
+              <div className='flex flex-row items-center space-x-6'>
+                <div>
+                  <button type="button" 
+                          className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
+                          aria-label="Owner Dashboard"
+                          onClick={() => navigate('/owner/dashboard')}>
+                    Owner Dashboard
+                  </button>
+                 </div>
+                 <div>
+                    <button type="button" 
+                            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                            aria-label="Add Food"
+                            onClick={() => navigate('/owner/add-food')}>
+                      Add Food
+                    </button>
+                  </div>
+                  <div>
+                    <button type="button" 
+                            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                            aria-label="Add Food"
+                            onClick={() => navigate('/owner/menu-list')}>
+                      Menu List
+                    </button>
+                  </div>
+              </div>
+            )
+          }
 
           <div className='flex direction-row items-center space-x-6'>
             <nav className="hidden sm:flex sm:space-x-6" aria-label="Main">

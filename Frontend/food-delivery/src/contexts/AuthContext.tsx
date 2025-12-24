@@ -13,7 +13,7 @@ type AuthContextValue = {
   token: string | null;
   isAuthenticated: boolean;
   login: (phone: string, password: string) => Promise<void>;
-  register: (username: string, password: string, idToken: string) => Promise<void>;
+  register: (username: string, password: string, role: 'customer' | 'restaurant_owner' | 'admin', idToken: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -22,13 +22,6 @@ export const AuthContext = createContext<AuthContextValue | undefined>(undefined
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-
-  useEffect(() => {
-    if (token) {
-      // In a real app, fetch user profile here. We'll decode minimal info if backend returns it in token
-      // keeping this simple for now
-    }
-  }, [token]);
 
   const login = async (phone: string, password: string) => {
     const data = await apiLogin({ phone, password });
@@ -48,8 +41,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (username: string, password: string, idToken: string) => {
-    const data = await apiRegister({ username, password, idToken });
+  const register = async (username: string, password: string, role: 'customer' | 'restaurant_owner' | 'admin', idToken: string) => {
+    const data = await apiRegister({ username, password, role, idToken });
     const t = data.data?.accessToken ?? data.accessToken ?? null;
     if (t) {
       localStorage.setItem('token', t);

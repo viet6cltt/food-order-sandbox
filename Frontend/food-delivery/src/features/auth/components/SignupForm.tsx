@@ -10,6 +10,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'customer' | 'restaurant_owner' | 'admin'>('customer');
   const [phone, setPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [step, setStep] = useState<'phone' | 'otp' | 'register'>('phone');
@@ -100,7 +101,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password || !idToken) {
+    if (!username || !password || !role || !idToken) {
       setError('Vui lòng điền đầy đủ thông tin');
       return;
     }
@@ -109,8 +110,13 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
     setError(null);
 
     try {
-      await register(username, password, idToken);
-      navigate('/');
+      await register(username, password, role, idToken);
+      // Redirect theo role
+      if (role === 'restaurant_owner') {
+        navigate('/owner/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err: unknown) {
       let errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
       if (err && typeof err === 'object' && 'response' in err) {
@@ -240,6 +246,19 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
             />
           </label>
 
+          <label className="block mb-4">
+            <span className="text-sm font-medium text-gray-700">Role</span>
+            <select
+              required
+              value={role}
+              onChange={e => setRole(e.target.value as 'customer' | 'restaurant_owner' | 'admin')}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="customer">Customer</option>
+              <option value="restaurant_owner">Restaurant Owner</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
           <button 
             type="submit" 
             disabled={loading} 
