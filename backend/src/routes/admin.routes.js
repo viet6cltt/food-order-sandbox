@@ -29,4 +29,7 @@ router.patch('/categories/:categoryId/active',categoryController.activeCategory)
 router.delete('/categories/:categoryId', categoryController.deleteCategory);
 
 
+
+
+
 module.exports = router;
