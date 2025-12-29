@@ -14,13 +14,14 @@ const requireAuth = (req, res, next) => {
   try {
     const decoded = authHelper.verifyAccessToken(token);
     req.userId = decoded.userId;
+    req.role = decoded.role;
     next();
   } catch(err) {
     return next(new HTTP_ERROR.UnauthorizedError('Invalid or expired token', ERR.AUTH_INVALID_TOKEN));
   }
 }
 
-const optinalAuth = (req, res, next) => {
+const optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
   if (!authHeader || !authHeader.startsWith('Bearer')) {
     next();
@@ -30,10 +31,11 @@ const optinalAuth = (req, res, next) => {
   try{
     const decoded = authHelper.verifyAccessToken(token);
     req.userId = decoded.userId;
+    req.role = decoded.role;
   } catch (err) {
     // khi có token nhưng token không hợp lệ
     next(); // vẫn cho qua
   }
 }
 
-module.exports = { requireAuth, optinalAuth };
+module.exports = { requireAuth, optionalAuth };

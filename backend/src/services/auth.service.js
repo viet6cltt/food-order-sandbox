@@ -63,11 +63,11 @@ class AuthService {
     }
 
     // Create token
-    const accessToken = authHelper.generateAccessToken(user._id);
+    const accessToken = authHelper.generateAccessToken(user._id, user.role);
 
     await AuthRepository.revokeSessionByUserId(user._id);
 
-    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, user.role);
     await AuthRepository.createAuthSession({
       userId: user._id,
       refreshTokenId: refreshTokenId,
@@ -89,9 +89,9 @@ class AuthService {
     const user = await UserService.findById(userId);
     if (!user) throw new HTTP_ERROR.UnauthorizedError('Account does not exist', ERR.AUTH_INVALID_CREDENTIALS);
 
-    const accessToken = authHelper.generateAccessToken(user._id);
+    const accessToken = authHelper.generateAccessToken(user._id, user.role);
 
-    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, role);
 
     await AuthRepository.createAuthSession({
       userId,
@@ -120,7 +120,7 @@ class AuthService {
       }
 
       // tạo access token mới
-      const newAccessToken = authHelper.generateAccessToken(decoded.userId);
+      const newAccessToken = authHelper.generateAccessToken(decoded.userId, decoded.role);
 
       return newAccessToken;
 
