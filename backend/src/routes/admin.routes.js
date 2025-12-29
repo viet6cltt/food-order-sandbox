@@ -14,19 +14,7 @@ router.patch("/restaurant-requests/:requestId/approve", restaurantRequestControl
 router.patch("/restaurant-requests/:requestId/reject", restaurantRequestController.reject);
 
 // manage restaurant category
-router.post("/categories", categoryController.createCategory);
 
-router.get("/categories", categoryController.getAllCategories);
-
-router.get('/categories/:categoryId', categoryController.getById);
-
-router.put('/categories/:categoryId', categoryController.updateCategory);
-
-router.patch('/categories/:categoryId/deactive',categoryController.deactiveCategory);
-
-router.patch('/categories/:categoryId/active',categoryController.activeCategory);
-
-router.delete('/categories/:categoryId', categoryController.deleteCategory);
 
 
 

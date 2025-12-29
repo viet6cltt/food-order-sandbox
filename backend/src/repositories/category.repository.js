@@ -1,7 +1,7 @@
 const Category = require('../models/Category');
 
 class CategoryRepository {
-  async createCategory(data) {
+  async create(data) {
     return await Category.create(data);
   }
 
