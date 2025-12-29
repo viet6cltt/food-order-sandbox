@@ -3,20 +3,18 @@ const router = require('express').Router();
 const { requireAuth } = require('../../middlewares/auth.middleware');
 const { requireAdmin } = require('../../middlewares/admin.middleware');
 
+const ctl = require('../../controllers/admin/adminCategory.controller');
+
 router.use(requireAuth, requireAdmin);
 
-router.post("/categories", categoryController.createCategory);
+router.post("/", ctl.create);
 
-router.get("/categories", categoryController.getAllCategories);
+router.put('/:categoryId', ctl.update);
 
-router.get('/categories/:categoryId', categoryController.getById);
+router.patch('/:categoryId/deactive',ctl.deactive);
 
-router.put('/categories/:categoryId', categoryController.updateCategory);
+router.patch('/:categoryId/active',ctl.active);
 
-router.patch('/categories/:categoryId/deactive',categoryController.deactiveCategory);
-
-router.patch('/categories/:categoryId/active',categoryController.activeCategory);
-
-router.delete('/categories/:categoryId', categoryController.deleteCategory);
+router.delete('/:categoryId', ctl.deactive);
 
 module.exports = router;

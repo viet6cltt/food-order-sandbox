@@ -40,7 +40,7 @@ class AdminCategoryController {
     }
   }
 
-  async deactiveCategory(req, res, next) {
+  async deactive(req, res, next) {
     try {
       const { categoryId } = req.params;
 
@@ -68,7 +68,7 @@ class AdminCategoryController {
     }
   }
 
-  async deleteCategory(req, res, next) {
+  async delete(req, res, next) {
     try {
       const { categoryId } = req.params;
 

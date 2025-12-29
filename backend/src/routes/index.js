@@ -7,9 +7,10 @@ const cartRoutes = require('./cart.routes.js');
 const orderRoutes = require('./order.routes.js');
 const paymentRoutes = require('./payment.routes.js');
 const revenueRoutes = require('./revenue.routes.js');
-const adminRoutes = require('./admin.routes.js');
 
 const adminUserRoutes = require('./admin/adminUser.routes.js');
+const adminCategoryRoutes = require('./admin/adminCategory.routes.js');
+const adminRestaurantRequestRoutes = require('./admin/adminRestaurantRequest.routes.js');
 
 const errorHandler = require('../middlewares/error.middleware');
 
@@ -24,10 +25,11 @@ function route(app) {
   apiRouter.use('/orders', orderRoutes);
   apiRouter.use('/payments', paymentRoutes);
   apiRouter.use('/revenue', revenueRoutes);
-  apiRouter.use('/admin', adminRoutes);
   // admin
   apiRouter.use('/admin/users', adminUserRoutes);
-
+  apiRouter.use('/admin/categories', adminCategoryRoutes);
+  apiRouter.use('/admin/restaurant-requests', adminRestaurantRequestRoutes);
+  
   app.use('/api', apiRouter); // add all with /api
 
   // Handler err
