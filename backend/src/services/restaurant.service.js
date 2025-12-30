@@ -2,6 +2,8 @@ const RestaurantRepository = require('../repositories/restaurant.repository');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const ERR = require('../constants/errorCodes');
 const restaurantRepository = require('../repositories/restaurant.repository');
+const cloudinary = require("@/config/cloudinary.config");
+const fs = require('fs');
 
 function isWithinBusinessHours(current, open, close) {
   // current, open, close đều dạng "HH:MM"
@@ -67,7 +69,25 @@ class RestaurantService {
     });
   }
 
-  
+  async uploadBanner(id, file) {
+    const restaurant = await restaurantRepository.getById(id);
+    if (!restaurant) throw new ERR_RESPONSE.NotFoundError("Restaurant not found");
+
+    // upload file to cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: `food-order/restaurants/${id}`,
+      public_id: `banner-${Date.now()}`,
+      overwrite: true,
+    });
+
+    // delete temp file
+    fs.unlinkSync(file.path);
+
+    // update DB
+    const updated = await restaurantRepository.updateBannerUrl(id, result.secure_url);
+
+    return updated;
+  }
 }
 
 module.exports = new RestaurantService();

@@ -10,6 +10,14 @@ class RestaurantRepository {
     return await Restaurant.create(data);
   }
 
+  async updateBannerUrl(id, url) {
+    return await Restaurant.findByIdAndUpdate(
+      id,
+      { bannerUrl: url },
+      { new: true }
+    );
+  }
+
   async search({ keyword, lat, lng, limit = 0, skip = 20 }) {
     return Restaurant.aggregate([
       {
