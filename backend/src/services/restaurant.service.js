@@ -1,6 +1,7 @@
 const RestaurantRepository = require('../repositories/restaurant.repository');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const ERR = require('../constants/errorCodes');
+const restaurantRepository = require('../repositories/restaurant.repository');
 
 function isWithinBusinessHours(current, open, close) {
   // current, open, close đều dạng "HH:MM"
@@ -54,6 +55,16 @@ class RestaurantService {
     const currentTime = now.toTimeString().slice(0, 5); // HH:MM
 
     return isWithinBusinessHours(currentTime, restaurant.opening_time, restaurant.closing_time);
+  }
+
+  async searchRestaurants({ keyword, lat, lng, limit, skip }) {
+    return restaurantRepository.search({
+      keyword,
+      lat: Number(lat),
+      lng: Number(lng),
+      skip: Number(skip),
+      limit: Number(limit)
+    });
   }
 
   

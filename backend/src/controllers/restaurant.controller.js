@@ -20,6 +20,19 @@ class RestaurantController {
       console.error(err);
     }
   }
+
+  async search(req, res, next) {
+    try {
+      const { keyword, lat, lng } = req.query;
+      const { skip, limit } = req.pagination;
+
+      const data = await RestaurantService.searchRestaurants({ keyword, lat, lng, skip, limit });
+
+      return SUCCESS_RESPONSE.success(res, `search restaurants by keyword ${keyword}`, data);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new RestaurantController();
