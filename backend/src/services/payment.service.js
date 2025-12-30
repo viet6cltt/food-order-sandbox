@@ -2,12 +2,12 @@ const paymentRepository = require('../repositories/payment.repository');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const ERR = require('../constants/errorCodes');
 const restaurantService = require('./restaurant.service');
-const orderService = require('./order.service');
+// Lazy load orderService to break circular dependency
+// const orderService = require('./order.service');
 const { orderStatusObject } = require('../constants/orderStatus');
 
 class PaymentService {
 
-  // được gọi từ bên restaurant khi confirm order
   async createPaymentCOD(order) {
 
     const payment = {
@@ -31,6 +31,8 @@ class PaymentService {
 
   async createPaymentBANK({ orderId, userId, status }) {
     // Khi status là BANK_TRANSFER thì tạo payment khi checkout order
+    // Lazy load to break circular dependency
+    const orderService = require('./order.service');
     const order = await orderService.getOrder(userId, orderId);
 
     if (order.paymentMethod !== "BANK_TRANSFER") {
@@ -72,7 +74,11 @@ class PaymentService {
       throw new ERR_RESPONSE.NotFoundError("Payment id not found", ERR.PAYMENT_NOT_FOUND);
     }
 
-    const order = await orderService.getOrder(payment.orderId);
+    // Lazy load to break circular dependency
+    const orderService = require('./order.service');
+    // Note: getOrder requires userId, but we only have orderId here
+    // We need to use getOrderById instead or pass userId
+    const order = await orderService.getOrderById(payment.orderId);
 
     if (!order) {
       throw new ERR_RESPONSE.NotFoundError("Order of this Payment is not found", ERR.ORDER_NOT_FOUND);
@@ -86,7 +92,7 @@ class PaymentService {
 
     // update fields
     payment.status = "success";
-    paymentId.paidAt = new Date();
+    payment.paidAt = new Date();
 
     order.isPaid = true;
     order.paidAt = new Date();
@@ -106,6 +112,8 @@ class PaymentService {
       throw new ERR_RESPONSE.NotFoundError("Payment not found", ERR.PAYMENT_NOT_FOUND);
     }
 
+    // Lazy load to break circular dependency
+    const orderService = require('./order.service');
     const order = await orderService.getOrderById(payment.orderId);
 
     if (!order) {

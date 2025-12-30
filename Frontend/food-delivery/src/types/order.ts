@@ -1,26 +1,39 @@
-export type OrderStatus = 'pending' | 'confirmed' | 'delivering' | 'completed' | 'canceled' | 'refunded' | 'cooking';
+export type OrderStatus = 'draft' | 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'completed' | 'canceled' | 'refunded' | 'cooking';
 
 export interface OrderItem {
   menuItemId: string
   name: string
-  price: number
+  imageUrl?: string
   quantity: number
-  image?: string
+  finalPrice: number
+  selectedOptions?: Array<{
+    groupName: string
+    optionName: string
+    price: number
+  }>
 }
 
 export interface Order {
   _id: string
+  userId: string
   restaurantId: string
-  restaurantName: string
   items: OrderItem[]
-  totalPrice: number
+  totalFoodPrice: number
+  shippingFee?: number
+  discountAmount?: number
   status: OrderStatus
   createdAt: string
   updatedAt: string
-  deliveryAddress?: string
-  paymentMethod?: string
-
-  customerName?: string;
+  deliveryAddress?: {
+    full: string
+    lat: number
+    lng: number
+  }
+  paymentMethod?: 'COD' | 'BANK_TRANSFER'
+  paymentId?: string
+  isPaid?: boolean
+  paidAt?: string
+  note?: string
 }
 
 export interface OrdersResponse {

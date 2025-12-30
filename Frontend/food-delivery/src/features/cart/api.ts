@@ -1,6 +1,9 @@
 import apiClient from '../../services/apiClient'
 import type { Order } from '../../types/order'
 
+// Re-export Order type for convenience
+export type { Order }
+
 export type CartItem = {
   _id: string
   menuItemId: string

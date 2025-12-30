@@ -110,9 +110,12 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
     try {
       setCheckoutLoading(true)
       setError(null)
+      
+      // Call checkout API to create draft order
       const order = await cartApi.checkout()
-      // Navigate to order detail or order list
-      navigate(`/orders/${order._id}`)
+      
+      // Navigate to payment screen with orderId
+      navigate(`/payment?orderId=${order._id}`)
     } catch (err: unknown) {
       let errorMessage = 'Không thể đặt hàng'
       if (err && typeof err === 'object' && 'response' in err) {
