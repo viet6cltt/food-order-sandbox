@@ -7,7 +7,7 @@ class OrderRepository {
   }
 
   async findByUserId(userId) {
-    return Order.find({ userId: userId });
+    return Order.find({ userId: userId }).sort({ updatedAt: -1 });
   }
 
   async findByOrderId(orderId) {
@@ -22,7 +22,7 @@ class OrderRepository {
     const skip = (page - 1) * limit;
 
     const orders = await Order.find(filter)
-      .sort({ createdAt: -1 })
+      .sort({ updatedAt: -1 })
       .skip(skip)
       .limit(limit);
       

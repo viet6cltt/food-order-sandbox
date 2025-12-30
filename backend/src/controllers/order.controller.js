@@ -47,7 +47,7 @@ class OrderController {
       }
 
       const order = await orderService.cancelOrder(userId, orderId);
-      return SUCCESS_RESPONSE.success(req, "Cancel Order Successfully", { order });
+      return SUCCESS_RESPONSE.success(res, "Cancel Order Successfully", { order });
     } catch (err) {
       next(err);
     }

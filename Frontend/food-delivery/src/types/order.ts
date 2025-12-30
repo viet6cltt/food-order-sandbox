@@ -1,4 +1,4 @@
-export type OrderStatus = 'draft' | 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'completed' | 'canceled' | 'refunded' | 'cooking';
+export type OrderStatus = 'draft' | 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'completed' | 'cancelled' | 'refunded' | 'cooking';
 
 export interface OrderItem {
   menuItemId: string

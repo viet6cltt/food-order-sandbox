@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { type UserProfile } from '../../../types/user';
 import { getMe } from '../api';
 import useAuth from '../../../hooks/useAuth';
@@ -6,6 +7,7 @@ import AppLayout from '../../../layouts/AppLayout';
 import ProfileEditForm from '../components/ProfileEditForm';
 
 const ProfileScreen: React.FC = () => {
+    const navigate = useNavigate();
     const { logout } = useAuth();
     const [user, setUser] = useState<UserProfile | null>(null);
     const [loading, setLoading] = useState(true);
@@ -305,7 +307,16 @@ const ProfileScreen: React.FC = () => {
                                 </div>
 
                                 {/* Actions */}
-                                <div className="mt-8 pt-6 border-t border-gray-200">
+                                <div className="mt-8 pt-6 border-t border-gray-200 space-y-3">
+                                    <button
+                                        onClick={() => navigate('/order-list')}
+                                        className="w-full py-3 bg-green-50 text-green-600 font-semibold rounded-lg hover:bg-green-100 transition flex items-center justify-center gap-2"
+                                    >
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                        Đơn hàng của tôi
+                                    </button>
                                     <button
                                         onClick={handleLogout}
                                         className="w-full py-3 bg-red-50 text-red-600 font-semibold rounded-lg hover:bg-red-100 transition flex items-center justify-center gap-2"
