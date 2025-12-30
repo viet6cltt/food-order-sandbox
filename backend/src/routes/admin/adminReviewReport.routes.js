@@ -2,7 +2,7 @@ const router = require('express').Router();
 const { requireAuth } = require('@/middlewares/auth.middleware');
 const { requireAdmin} = require('@/middlewares/admin.middleware');
 
-const adminReviewReportController = require("../controllers/admin/adminReviewReport.controller");
+const adminReviewReportController = require("@/controllers/admin/adminReviewReport.controller");
 
 router.use(requireAuth, requireAdmin);
 

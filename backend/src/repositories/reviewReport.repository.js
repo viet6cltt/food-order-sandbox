@@ -1,9 +1,14 @@
+const Review = require('@/models/Review');
 const ReviewReport = require('../models/ReviewReport');
 
 class ReviewReportRepo { 
 
   async create(data) {
     return await ReviewReport.create(data);
+  }
+
+  async findOne(filter) {
+    return await ReviewReport.findOne(filter);
   }
 
   async findAll({ status, skip, limit }) {
@@ -22,9 +27,15 @@ class ReviewReportRepo {
     return { items, total };
   }
 
+  async findById(id) {
+    return ReviewReport.findById(id)
+      .populate("reviewId")
+      .populate("reportedBy", "firstname lastname");
+  }
+
   async update(id, data) {
     return await ReviewReport.findByIdAndUpdate(id, data, { new: true });
   }
 }
 
-module.exports = new ReviewReport();
+module.exports = new ReviewReportRepo();
