@@ -10,7 +10,7 @@ class OrderRepository {
     return Order.find({ userId: userId });
   }
 
-  async findByOrderId(orderId) {
+  async findById(orderId) {
     return Order.findById(orderId);
   }
 

@@ -10,6 +10,9 @@
     "bundle:swagger": "swagger-cli bundle ./src/docs/swagger.yaml --outfile dist/swagger.json --type json",
     "dev": "nodemon server.js"
   },
+  "_moduleAliases": {
+    "@": "src"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

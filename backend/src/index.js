@@ -8,6 +8,7 @@ const YAML = require('yamljs');
 const path = require('path');
 const passport = require('passport');
 require('./config/passport.config');
+require("module-alias/register");
 
 
 const route = require('./routes');
