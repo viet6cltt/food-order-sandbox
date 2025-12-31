@@ -48,15 +48,14 @@ export type UserResponse = {
 export async function getMe(): Promise<UserResponse> {
   const res = await apiClient.get('/users/me');
   const user = res.data?.data?.user ?? res.data?.user;
-  
+
   // Normalize id field
   if (user) {
     user.id = user.id || (user._id ? String(user._id) : '');
   }
-  
+
   return user;
 }
-
 /**
  * Update current user information
  * @param payload User data to update
