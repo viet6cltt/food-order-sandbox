@@ -1,9 +1,10 @@
-const adminResReqService = require('../../services/adminRestaurantRequest.service');
-const ERR = require('../../constants/errorCodes');
-const ERR_RESPONSE = require('../../utils/httpErrors');
-const SUCCESS_RESPONSE = require('../../utils/successResponse');
+const adminResReqService = require('@/services/admin/adminRestaurantRequest.service');
+const ERR = require('@/constants/errorCodes');
+const ERR_RESPONSE = require('@/utils/httpErrors');
+const SUCCESS_RESPONSE = require('@/utils/successResponse');
 
 class RestaurantRequestController {
+  
   async listPending(req, res, next) {
     try {
       const data = await adminResReqService.getPendingRequests();

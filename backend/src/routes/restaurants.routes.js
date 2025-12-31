@@ -4,11 +4,11 @@ const RestaurantsController = require('../controllers/restaurant.controller.js')
 const OrderController = require('../controllers/order.controller.js');
 const MenuItemController = require('../controllers/menuItem.controller.js');
 const revenueController = require('../controllers/revenue.controller');
-const { optinalAuth, requireAuth } = require('../middlewares/auth.middleware');
+const { optionalAuth, requireAuth } = require('../middlewares/auth.middleware');
 const upload = require('@/middlewares/upload.middleware.js');
 
-router.get('/:restaurantId', optinalAuth, RestaurantsController.getInfo);
-router.get('/:restaurantId/menu-items', optinalAuth, MenuItemController.getMenuItems);
+router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
+router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
 router.post('/:restaurantId/menu-item', requireAuth, MenuItemController.createMenuItem);
 
 // update

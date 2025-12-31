@@ -1,6 +1,6 @@
-const UserRepo = require("../../repositories/user.repository");
-const ERR_RESPONSE = require('../../utils/httpErrors.js');
-const ERR = require('../constants/errorCodes');
+const UserRepo = require("@/repositories/user.repository");
+const ERR_RESPONSE = require('@/utils/httpErrors.js');
+const ERR = require('@/constants/errorCodes');
 
 class AdminUserService {
   async listUsers({ role, status }) {

@@ -1,4 +1,7 @@
+
+require("module-alias/register");
 const mongoose = require('mongoose');
+
 const dotenv = require('dotenv');
 const swaggerUi = require('swagger-ui-express');
 
