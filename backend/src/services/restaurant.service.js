@@ -28,6 +28,44 @@ function isWithinBusinessHours(current, open, close) {
 }
 
 class RestaurantService {
+
+  // get restaurants by categoryId
+  async getRestaurants({ categoryId, pagination, sortBy = 'rating' }) {
+    const { skip, limit, page } = pagination;
+
+    // Khởi tạo filter cơ bản
+    const filter = { isActive: true };
+    
+    // Nếu truyền categoryId, MongoDB sẽ quét trong mảng categories
+    if (categoryId) {
+      filter.categoriesId = categoryId; 
+    }
+
+    // Xử lý logic Sort (Mặc định: Rating cao nhất lên đầu)
+    let sortOptions = { rating: -1, createdAt: -1 };
+    if (sortBy === 'newest') {
+      sortOptions = { createdAt: -1 };
+    }
+
+    const { items, total } = await RestaurantRepository.findAll({
+      filter,
+      sort: sortOptions,
+      skip,
+      limit
+    });
+
+    console.log(items);
+
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
   
   // get restaurant info 
   async getRestaurantInfo(restaurantId) {
@@ -89,6 +127,12 @@ class RestaurantService {
     const updated = await restaurantRepository.updateBannerUrl(id, result.secure_url);
 
     return updated;
+  }
+
+  async getRecommend() {
+    const data = await restaurantRepository.getRecommend();
+
+    return data;
   }
 }
 

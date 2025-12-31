@@ -1,147 +1,96 @@
-import React, { useState } from 'react';
-import AdminLayout from '../../../layouts/AdminLayout'; // ✅ Đã bật lại Layout
+import React, { useState, useEffect, useCallback } from 'react';
+import AdminLayout from '../../../layouts/AdminLayout';
 import UserList from '../components/user-statistics/UserList';
 import PenaltyAccountList from '../components/user-statistics/PenaltyAccountList';
 import OwnerRegisterList from '../components/user-statistics/OwnerRegisterList';
-
-// --- MOCK DATA ---
-const MOCK_USERS = [
-    { id: '1', name: 'Nguyễn Văn A', email: 'khach1@gmail.com', role: 'customer', status: 'active' },
-    { id: '2', name: 'Trần Văn B', email: 'owner1@gmail.com', role: 'owner', status: 'active' },
-    { id: '3', name: 'Lê Thị C', email: 'khach2@gmail.com', role: 'customer', status: 'active' },
-];
-
-const MOCK_PENALTY = [
-    { id: '4', name: 'Hoàng Hacker', email: 'hack@gmail.com', reason: 'Gian lận khuyến mãi', bannedDate: '28/12/2025' },
-    { id: '5', name: 'Shipper Hủy Đơn', email: 'ship@gmail.com', reason: 'Hủy đơn liên tục', bannedDate: '25/12/2025' },
-];
-
-const MOCK_REQUESTS = [
-    { id: '6', name: 'Đặng Khởi Nghiệp', email: 'newowner@gmail.com', phone: '0909123456', registerDate: '29/12/2025' },
-    { id: '7', name: 'Phạm Bán Cơm', email: 'rice@gmail.com', phone: '0912345678', registerDate: '29/12/2025' },
-];
+import { adminUserApi } from '../api'; // Giả định file lưu api
+import { toast } from 'react-hot-toast';
 
 const UserStatisticsScreen: React.FC = () => {
-    // State quản lý Tab hiện tại
     const [activeTab, setActiveTab] = useState<'users' | 'penalty' | 'requests'>('users');
+    const [isLoading, setIsLoading] = useState(false);
+    
+    // Data States
+    const [users, setUsers] = useState<any[]>([]);
+    const [penaltyList, setPenaltyList] = useState<any[]>([]);
+    const [requests, setRequests] = useState<any[]>([]);
 
-    // State dữ liệu
-    const [users, setUsers] = useState(MOCK_USERS);
-    const [penaltyList, setPenaltyList] = useState(MOCK_PENALTY);
-    const [requests, setRequests] = useState(MOCK_REQUESTS);
+    // Hàm lấy dữ liệu dựa trên Tab
+    const fetchData = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            if (activeTab === 'users') {
+                // Lấy user active (customer/owner)
+                const data = await adminUserApi.getUsers({ status: 'active' });
+                setUsers(data.users || data); // Tùy cấu hình phân trang của BE
+            } else if (activeTab === 'penalty') {
+                // Lấy danh sách user bị block
+                const data = await adminUserApi.getUsers({ status: 'banned' });
+                setPenaltyList(data.users || data);
+            }
+            // else: fetchData cho requests duyệt quán (nếu có API riêng)
+        } catch (error) {
+            toast.error("Không thể tải dữ liệu người dùng");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [activeTab]);
 
-    // --- 1. DUYỆT ĐĂNG KÝ (Chuyển từ Requests -> Users) ---
-    const handleApproveOwner = (id: string) => {
-        const ownerToApprove = requests.find(r => r.id === id);
+    useEffect(() => { fetchData(); }, [fetchData]);
 
-        if (ownerToApprove && window.confirm('Duyệt người này làm Chủ quán?')) {
-            // Thêm vào danh sách User
-            const newUser = {
-                id: ownerToApprove.id,
-                name: ownerToApprove.name,
-                email: ownerToApprove.email,
-                role: 'owner',
-                status: 'active'
-            };
-            setUsers(prev => [newUser, ...prev]);
-
-            // Xóa khỏi danh sách chờ
-            setRequests(prev => prev.filter(r => r.id !== id));
-
-            alert('Đã duyệt thành công!');
+    // --- XỬ LÝ KHÓA TÀI KHOẢN (BE: blockUser) ---
+    const handleBan = async (id: string) => {
+        if (!window.confirm('Bạn có chắc muốn khóa tài khoản này?')) return;
+        try {
+            await adminUserApi.blockUser(id);
+            toast.success("Đã khóa tài khoản thành công");
+            fetchData(); // Reload lại danh sách
+        } catch (error) {
+            toast.error("Lỗi khi khóa tài khoản");
         }
     };
 
-    // --- 2. TỪ CHỐI ĐĂNG KÝ ---
-    const handleRejectOwner = (id: string) => {
-        if (window.confirm('Từ chối yêu cầu này?')) {
-            setRequests(prev => prev.filter(r => r.id !== id));
-        }
-    };
-
-    // --- 3. MỞ KHÓA (Chuyển từ Penalty -> Users) ---
-    const handleUnlock = (id: string) => {
-        const userToUnlock = penaltyList.find(u => u.id === id);
-
-        if (userToUnlock && window.confirm('Mở khóa tài khoản này?')) {
-            // Thêm lại vào danh sách User
-            const unlockedUser = {
-                id: userToUnlock.id,
-                name: userToUnlock.name,
-                email: userToUnlock.email,
-                role: 'customer', // Mặc định reset về customer (hoặc giữ role cũ nếu backend hỗ trợ)
-                status: 'active'
-            };
-            setUsers(prev => [unlockedUser, ...prev]);
-
-            // Xóa khỏi danh sách phạt
-            setPenaltyList(prev => prev.filter(u => u.id !== id));
-
-            alert('Đã mở khóa tài khoản!');
-        }
-    };
-
-    // --- 4. KHÓA TÀI KHOẢN (Chuyển từ Users -> Penalty) ---
-    const handleBan = (id: string) => {
-        const userToBan = users.find(u => u.id === id);
-        const reason = window.prompt('Nhập lý do khóa tài khoản:');
-
-        if (reason && userToBan) {
-            // Thêm vào danh sách Phạt
-            const penaltyUser = {
-                id: userToBan.id,
-                name: userToBan.name,
-                email: userToBan.email,
-                reason: reason,
-                bannedDate: new Date().toLocaleDateString('vi-VN')
-            };
-            setPenaltyList(prev => [penaltyUser, ...prev]);
-
-            // Xóa khỏi danh sách User
-            setUsers(prev => prev.filter(u => u.id !== id));
-
-            alert(`Đã khóa user với lý do: ${reason}`);
+    // --- XỬ LÝ MỞ KHÓA (BE: unlockUser) ---
+    const handleUnlock = async (id: string) => {
+        if (!window.confirm('Xác nhận mở khóa tài khoản?')) return;
+        try {
+            await adminUserApi.unlockUser(id);
+            toast.success("Đã mở khóa tài khoản");
+            fetchData();
+        } catch (error) {
+            toast.error("Lỗi khi mở khóa");
         }
     };
 
     return (
         <AdminLayout className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8">
             <div className="mb-8">
-                <h1 className="text-2xl font-bold text-gray-900">Thống kê & Quản lý User</h1>
-                <p className="text-gray-500 text-sm mt-1">Kiểm soát người dùng, xử lý vi phạm và duyệt đối tác mới.</p>
+                <h1 className="text-2xl font-bold text-gray-900">Quản lý User & Đối tác</h1>
+                <p className="text-gray-500 text-sm mt-1">Hệ thống quản trị người dùng tập trung.</p>
             </div>
 
             {/* TAB NAVIGATION */}
             <div className="flex space-x-1 mb-6 bg-gray-200 p-1 rounded-xl w-fit">
-                <button
-                    onClick={() => setActiveTab('users')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'users' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                    Danh sách User ({users.length})
+                <button onClick={() => setActiveTab('users')} className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'users' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600'}`}>
+                    Người dùng ({users.length})
                 </button>
-                <button
-                    onClick={() => setActiveTab('penalty')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'penalty' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                    Vi phạm ({penaltyList.length})
+                <button onClick={() => setActiveTab('penalty')} className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'penalty' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-600'}`}>
+                    Đang bị khóa ({penaltyList.length})
                 </button>
-                <button
-                    onClick={() => setActiveTab('requests')}
-                    className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'requests' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                    Đăng ký mới ({requests.length})
+                <button onClick={() => setActiveTab('requests')} className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'requests' ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-600'}`}>
+                    Duyệt Owner ({requests.length})
                 </button>
             </div>
 
-            {/* CONTENT */}
-            <div className="animate-fade-in">
-                {activeTab === 'users' && <UserList users={users} onBan={handleBan} />}
-
-                {activeTab === 'penalty' && <PenaltyAccountList users={penaltyList} onUnlock={handleUnlock} />}
-
-                {activeTab === 'requests' && <OwnerRegisterList requests={requests} onApprove={handleApproveOwner} onReject={handleRejectOwner} />}
-            </div>
-
+            {isLoading ? (
+                <div className="py-10 text-center">Đang tải...</div>
+            ) : (
+                <div className="animate-fade-in">
+                    {activeTab === 'users' && <UserList users={users} onBan={handleBan} />}
+                    {activeTab === 'penalty' && <PenaltyAccountList users={penaltyList} onUnlock={handleUnlock} />}
+                    {activeTab === 'requests' && <OwnerRegisterList requests={requests} onApprove={() => {}} onReject={() => {}} />}
+                </div>
+            )}
         </AdminLayout>
     );
 };

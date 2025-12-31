@@ -22,7 +22,8 @@ import SearchScreen from '../features/home/SearchScreen';
 import AdminDashboardScreen from '../features/admin/screens/AdminDashboardScreen';
 import RestaurantCategoryScreen from '../features/admin/screens/RestaurantCategoryScreen';
 import AdminReportHandlingScreen from '../features/admin/screens/AdminReportHandlingScreen';
-
+import UserStatisticsScreen from '../features/admin/screens/UserStatisticsScreen';
+import AdminRestaurantRequestsScreen from '../features/admin/screens/AdminRestaurantRequestScreen';
 const AppRoutes: React.FC = () => {
 	return (
 		<BrowserRouter>
@@ -93,7 +94,7 @@ const AppRoutes: React.FC = () => {
 						</ProtectedRoute>
 				} />
 
-				<Route path="/admin/category/*" element={
+				<Route path="/admin/categories/*" element={
 						<ProtectedRoute allowedRoles={['admin']}>
 								<RestaurantCategoryScreen />
 						</ProtectedRoute>
@@ -102,6 +103,18 @@ const AppRoutes: React.FC = () => {
 				<Route path="/admin/reports/*" element={
 						<ProtectedRoute allowedRoles={['admin']}>
 								<AdminReportHandlingScreen />
+						</ProtectedRoute>
+				} />
+
+				<Route path="/admin/users/*" element={
+						<ProtectedRoute allowedRoles={['admin']}>
+								<UserStatisticsScreen />
+						</ProtectedRoute>
+				} />
+
+				<Route path="/admin/restaurant-requests/*" element={
+						<ProtectedRoute allowedRoles={['admin']}>
+								<AdminRestaurantRequestsScreen />
 						</ProtectedRoute>
 				} />
 

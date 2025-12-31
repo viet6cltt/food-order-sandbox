@@ -14,7 +14,7 @@ router.get('/', adminUserController.listUsers); // view all users
 
 router.patch('/:userId/block', adminUserController.blockUser); // block user account
  
-router.patch('/:userId/block', adminUserController.unlockUser); // unlock user account
+router.patch('/:userId/unlock', adminUserController.unlockUser); // unlock user account
 
 router.get('/:userId', adminUserController.getUserDetail); // view detail user
 

@@ -19,6 +19,8 @@ class UserController {
 
       const user = await UserService.findById(userId);
 
+      user.avatarUrl = user.avatarUrl || user.providers[0]?.avatarUrl || null;
+
       return SUCCESS_RESPONSE.success(res, 'Get your Info successfully', { user });
     } catch (err) {
       next(err);

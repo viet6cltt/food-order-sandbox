@@ -87,13 +87,15 @@ class AuthService {
     }
 
     // Kiem tra mat khau
-    const isMatch = authHelper.comparePassword(password, user.passwordHash);
+    const isMatch = await authHelper.comparePassword(password, user.passwordHash);
     if (!isMatch) {
       throw new HTTP_ERROR.UnauthorizedError('Wrong password', ERR.AUTH_INVALID_CREDENTIALS);
     }
 
     // Create token
     const accessToken = authHelper.generateAccessToken(user._id, user.role);
+
+    console.log(user.role);
 
     await AuthRepository.revokeSessionByUserId(user._id);
 
@@ -121,7 +123,7 @@ class AuthService {
 
     const accessToken = authHelper.generateAccessToken(user._id, user.role);
 
-    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, role);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, user.role);
 
     await AuthRepository.createAuthSession({
       userId,

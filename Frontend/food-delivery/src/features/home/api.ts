@@ -47,9 +47,14 @@ export async function getRecommendRestaurants() {
 }
 
 export async function getCategories() {
-  const res = await api.get('/categories');
+  const res = await api.get('/categories', {
+    params: {
+      page: 1,
+      limit: 12
+    }
+  });
 
-  const categories = res.data.data || [];
+  const categories = res.data.data.categories || [];
 
   console.log(categories);
   

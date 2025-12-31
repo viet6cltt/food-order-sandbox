@@ -20,6 +20,38 @@ class RestaurantController {
     }
   }
 
+  async getAll(req, res, next) {
+    try {
+      // 1. Lấy các tham số từ query string
+      const { 
+        categoryId, 
+        sortBy 
+      } = req.query;
+
+      const pagination = req.pagination;
+
+      // 2. Ép kiểu và chuẩn bị dữ liệu gửi xuống Service
+      // Mặc định sortBy là 'rating' như bạn yêu cầu
+      const options = {
+        categoryId: categoryId || null,
+        pagination,
+        sortBy: sortBy || 'rating' 
+      };
+
+      // 3. Gọi Service xử lý logic nghiệp vụ
+      const result = await RestaurantService.getRestaurants(options);
+
+      // 4. Trả về kết quả cho Client
+      return res.status(200).json({
+        success: true,
+        message: 'Lấy danh sách nhà hàng thành công',
+        data: result
+      });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   // [GET] /
   async list(req, res, next) {
     try {
@@ -36,6 +68,8 @@ class RestaurantController {
     try {
       const { keyword, lat, lng } = req.query;
       const { skip, limit } = req.pagination;
+
+      console.log(keyword, lat, lng);
 
       const data = await RestaurantService.searchRestaurants({ keyword, lat, lng, skip, limit });
 
@@ -58,9 +92,18 @@ class RestaurantController {
         throw new ERR_RESPONSE.BadRequestError("File is required");
       }
 
-      const updated = await RestaurantService.uploadBanner(id, file);
+      const updated = await RestaurantService.uploadBanner(restaurantId, file);
 
       return SUCCESS_RESPONSE.success(res, `Banner updated successfully`, updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getRecommend(req, res, next) {
+    try {
+      const data = await RestaurantService.getRecommend();
+      return SUCCESS_RESPONSE.success(res, 'Get recommend successfully', data);
     } catch (err) {
       next(err);
     }
