@@ -18,9 +18,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   const [firstname, setFirstname] = useState(user.firstname || '');
   const [lastname, setLastname] = useState(user.lastname || '');
   const [email, setEmail] = useState(user.email || '');
-  const [dateOfBirth, setDateOfBirth] = useState(
-    user.dateOfBirth ? user.dateOfBirth.split('T')[0] : ''
-  );
+  const [dateOfBirth, setDateOfBirth] = useState(user.dateOfBirth || '');
   const [street, setStreet] = useState(user.address?.street || '');
   const [city, setCity] = useState(user.address?.city || '');
   const [loading, setLoading] = useState(false);
@@ -31,7 +29,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     setFirstname(user.firstname || '');
     setLastname(user.lastname || '');
     setEmail(user.email || '');
-    setDateOfBirth(user.dateOfBirth ? user.dateOfBirth.split('T')[0] : '');
+    setDateOfBirth(user.dateOfBirth || '');
     setStreet(user.address?.street || '');
     setCity(user.address?.city || '');
   }, [user]);
@@ -41,7 +39,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     setError(null);
     setSuccess(false);
 
-    // Validation
+    // Validation cơ bản
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError('Email không hợp lệ');
       return;
@@ -50,6 +48,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     setLoading(true);
 
     try {
+      // Xây dựng payload sạch
       const payload: UpdateUserPayload = {
         firstname: firstname.trim() || undefined,
         lastname: lastname.trim() || undefined,
@@ -61,196 +60,98 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         },
       };
 
-      // Remove undefined fields
-      Object.keys(payload).forEach((key) => {
-        if (payload[key as keyof UpdateUserPayload] === undefined) {
-          delete payload[key as keyof UpdateUserPayload];
-        }
-      });
-
-      if (payload.address) {
-        Object.keys(payload.address).forEach((key) => {
-          if (payload.address![key as keyof typeof payload.address] === undefined) {
-            delete payload.address![key as keyof typeof payload.address];
-          }
-        });
-        if (Object.keys(payload.address).length === 0) {
-          delete payload.address;
-        }
-      }
-
+      // Gọi API update
       const updatedUser = await updateMe(payload);
 
-      // Map to UserProfile format
-      const fullName = updatedUser.firstname || updatedUser.lastname
+      // Tính toán fullName mới từ dữ liệu server trả về
+      const newFullName = updatedUser.firstname || updatedUser.lastname
         ? `${updatedUser.firstname || ''} ${updatedUser.lastname || ''}`.trim()
         : updatedUser.username;
 
       const profile: UserProfile = {
         ...updatedUser,
-        fullName,
+        fullName: newFullName,
       };
 
       setSuccess(true);
 
-      // Call callback if provided
       if (onSuccess) {
+        // Đợi 1 chút để user thấy thông báo thành công
         setTimeout(() => {
           onSuccess(profile);
-        }, 1000);
+        }, 800);
       }
     } catch (err: unknown) {
-      let errorMessage = 'Không thể cập nhật thông tin. Vui lòng thử lại.';
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { message?: string; error?: string } } };
-        errorMessage =
-          axiosError.response?.data?.message ||
-          axiosError.response?.data?.error ||
-          errorMessage;
-      } else if (err instanceof Error) {
-        errorMessage = err.message;
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        setError(axiosErr.response?.data?.message || 'Không thể cập nhật thông tin');
+      } else {
+        setError('Không thể cập nhật thông tin');
       }
-      setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={`bg-white rounded-2xl shadow-lg p-6 md:p-8 ${className}`}>
-      {/* Header */}
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Chỉnh sửa thông tin</h2>
-        <p className="text-gray-600 text-sm">Cập nhật thông tin cá nhân của bạn</p>
+    <div className={`bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8 ${className}`}>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Chỉnh sửa hồ sơ</h2>
+          <p className="text-gray-500 text-sm mt-1">Thông tin này sẽ được hiển thị trên các đơn hàng của bạn.</p>
+        </div>
+        <button 
+          onClick={onCancel}
+          className="p-2 hover:bg-gray-100 rounded-full text-gray-400 transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit}>
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                />
-              </svg>
-              <span>{error}</span>
-            </div>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Alerts */}
+        {error && <div className="p-4 bg-red-50 text-red-700 rounded-xl text-sm border border-red-100 animate-shake">{error}</div>}
+        {success && <div className="p-4 bg-green-50 text-green-700 rounded-xl text-sm border border-green-100">Cập nhật thành công!</div>}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputGroup label="Họ (Firstname)" value={firstname} onChange={setFirstname} placeholder="Vd: Văn" />
+          <InputGroup label="Tên (Lastname)" value={lastname} onChange={setLastname} placeholder="Vd: Việt" />
+        </div>
+
+        <InputGroup label="Email" type="email" value={email} onChange={setEmail} placeholder="phanvanviet@example.com" />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <InputGroup label="Ngày sinh" type="date" value={dateOfBirth} onChange={setDateOfBirth} />
+          <div className="flex flex-col justify-end">
+             <p className="text-[10px] text-gray-400 italic mb-2">* Ngày sinh giúp chúng tôi gửi ưu đãi sinh nhật.</p>
           </div>
-        )}
-
-        {/* Success Message */}
-        {success && (
-          <div className="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 text-emerald-700 rounded">
-            <div className="flex items-start gap-3">
-              <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                />
-              </svg>
-              <span>Thông tin đã được cập nhật thành công!</span>
-            </div>
-          </div>
-        )}
-
-        {/* First Name */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Họ</label>
-          <input
-            type="text"
-            value={firstname}
-            onChange={(e) => setFirstname(e.target.value)}
-            placeholder="Nhập họ"
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition placeholder:text-gray-400 placeholder:opacity-70"
-          />
         </div>
 
-        {/* Last Name */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Tên</label>
-          <input
-            type="text"
-            value={lastname}
-            onChange={(e) => setLastname(e.target.value)}
-            placeholder="Nhập tên"
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition placeholder:text-gray-400 placeholder:opacity-70"
-          />
+        <div className="space-y-4 pt-4 border-t border-gray-50">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Địa chỉ giao hàng mặc định</h3>
+          <InputGroup label="Số nhà, tên đường" value={street} onChange={setStreet} placeholder="Vd: 123 Nguyễn Huệ" />
+          <InputGroup label="Thành phố / Tỉnh" value={city} onChange={setCity} placeholder="Vd: Hà Nội" />
         </div>
 
-        {/* Email */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Nhập email (tùy chọn)"
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition placeholder:text-gray-400 placeholder:opacity-70"
-          />
-        </div>
-
-        {/* Date of Birth */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Ngày sinh</label>
-          <input
-            type="date"
-            value={dateOfBirth}
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition placeholder:text-gray-400 placeholder:opacity-70"
-          />
-        </div>
-
-        {/* Address Street */}
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-2">Địa chỉ</label>
-          <input
-            type="text"
-            value={street}
-            onChange={(e) => setStreet(e.target.value)}
-            placeholder="Số nhà, tên đường"
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition mb-2 placeholder:text-gray-400 placeholder:opacity-70"
-          />
-        </div>
-
-        {/* Address City */}
-        <div className="mb-8">
-          <input
-            type="text"
-            value={city}
-            onChange={(e) => setCity(e.target.value)}
-            placeholder="Thành phố/Tỉnh"
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-500 focus:ring-2 focus:ring-green-200 transition placeholder:text-gray-400 placeholder:opacity-70"
-          />
-        </div>
-
-        {/* Buttons */}
-        <div className="flex gap-4">
-          {onCancel && (
-            <button
-              type="button"
-              onClick={onCancel}
-              disabled={loading}
-              className="flex-1 px-4 py-3 bg-gray-200 text-gray-700 font-semibold rounded-lg hover:bg-gray-300 transition disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Hủy
-            </button>
-          )}
+        <div className="flex gap-4 pt-6">
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={loading}
+            className="flex-1 px-6 py-3.5 border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50"
+          >
+            Hủy bỏ
+          </button>
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-3 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-lg shadow-green-200 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading && (
-              <svg className="animate-spin w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path
-                  fillRule="evenodd"
-                  d="M4.293 4.293a1 1 0 011.414 0A7 7 0 0114.707 14.707a1 1 0 01-1.414 1.414A9 9 0 014.293 4.293zM15.71 2.29a1 1 0 011.414 1.414A9 9 0 005.707 16.707a1 1 0 01-1.414-1.414A7 7 0 0115.71 2.29z"
-                />
-              </svg>
-            )}
-            {loading ? 'Đang cập nhật...' : 'Lưu thay đổi'}
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : 'Lưu thay đổi'}
           </button>
         </div>
       </form>
@@ -258,5 +159,24 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   );
 };
 
-export default ProfileEditForm;
+// Sub-component cho Input để code sạch hơn
+const InputGroup = ({ label, value, onChange, type = "text", placeholder = "" } : {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  type?: string;
+  placeholder?: string;
+}) => (
+  <div className="flex flex-col gap-2">
+    <label className="text-xs font-bold text-gray-500 uppercase ml-1">{label}</label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-4 py-3 bg-gray-50 border border-transparent rounded-xl focus:bg-white focus:border-green-500 focus:ring-4 focus:ring-green-500/10 transition-all outline-none text-gray-900 font-medium"
+    />
+  </div>
+);
 
+export default ProfileEditForm;

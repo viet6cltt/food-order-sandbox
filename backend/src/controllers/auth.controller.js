@@ -21,6 +21,9 @@ class AuthController {
 
       const user = await AuthService.registerWithFirebase({ username, password, role, idToken });
       
+<<<<<<< HEAD
+      return SUCCESS_RESPONSE.created(res, 'User registered successfully');
+=======
       return SUCCESS_RESPONSE.created(res, 'User registered successfully', {
         user: {
           id: user._id,
@@ -29,6 +32,7 @@ class AuthController {
           role: user.role,
         }
       });
+>>>>>>> origin/main
     } catch (err) {
       next(err);
     }
@@ -57,9 +61,21 @@ class AuthController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
 
+      const safeUser = {
+        id: user._id,
+        username: user.username,
+        phone: user.phone,
+        role: user.role,
+        avatarUrl: user.avatarUrl ? user.avatarUrl : user.providers?.[0]?.avatarUrl,
+        firstname: user.firstname,
+        lastname: user.lastname,
+        address: user.address,
+        role: user.role
+      }
+
       return SUCCESS_RESPONSE.success(res, 'Login successfully', {
         accessToken,
-        user: { id: user._id, username: user.username, phone: user.phone },
+        user: safeUser,
       })
     } catch (err) {
       next(err);

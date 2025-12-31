@@ -1,43 +1,20 @@
-// src/hooks/useUser.ts
-import { useState, useEffect } from 'react';
-import { getUserProfile } from '../features/profile/api';
-import { type UserProfile } from '../types/user';
-import useAuth from './useAuth';
+import { useContext } from 'react';
+import { AuthContext } from '../contexts/AuthContext';
 
 export const useUser = () => {
-  const { isAuthenticated } = useAuth();
-  const [user, setUser] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const context = useContext(AuthContext);
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setUser(null);
-      return;
-    }
+  if (!context) {
+    throw new Error('useUser must be used within an AuthProvider');
+  }
 
-    const fetchUser = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const userData = await getUserProfile();
-        setUser(userData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch user');
-        console.error('Error fetching user:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUser();
-  }, [isAuthenticated]);
-
-  const getRole = () => {
-    return user?.role || null;
+  return {
+    user: context.user,
+    isLoading: context.isLoading,
+    isAuthenticated: context.isAuthenticated,
+    getRole: () => context.user?.role || null,
+    refetch: context.refreshUser, // Gọi khi user vừa update profile xong
   };
-
-  return { user, loading, error, refetch: () => {}, getRole };
 };
 
 export default useUser;

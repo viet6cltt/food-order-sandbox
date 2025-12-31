@@ -55,7 +55,7 @@ function SearchModal({ onClose }: { onClose: () => void }) {
     onClose()
     // Navigate to search results or home with query
     // For now, navigate to home and can filter/search there
-    navigate(`/?search=${encodeURIComponent(trimmedQuery)}`)
+    navigate(`/restaurants?search=${encodeURIComponent(trimmedQuery)}`)
   }
 
   function handleBackdropClick(e: React.MouseEvent) {
