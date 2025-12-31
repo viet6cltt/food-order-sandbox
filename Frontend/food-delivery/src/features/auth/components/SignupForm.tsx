@@ -102,7 +102,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
     try {
       await register(username, password, idToken);
-      navigate('/');
+      navigate('/login');
     } catch (err: unknown) {
       let errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
       if (err && typeof err === 'object' && 'response' in err) {
@@ -173,7 +173,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
                   value={phone} 
                   onChange={e => setPhone(e.target.value)} 
                   placeholder="09xx xxx xxx"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+                  className="w-full px-4 py-3 border-2 placeholder:text-gray-400 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
                 />
                 <p className="mt-2 text-xs text-gray-500">
                   Chúng tôi sẽ gửi mã OTP đến số điện thoại này để xác minh

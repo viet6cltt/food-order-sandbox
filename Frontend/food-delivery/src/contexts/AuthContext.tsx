@@ -1,16 +1,20 @@
-import React, { createContext, useEffect, useState } from 'react';
+import React, { createContext, useState, ReactNode } from 'react';
 import { login as apiLogin, register as apiRegister } from '../features/auth/api';
 
-type User = {
-  id?: string;
-  name?: string;
-  email?: string;
-  role?: string;
+export type User = {
+  id: string;
+  username: string;
+  phone: string;
+  role: string;
+  avatarUrl?: string;
+  address?: { street: string; city: string; geo: [number, number] };
+  firstname?: string;
+  lastname?: string;
 };
 
-type AuthContextValue = {
+export type AuthContextValue = {
   user: User | null;
-  token: string | null;
+  accessToken: string | null;
   isAuthenticated: boolean;
   login: (phone: string, password: string) => Promise<void>;
   register: (username: string, password: string, idToken: string) => Promise<void>;
@@ -19,68 +23,55 @@ type AuthContextValue = {
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
-
-  useEffect(() => {
-    if (token) {
-      // In a real app, fetch user profile here. We'll decode minimal info if backend returns it in token
-      // keeping this simple for now
-    }
-  }, [token]);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   const login = async (phone: string, password: string) => {
-    const data = await apiLogin({ phone, password });
-    const t = data.data?.accessToken ?? data.accessToken ?? null;
-    if (t) {
-      localStorage.setItem('token', t);
-      setToken(t);
-    }
-    const userData = data.data?.user ?? data.user ?? null;
-    if (userData) {
-      setUser({
-        id: userData.id ?? String(userData._id),
-        name: userData.username,
-        email: userData.email,
-        role: userData.role,
-      });
-    }
+    const res = await apiLogin({ phone, password });
+    const token = res.data?.accessToken ?? null;
+    if (!token) throw new Error('Access token missing');
+
+    setAccessToken(token);
+
+    const userData = res.data?.user;
+    if (!userData) throw new Error('User data missing');
+
+    setUser({
+      id: userData.id,
+      username: userData.username,
+      phone: userData.phone,
+      role: userData.role ?? 'customer',
+      avatarUrl: userData.avatarUrl,
+      firstname: userData.firstname,
+      lastname: userData.lastname,
+      address: userData.address,
+    });
   };
 
   const register = async (username: string, password: string, idToken: string) => {
-    const data = await apiRegister({ username, password, idToken });
-    const t = data.data?.accessToken ?? data.accessToken ?? null;
-    if (t) {
-      localStorage.setItem('token', t);
-      setToken(t);
-    }
-    const userData = data.data?.user ?? data.user ?? null;
-    if (userData) {
-      setUser({
-        id: userData.id ?? String(userData._id),
-        name: userData.username,
-        email: userData.email,
-        role: userData.role,
-      });
-    }
+    await apiRegister({ username, password, idToken });
+    // Chỉ trả về success, không set token hay user
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
     setUser(null);
+    setAccessToken(null);
     window.location.href = '/login';
   };
 
-  const value: AuthContextValue = {
-    user,
-    token,
-    isAuthenticated: !!token,
-    login,
-    register,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        accessToken,
+        isAuthenticated: !!accessToken,
+        login,
+        register,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };

@@ -9,6 +9,7 @@ import CartScreen from '../features/cart/CartScreen';
 import FoodDetailScreen from '../features/food/FoodDetailScreen';
 import PaymentScreen from '../features/payment/PaymentScreen';
 import OrderListScreen from '../features/order/OrderListScreen';
+import ResetPasswordRequestScreen from '../features/auth/screens/ResetPasswordRequestScreen';
 import ResetPasswordScreen from '../features/auth/screens/ResetPasswordScreen';
 
 const AppRoutes: React.FC = () => {
@@ -19,6 +20,7 @@ const AppRoutes: React.FC = () => {
 				<Route path="/login" element={<LoginScreen />} />
 				<Route path="/signup" element={<SignupScreen />} />
 				<Route path="/order-list" element={<OrderListScreen />} />
+				<Route path="/reset-password-request" element={<ResetPasswordRequestScreen />} />
 				<Route path="/reset-password" element={<ResetPasswordScreen />} />
 				<Route path="/cart" element={<CartScreen />} />
 				<Route path="/payment" element={<PaymentScreen />} />

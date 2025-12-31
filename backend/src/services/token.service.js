@@ -67,6 +67,11 @@ class TokenService {
 
     return true;
   }
+
+  async findOne(user, type) {
+    const token = await TokenRepository.findActiveToken(user, type);
+    return token;
+  }
 }
 
 

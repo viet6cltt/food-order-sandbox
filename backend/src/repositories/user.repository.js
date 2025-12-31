@@ -52,7 +52,7 @@ class UserRepository {
   }
 
   async updateUser(userId, updateFields) {
-    return await User.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: true });
+    return await User.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: false });
   }
 
   async updateEmail(userId, email) {

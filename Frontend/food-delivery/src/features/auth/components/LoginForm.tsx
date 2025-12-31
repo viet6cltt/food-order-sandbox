@@ -1,34 +1,51 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { getOAuthUrl } from '../api';
 import useAuth from '../../../hooks/useAuth';
 
 const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      await login(phone, password);
-      navigate('/');
+      await login(phone, password); // dùng context
+      navigate('/'); // redirect sau login thành công
     } catch (err: unknown) {
-      const errorMessage = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data?.error || (err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error).message || 'Đăng nhập thất bại. Vui lòng thử lại.';
+      const errorMessage =
+        (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data?.error ||
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err as Error).message ||
+        'Đăng nhập thất bại. Vui lòng thử lại.';
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOAuthLogin = (provider: 'google' | 'facebook') => {
-    // Mock OAuth login - replace with real OAuth integration later
-    alert(`Chức năng đăng nhập bằng ${provider.toUpperCase()} đang phát triển`);
+  const handleOAuthLogin = async () => {
+    try {
+      const returnUrl = window.location.origin + '/';
+      const res = await getOAuthUrl('google', returnUrl);
+
+      if (res.success && res.data?.url) {
+        window.location.href = res.data.url;
+      } else {
+        alert('Không lấy được URL đăng nhập Google');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi khi lấy OAuth URL');
+    }
   };
 
   return (
@@ -46,7 +63,7 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
         </div>
 
         {/* Form Card */}
-        <form onSubmit={onSubmit} className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+        <form onSubmit={handleSubmit} className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           {/* Error Message */}
           {error && (
             <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
@@ -62,13 +79,13 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
           {/* Phone Input */}
           <div className="mb-5">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Số điện thoại</label>
-            <input 
-              type="tel" 
-              required 
-              value={phone} 
-              onChange={e => setPhone(e.target.value)} 
+            <input
+              type="tel"
+              required
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
               placeholder="09xx xxx xxx"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+              className="w-full px-4 py-3 border-2 border-gray-200 placeholder:text-gray-400 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
             />
           </div>
 
@@ -76,24 +93,24 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-semibold text-gray-700">Mật khẩu</label>
-              <Link to="/reset-password" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              <Link to="/reset-password-request" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                 Quên mật khẩu?
               </Link>
             </div>
-            <input 
-              type="password" 
-              required 
-              value={password} 
-              onChange={e => setPassword(e.target.value)} 
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg placeholder:text-gray-400 focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
             />
           </div>
 
           {/* Submit Button */}
-          <button 
-            type="submit" 
-            disabled={loading} 
+          <button
+            type="submit"
+            disabled={loading}
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed mb-4 flex items-center justify-center gap-2"
           >
             {loading && <svg className="animate-spin w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0A7 7 0 0014.707 14.707a1 1 0 01-1.414 1.414A9 9 0 014.293 4.293zM15.71 2.29a1 1 0 011.414 1.414A9 9 0 005.707 16.707a1 1 0 01-1.414-1.414A7 7 0 0115.71 2.29z" /></svg>}
@@ -112,26 +129,18 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
         </div>
 
         {/* OAuth Buttons */}
-        <div className="grid grid-cols-2 gap-3 mb-8">
+        <div className="grid grid-cols-1 gap-3 mb-8">
           <button
             type="button"
-            onClick={() => handleOAuthLogin('google')}
+            onClick={handleOAuthLogin}
             className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:border-gray-300 hover:bg-gray-50 transition"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <image href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM2IDEwSDEySi4xMlYxNC41Nkg3LjA5QzYuNjMgMTUuODkgNS4xMyAxNi42MyAzLjI4IDE2LjYzQzEuNzEgMTYuNjMgMC4zOCAxNS40OCAwLjI1IDE0TDAgMTIuODhWMTEuMDZMMC4yMyAxMC4xMkMwLjM1IDguNjMgMS42OSA3LjM4IDMuMjggNy4zOEM1LjA1IDcuMzggNi40NCA4LjMxIDcuMDYgOS43M0wxMi41IDcuMDZDMTEuOCA0LjQxIDkuMTggMi41NiA2IDIuNTZDMi43NyAyLjU2IDAgNS4yIDAgOC4xMkMwIDExLjA0IDIuNzcgMTMuNjggNiAxMy42OEM3LjE4IDEzLjY4IDguMzEgMTMuMzggOS4yOCAxMi43M0wxMyAxNS41MUMxMS41IDE2LjM3IDkuNzEgMTYuOCA3Ljc1IDE2LjhDMy41NSAxNi44IDAuMDMgMTMuMjggMC4wMyA5LjA4QzAgNC44OCAzLjU1IDEuMzYgNy43NSAxLjM2QzEwLjA0IDEuMzYgMTIuMSAyLjI2IDE0LjM1IDMuODhMMTkuMDMgMS41NUMyMS4wMyAwLjU0IDIzLjI2IDAgMjQgMFYyNC41SDE4LjA2VjE4LjQ4SDE0LjM1VjI0LjVIMTJWMTIuMjVIMjIuNTZaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+" />
+              <image
+                href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTIyLjU2IDEyLjI1QzIyLjU2IDExLjQ3IDIyLjQ5IDEwLjcyIDIyLjM2IDEwSDEySi4xMlYxNC41Nkg3LjA5QzYuNjMgMTUuODkgNS4xMyAxNi42MyAzLjI4IDE2LjYzQzEuNzEgMTYuNjMgMC4zOCAxNS40OCAwLjI1IDE0TDAgMTIuODhWMTEuMDZMMC4yMyAxMC4xMkMwLjM1IDguNjMgMS42OSA3LjM4IDMuMjggNy4zOEM1LjA1IDcuMzggNi40NCA4LjMxIDcuMDYgOS43M0wxMi41IDcuMDZDMTEuOCA0LjQxIDkuMTggMi41NiA2IDIuNTZDMi43NyAyLjU2IDAgNS4yIDAgOC4xMkMwIDExLjA0IDIuNzcgMTMuNjggNiAxMy42OEM3LjE4IDEzLjY4IDguMzEgMTMuMzggOS4yOCAxMi43M0wxMyAxNS41MUMxMS41IDE2LjM3IDkuNzEgMTYuOCA3Ljc1IDE2LjhDMy41NSAxNi44IDAuMDMgMTMuMjggMC4wMyA5LjA4QzAgNC44OCAzLjU1IDEuMzYgNy43NSAxLjM2QzEwLjA0IDEuMzYgMTIuMSAyLjI2IDE0LjM1IDMuODhMMTkuMDMgMS41NUMyMS4wMyAwLjU0IDIzLjI2IDAgMjQgMFYyNC41SDE4LjA2VjE4LjQ4SDE0LjM1VjI0LjVIMTJWMTIuMjVIMjIuNTZaIiBmaWxsPSJjdXJyZW50Q29sb3IiLz4KPC9zdmc+"
+              />
             </svg>
             Google
-          </button>
-          <button
-            type="button"
-            onClick={() => handleOAuthLogin('facebook')}
-            className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-lg hover:border-gray-300 hover:bg-gray-50 transition"
-          >
-            <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-            </svg>
-            Facebook
           </button>
         </div>
 
