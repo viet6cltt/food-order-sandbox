@@ -10,11 +10,11 @@ import FoodDetailScreen from '../features/food/FoodDetailScreen';
 import PaymentScreen from '../features/payment/PaymentScreen';
 import OrderListScreen from '../features/order/OrderListScreen';
 import OwnerDashboardScreen from '../features/owner/screens/OwnerDashboardScreen';
-import OwnerMenuListScreen from '../features/owner/screens/OwnerMenuListScreen';
 import AddFoodScreen from '../features/owner/screens/AddFoodScreen';
 import OwnerRestaurantInfoScreen from '../features/owner/screens/OwnerRestaurantInfoScreen';
 import ProtectedRoute from './ProtectedRoute';
 import RoleBasedRedirect from './RoleBasedRedirect';
+import ProfileScreen from '../features/profile/screens/ProfileScreen';
 
 const AppRoutes: React.FC = () => {
     return (
@@ -46,17 +46,21 @@ const AppRoutes: React.FC = () => {
 						<OwnerRegisterScreen />
 					</ProtectedRoute>
 				} />
-                <Route path="/orders" element={<OrderListScreen />} />
+                <Route path="/order-list" element={
+					<ProtectedRoute allowedRoles={['customer']}>
+						<OrderListScreen />
+					</ProtectedRoute>
+				} />
+                <Route path="/profile" element={
+					<ProtectedRoute allowedRoles={['customer', 'restaurant_owner', 'admin']}>
+						<ProfileScreen />
+					</ProtectedRoute>
+				} />
 
                 {/* Owner routes */}
                 <Route path="/owner/dashboard/*" element={
                     <ProtectedRoute allowedRoles={['restaurant_owner']}>
                         <OwnerDashboardScreen />
-                    </ProtectedRoute>
-                } />
-                <Route path="/owner/menu-list/*" element={
-                    <ProtectedRoute allowedRoles={['restaurant_owner']}>
-                        <OwnerMenuListScreen />
                     </ProtectedRoute>
                 } />
                 <Route path="/owner/add-food/*" element={

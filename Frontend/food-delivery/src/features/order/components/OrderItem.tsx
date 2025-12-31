@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'react-toastify'
 import type { Order } from '../../../types/order'
 import * as orderApi from '../api'
+import * as reviewApi from '../../review/api'
 
 interface OrderItemProps {
   order: Order
@@ -85,19 +86,53 @@ const OrderItem: React.FC<OrderItemProps> = ({ order, restaurantName = 'Nhà hà
   }
 
   const handleReview = async () => {
-    if (!comment.trim()) {
-      alert('Vui lòng nhập bình luận')
+    if (rating === 0) {
+      toast.error('Vui lòng chọn số sao đánh giá')
       return
     }
+
+    if (!order.restaurantId) {
+      toast.error('Không tìm thấy thông tin nhà hàng')
+      return
+    }
+
     setLoading(true)
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      alert('Cảm ơn đánh giá của bạn!')
+      await reviewApi.createReview({
+        orderId: order._id,
+        restaurantId: order.restaurantId,
+        rating: rating,
+        comment: comment.trim() || undefined,
+      })
+      
+      toast.success('Cảm ơn đánh giá của bạn!')
       setShowReviewModal(false)
       setComment('')
       setRating(5)
-    } catch {
-      alert('Lỗi: Gửi đánh giá thất bại')
+      
+      // Refresh orders if callback provided
+      if (onOrderCanceled) {
+        onOrderCanceled()
+      }
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể gửi đánh giá'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
+        if (axiosError.response?.status === 401) {
+          errorMessage = 'Vui lòng đăng nhập lại'
+        } else if (axiosError.response?.status === 400) {
+          errorMessage = axiosError.response?.data?.message || 'Đơn hàng chưa hoàn thành hoặc đã được đánh giá'
+        } else if (axiosError.response?.status === 403) {
+          errorMessage = 'Bạn không có quyền đánh giá đơn hàng này'
+        } else {
+          errorMessage = axiosError.response?.data?.message || 
+                        axiosError.response?.data?.error || 
+                        errorMessage
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      toast.error(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -271,40 +306,55 @@ const OrderItem: React.FC<OrderItemProps> = ({ order, restaurantName = 'Nhà hà
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-lg font-bold mb-4">Đánh giá đơn hàng</h2>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Xếp hạng</label>
+              <label className="block text-sm font-medium mb-2">
+                Xếp hạng <span className="text-red-500">*</span>
+              </label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
                     key={star}
+                    type="button"
                     onClick={() => setRating(star)}
-                    className={`text-2xl transition ${rating >= star ? 'text-emerald-500' : 'text-gray-300'}`}
+                    className={`text-2xl transition hover:scale-110 ${
+                      rating >= star ? 'text-yellow-400' : 'text-gray-300'
+                    }`}
+                    aria-label={`${star} sao`}
                   >
                     ★
                   </button>
                 ))}
               </div>
+              {rating > 0 && (
+                <p className="text-sm text-gray-600 mt-1">{rating} sao</p>
+              )}
             </div>
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">Bình luận</label>
+              <label className="block text-sm font-medium mb-2">Bình luận (tùy chọn)</label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Nhập bình luận của bạn..."
+                placeholder="Chia sẻ trải nghiệm của bạn về nhà hàng..."
                 className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 rows={4}
               />
             </div>
             <div className="flex gap-2 justify-end">
               <button
-                onClick={() => setShowReviewModal(false)}
+                type="button"
+                onClick={() => {
+                  setShowReviewModal(false)
+                  setComment('')
+                  setRating(5)
+                }}
                 className="px-4 py-2 rounded-md bg-gray-200 text-gray-700 hover:bg-gray-300"
               >
                 Hủy
               </button>
               <button
+                type="button"
                 onClick={handleReview}
-                disabled={loading}
-                className="px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                disabled={loading || rating === 0}
+                className="px-4 py-2 rounded-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? 'Đang gửi...' : 'Gửi đánh giá'}
               </button>

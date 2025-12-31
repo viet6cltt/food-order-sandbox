@@ -6,7 +6,7 @@ const SUCCESS = require('@/utils/successResponse');
 
 
 class ReviewReportController {
-  async create(res, req, next) {
+  async create(req, res, next) {
     try {
       const { reviewId } = req.params;
       const { reason } = req.body;

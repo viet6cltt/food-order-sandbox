@@ -68,7 +68,7 @@ class AuthService {
       passwordHash,
       phone,
       phoneVerifiedAt: new Date(),
-      role,
+      // role,
       providers: [{ provider: 'firebase' }],
     });
 

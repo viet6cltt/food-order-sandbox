@@ -1,6 +1,6 @@
 // src/hooks/useUser.ts
 import { useState, useEffect } from 'react';
-import { getUserProfile } from '../features/profile/api';
+import {  getMe } from '../features/profile/api';
 import { type UserProfile } from '../types/user';
 import useAuth from './useAuth';
 
@@ -20,7 +20,7 @@ export const useUser = () => {
       setLoading(true);
       setError(null);
       try {
-        const userData = await getUserProfile();
+        const userData = await getMe();
         setUser(userData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch user');

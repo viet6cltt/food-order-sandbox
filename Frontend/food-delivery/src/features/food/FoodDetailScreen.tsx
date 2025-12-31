@@ -7,8 +7,9 @@ import ReviewForm from './components/ReviewForm'
 import AddToCartBar from './components/AddToCartBar'
 import * as foodApi from './api'
 import * as cartApi from '../cart/api'
+import * as reviewApi from '../review/api'
 import type { MenuItemDto } from '../restaurant/components/FoodItem'
-import type { Review } from './api'
+import type { Review } from '../review/api'
 import useAuth from '../../hooks/useAuth'
 import { toast } from 'react-toastify'
 
@@ -54,11 +55,11 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
   }
 
   async function loadReviews() {
-    if (!foodId) return
+    if (!food?.restaurantId) return
 
     try {
-      const data = await foodApi.getReviews(foodId)
-      setReviews(data)
+      const result = await reviewApi.getReviewsByRestaurant(food.restaurantId, 1, 20)
+      setReviews(result.items)
     } catch (err) {
       console.error('Failed to load reviews:', err)
       setReviews([])
@@ -73,9 +74,16 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
     }
 
     loadFoodDetails()
-    loadReviews()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foodId])
+
+  // Load reviews after food is loaded (to get restaurantId)
+  useEffect(() => {
+    if (food?.restaurantId) {
+      loadReviews()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [food?.restaurantId])
 
   async function handleAddToCart(payload: { itemId?: string; qty: number }) {
     if (!food || !payload.itemId) return
@@ -126,16 +134,40 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
     }
   }
 
-  async function handleReviewSubmit(payload: { rating: number; comment?: string }) {
-    if (!foodId) return
+  async function handleReviewSubmit(payload: { rating: number; comment?: string; orderId?: string }) {
+    if (!food?.restaurantId) {
+      toast.error('Không thể tạo đánh giá. Vui lòng chọn đơn hàng từ danh sách đơn hàng đã hoàn thành.')
+      return
+    }
 
-    await foodApi.createReview({
-      menuItemId: foodId,
-      rating: payload.rating,
-      comment: payload.comment,
-    })
+    if (!payload.orderId) {
+      toast.error('Vui lòng tạo đánh giá từ đơn hàng đã hoàn thành.')
+      return
+    }
 
-    await loadReviews()
+    try {
+      await reviewApi.createReview({
+        orderId: payload.orderId,
+        restaurantId: food.restaurantId,
+        rating: payload.rating,
+        comment: payload.comment,
+      })
+
+      toast.success('Đánh giá đã được gửi thành công!')
+      await loadReviews()
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể gửi đánh giá'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
+        errorMessage = axiosError.response?.data?.message || 
+                      axiosError.response?.data?.error || 
+                      errorMessage
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      toast.error(errorMessage)
+      throw err
+    }
   }
 
   if (loading) {
@@ -222,10 +254,11 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
         )}
 
         <div className="mt-8 space-y-6">
-          <ReviewForm
-            onSubmit={handleReviewSubmit}
-            className="mb-6"
-          />
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <p className="text-sm text-blue-800">
+              <strong>Lưu ý:</strong> Để đánh giá nhà hàng, vui lòng vào danh sách đơn hàng và chọn đánh giá cho đơn hàng đã hoàn thành.
+            </p>
+          </div>
 
           <ReviewList reviews={reviews} />
         </div>

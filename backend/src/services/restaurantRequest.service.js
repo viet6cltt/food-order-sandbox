@@ -13,6 +13,10 @@ class RestaurantRequestService {
 
     return await repoRestaurantRequest.createRequest({ ...data, userId });
   }
+
+  async getMyRequest(userId) {
+    return await repoRestaurantRequest.getPendingByUserId(userId);
+  }
 }
 
 module.exports = new RestaurantRequestService();

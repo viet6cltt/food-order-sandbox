@@ -12,6 +12,7 @@ router.put('/me', requireAuth, UserController.updateMe); // dùng khi người d
 
 
 // request restaurant
+router.get("/restaurant-requests/me", requireAuth, restaurantRequestController.getMyRequest);
 router.post("/restaurant-requests",requireAuth, restaurantRequestController.submit);
 
 module.exports = router;

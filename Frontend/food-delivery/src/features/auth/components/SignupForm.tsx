@@ -10,7 +10,6 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'customer' | 'restaurant_owner' | 'admin'>('customer');
   const [phone, setPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [step, setStep] = useState<'phone' | 'otp' | 'register'>('phone');
@@ -93,7 +92,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password || !role || !idToken) {
+    if (!username || !password || !idToken) {
       setError('Vui lòng điền đầy đủ thông tin');
       return;
     }
@@ -102,13 +101,8 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
     setError(null);
 
     try {
-      await register(username, password, role, idToken);
-      // Redirect theo role
-      if (role === 'restaurant_owner') {
-        navigate('/owner/dashboard');
-      } else {
-        navigate('/');
-      }
+      await register(username, password, idToken);
+      navigate('/login');
     } catch (err: unknown) {
       let errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
       if (err && typeof err === 'object' && 'response' in err) {
@@ -147,7 +141,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
           {/* reCAPTCHA container */}
-          <div id="recaptcha-container" className="hidden"></div>
+          <div id="recaptcha-container"></div>
 
           {/* Error Message */}
           {error && (
@@ -249,29 +243,18 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
                 </p>
               </div>
 
-          <label className="block mb-4">
-            <span className="text-sm font-medium text-gray-700">Role</span>
-            <select
-              required
-              value={role}
-              onChange={e => setRole(e.target.value as 'customer' | 'restaurant_owner' | 'admin')}
-              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-            >
-              <option value="customer">Customer</option>
-              <option value="restaurant_owner">Restaurant Owner</option>
-              <option value="admin">Admin</option>
-            </select>
-          </label>
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
-          >
-            {loading ? 'Đang đăng ký...' : 'Hoàn tất đăng ký'}
-          </button>
-        </form>
-      )}
-
+              <div className="mb-6">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Tên người dùng</label>
+                <input 
+                  type="text" 
+                  required 
+                  value={username} 
+                  onChange={e => setUsername(e.target.value)} 
+                  placeholder="Nhập tên người dùng"
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-lg text-center text-2xl font-bold tracking-widest focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70"
+                />
+              </div>
+              
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Mật khẩu</label>
                 <input 
@@ -279,18 +262,16 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
                   required 
                   value={password} 
                   onChange={e => setPassword(e.target.value)} 
-                  minLength={6}
-                  placeholder="Tối thiểu 6 ký tự"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
+                  placeholder="••••••••"
+                  className="w-full px-4 py-4 border-2 border-gray-200 rounded-lg text-center text-2xl font-bold tracking-widest focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition placeholder:text-sm placeholder:text-gray-400 placeholder:opacity-70"
                 />
               </div>
-
+              
               <button 
                 type="submit" 
                 disabled={loading} 
-                className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
               >
-                {loading && <svg className="animate-spin w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0A7 7 0 0114.707 14.707a1 1 0 01-1.414 1.414A9 9 0 014.293 4.293zM15.71 2.29a1 1 0 011.414 1.414A9 9 0 005.707 16.707a1 1 0 01-1.414-1.414A7 7 0 0115.71 2.29z" /></svg>}
                 {loading ? 'Đang đăng ký...' : 'Hoàn tất đăng ký'}
               </button>
             </form>

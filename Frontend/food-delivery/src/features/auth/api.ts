@@ -8,7 +8,6 @@ export type LoginPayload = {
 export type RegisterPayload = {
     username: string;
     password: string;
-    role: 'customer' | 'restaurant_owner' | 'admin';
     idToken: string; // Firebase ID Token
 };
 
@@ -32,14 +31,12 @@ export type RegisterResponse = {
         user: {
             id: string;
             username: string;
-            role: string;
             phone: string;
         };
     };
     user?: {
-        _id: string;
+        id: string;
         username: string;
-        role: string;
         phone: string;
     };
 };

@@ -1,5 +1,4 @@
 const Restaurant = require('../models/Restaurant');
-const mongoose = require("mongoose");
 
 class RestaurantRepository { 
   async getById(restaurantId) {
@@ -16,6 +15,17 @@ class RestaurantRepository {
       { bannerUrl: url },
       { new: true }
     );
+  }
+
+  async getAll({ limit = 16, skip = 0 }) {
+    const [items, total] = await Promise.all([
+      Restaurant.find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 }),
+      Restaurant.countDocuments()
+    ]);
+    return { items, total };
   }
 
   async search({ keyword, lat, lng, limit = 0, skip = 20 }) {
@@ -50,8 +60,18 @@ class RestaurantRepository {
                 distance: {
                   $sqrt: {
                     $add: [
-                      { $pow: [{ $subtract: ["$address.geo.coordinates.1", lat] }, 2] },
-                      { $pow: [{ $subtract: ["$address.geo.coordinates.0", lng] }, 2] }
+                      { 
+                        $pow: [
+                          { $subtract: [{ $arrayElemAt: ["$address.geo.coordinates", 1] }, lat] }, 
+                          2
+                        ] 
+                      },
+                      { 
+                        $pow: [
+                          { $subtract: [{ $arrayElemAt: ["$address.geo.coordinates", 0] }, lng] }, 
+                          2
+                        ] 
+                      }
                     ]
                   }
                 }
@@ -77,7 +97,8 @@ class RestaurantRepository {
           rating: 1,
           description: 1,
           bannerUrl: 1,
-          distance: lat && lng ? 1 : 0
+          _id: 1,
+          ...(lat && lng ? { distance: 1 } : {})
         }
       }
     ]);

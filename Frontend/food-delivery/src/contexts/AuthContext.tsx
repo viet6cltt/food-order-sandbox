@@ -13,7 +13,7 @@ type AuthContextValue = {
   token: string | null;
   isAuthenticated: boolean;
   login: (phone: string, password: string) => Promise<void>;
-  register: (username: string, password: string, role: 'customer' | 'restaurant_owner' | 'admin', idToken: string) => Promise<void>;
+  register: (username: string, password: string, idToken: string) => Promise<void>;
   logout: () => void;
 };
 
@@ -41,8 +41,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (username: string, password: string, role: 'customer' | 'restaurant_owner' | 'admin', idToken: string) => {
-    const data = await apiRegister({ username, password, role, idToken });
+  const register = async (username: string, password: string, idToken: string) => {
+    const data = await apiRegister({ username, password, idToken });
     const t = data.data?.accessToken ?? data.accessToken ?? null;
     if (t) {
       localStorage.setItem('token', t);
@@ -51,10 +51,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userData = data.data?.user ?? data.user ?? null;
     if (userData) {
       setUser({
-        id: userData.id ?? String(userData._id),
+        id: userData.id,
         name: userData.username,
         email: userData.email,
-        role: userData.role,
       });
     }
   };

@@ -1,4 +1,5 @@
 import React from 'react';
+import type { NormalizedCategory } from '../api';
 
 interface RestaurantFormProps {
     className?: string;
@@ -12,21 +13,19 @@ interface RestaurantFormProps {
         city?: string;
     };
     phone: string;
-    openingTime: string;
-    closingTime: string;
+    categoryId: string;
+    categories: NormalizedCategory[];
     onNameChange: (value: string) => void;
     onDescriptionChange: (value: string) => void;
     onAddressChange: (field: 'full' | 'street' | 'ward' | 'district' | 'city', value: string) => void;
     onPhoneChange: (value: string) => void;
-    onOpeningTimeChange: (value: string) => void;
-    onClosingTimeChange: (value: string) => void;
+    onCategoryChange: (value: string) => void;
     errors?: {
         name?: string;
         description?: string;
         address?: string;
         phone?: string;
-        openingTime?: string;
-        closingTime?: string;
+        categoryId?: string;
     };
 }
 
@@ -36,14 +35,13 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
     description,
     address,
     phone,
-    openingTime,
-    closingTime,
+    categoryId,
+    categories,
     onNameChange,
     onDescriptionChange,
     onAddressChange,
     onPhoneChange,
-    onOpeningTimeChange,
-    onClosingTimeChange,
+    onCategoryChange,
     errors = {}
 }) => {
     return (
@@ -124,41 +122,29 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                         <p className="mt-1 text-sm text-red-500">{errors.phone}</p>
                     )}
                 </div>
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                        <label htmlFor="opening-time" className="block text-sm font-medium text-gray-700 mb-1">
-                            Giờ mở cửa
-                        </label>
-                        <input
-                            type="time"
-                            id="opening-time"
-                            value={openingTime}
-                            onChange={(e) => onOpeningTimeChange(e.target.value)}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.openingTime ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors.openingTime && (
-                            <p className="mt-1 text-sm text-red-500">{errors.openingTime}</p>
-                        )}
-                    </div>
-                    <div>
-                        <label htmlFor="closing-time" className="block text-sm font-medium text-gray-700 mb-1">
-                            Giờ đóng cửa
-                        </label>
-                        <input
-                            type="time"
-                            id="closing-time"
-                            value={closingTime}
-                            onChange={(e) => onClosingTimeChange(e.target.value)}
-                                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
-                                errors.closingTime ? 'border-red-500' : 'border-gray-300'
-                            }`}
-                        />
-                        {errors.closingTime && (
-                            <p className="mt-1 text-sm text-red-500">{errors.closingTime}</p>
-                        )}
-                    </div>
+                <div className="mb-4">
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+                        Danh mục <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                        id="category"
+                        value={categoryId}
+                        onChange={(e) => onCategoryChange(e.target.value)}
+                        required
+                        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 ${
+                            errors.categoryId ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                    >
+                        <option value="">-- Chọn danh mục --</option>
+                        {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                                {category.name}
+                            </option>
+                        ))}
+                    </select>
+                    {errors.categoryId && (
+                        <p className="mt-1 text-sm text-red-500">{errors.categoryId}</p>
+                    )}
                 </div>
             </form>
         </div>

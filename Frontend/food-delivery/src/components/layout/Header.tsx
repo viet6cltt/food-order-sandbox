@@ -51,9 +51,9 @@ const Header: React.FC<Props> = ({ className = '' }) => {
             <div>
               <button type="button" 
                       className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
-                      aria-label="Owner registration"
+                      aria-label="Đăng ký chủ nhà hàng"
                       onClick={handleOnClickOwnerRegistration}>
-                Owner Registration
+                Đăng ký chủ nhà hàng
               </button>
             </div>
           )}

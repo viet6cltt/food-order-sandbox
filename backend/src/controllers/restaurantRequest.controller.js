@@ -19,6 +19,21 @@ class RestaurantRequestController {
       next(err);
     }
   }
+
+  async getMyRequest(req, res, next) {
+    try {
+      const userId = req.userId;
+      const request = await restaurantRequestService.getMyRequest(userId);
+      
+      if (!request) {
+        return SUCCESS_RESPONSE.success(res, "No pending request found", null);
+      }
+
+      return SUCCESS_RESPONSE.success(res, "Get request successfully", request);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new RestaurantRequestController();

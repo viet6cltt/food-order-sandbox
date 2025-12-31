@@ -61,6 +61,23 @@ class RestaurantService {
     return isWithinBusinessHours(currentTime, restaurant.opening_time, restaurant.closing_time);
   }
 
+  async getList({ page = 1, limit = 16 } = {}) {
+    const p = Math.max(1, parseInt(page, 10) || 1);
+    const l = Math.max(1, parseInt(limit, 10) || 16);
+    const skip = (p - 1) * l;
+
+    const { items, total } = await RestaurantRepository.getAll({ limit: l, skip });
+
+    return {
+      items,
+      meta: {
+        page: p,
+        limit: l,
+        total: total,
+      },
+    };
+  }
+
   async searchRestaurants({ keyword, lat, lng, limit, skip }) {
     return restaurantRepository.search({
       keyword,

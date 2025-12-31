@@ -6,6 +6,12 @@ const MenuItemController = require('../controllers/menuItem.controller.js');
 const revenueController = require('../controllers/revenue.controller');
 const { optionalAuth, requireAuth } = require('../middlewares/auth.middleware');
 const upload = require('@/middlewares/upload.middleware.js');
+const pagination = require('../middlewares/pagination.middleware');
+const ReviewController = require('../controllers/app/review.controller');
+
+router.get('/', RestaurantsController.list);
+
+router.get('/search', pagination(20, 50), RestaurantsController.search);
 
 router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
 router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
@@ -13,6 +19,9 @@ router.post('/:restaurantId/menu-item', requireAuth, MenuItemController.createMe
 
 // update
 router.patch("/:restaurantId/banner", upload.single("file"), RestaurantsController.uploadBanner);
+
+// review
+router.get('/:restaurantId/reviews', pagination(20, 50), ReviewController.listByRestaurant);
 
 // order
 router.get('/:restaurantId/orders', requireAuth, OrderController.getOrdersOfRestaurant); // get all orders of a restaurant
