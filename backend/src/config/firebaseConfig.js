@@ -1,5 +1,6 @@
 const admin = require("firebase-admin");
 
+//Thay đổi Firebase_project_id và firebase_client_email theo config firebase cá nhân trong .env
 const serviceAccount = {
   projectId: process.env.FIREBASE_PROJECT_ID,
   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,

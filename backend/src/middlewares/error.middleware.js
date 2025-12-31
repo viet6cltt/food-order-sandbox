@@ -11,6 +11,7 @@ function errorHandler(err, req, res, next) {
   }
 
   // những lỗi k mong muốn
+  console.error('Unhandled error:', err);
   return res.status(500).json({
     success: false,
     error: 'Internal server error',

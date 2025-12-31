@@ -4,7 +4,6 @@ const ERR = require('../constants/errorCodes');
 
 const requireAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  console.log(authHeader);
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next(new HTTP_ERROR.UnauthorizedError('Missing access Token', ERR.AUTH_MISSING_ACCESS_TOKEN));
   }
@@ -23,18 +22,18 @@ const requireAuth = (req, res, next) => {
 
 const optionalAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
-  if (!authHeader || !authHeader.startsWith('Bearer')) {
-    next();
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return next();
   }
 
   const token = authHeader.split(' ')[1];
-  try{
+  try {
     const decoded = authHelper.verifyAccessToken(token);
     req.userId = decoded.userId;
     req.role = decoded.role;
+    return next();
   } catch (err) {
-    // khi có token nhưng token không hợp lệ
-    next(); // vẫn cho qua
+    return next();
   }
 }
 

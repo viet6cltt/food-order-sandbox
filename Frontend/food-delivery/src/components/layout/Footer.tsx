@@ -1,4 +1,5 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom';
 
 type Props = {
 	className?: string
@@ -6,6 +7,11 @@ type Props = {
 
 const Footer: React.FC<Props> = ({ className = '' }) => {
 	const year = new Date().getFullYear()
+	const navigate = useNavigate();
+	
+	const handleOnClickHome = () => {
+		navigate('/');
+	}
 
 	return (
 		<footer className={`bg-white ${className}`} aria-labelledby="footer-heading">
@@ -13,7 +19,7 @@ const Footer: React.FC<Props> = ({ className = '' }) => {
 			<div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
 				<div className="md:flex md:items-center md:justify-between">
 					<div className="flex items-center space-x-3">
-						<a href="/" className="text-lg font-semibold text-indigo-600">Food Delivery</a>
+						<button className="text-lg font-semibold text-green-600" type="button" onClick={handleOnClickHome}>Food Delivery</button>
 						<p className="text-sm text-gray-500">Delivering happiness since 2025</p>
 					</div>
 

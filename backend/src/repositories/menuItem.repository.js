@@ -13,10 +13,25 @@ class MenuItemRepository {
 
   /** Get all menu items of a restaurant */
   async getByRestaurant(restaurantId, { limit = 50, skip = 0 } = {}) {
-    return await MenuItem.find({ restaurantId })
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
+    try {
+      // Convert restaurantId to ObjectId if it's a string
+      const mongoose = require('mongoose');
+      let queryRestaurantId = restaurantId;
+      if (typeof restaurantId === 'string' && mongoose.Types.ObjectId.isValid(restaurantId)) {
+        queryRestaurantId = new mongoose.Types.ObjectId(restaurantId);
+      }
+
+      const items = await MenuItem.find({ restaurantId: queryRestaurantId })
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 })
+        .lean()
+        .maxTimeMS(5000);
+      
+      return items || [];
+    } catch (error) {
+      return [];
+    }
   }
 
   /** Update menu item */

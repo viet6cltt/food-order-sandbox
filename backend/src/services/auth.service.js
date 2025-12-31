@@ -19,16 +19,41 @@ class AuthService {
  * @param {string} password 
  * @param {string} idToken  (Firebase ID Token từ frontend)
  */
+  /**
+   * Normalize số điện thoại về format chuẩn (+84...)
+   */
+  normalizePhone(phone) {
+    if (!phone) return phone;
+    const cleaned = phone.trim();
+    // Nếu đã có +84, giữ nguyên
+    if (cleaned.startsWith('+84')) {
+      return cleaned;
+    }
+    // Nếu bắt đầu bằng 0, chuyển thành +84
+    if (cleaned.startsWith('0')) {
+      return `+84${cleaned.substring(1)}`;
+    }
+    // Nếu bắt đầu bằng 84, thêm dấu +
+    if (cleaned.startsWith('84')) {
+      return `+${cleaned}`;
+    }
+    // Mặc định thêm +84
+    return `+84${cleaned}`;
+  }
+
   async registerWithFirebase({ username, password, idToken }) {
     //  Xác minh ID token do Firebase gửi về 
     const decoded = await admin.auth().verifyIdToken(idToken);
-    const phone = decoded.phone_number;
+    let phone = decoded.phone_number;
 
     if (!phone) {
       throw new HTTP_ERROR.BadRequestError('Phone number not found in Firebase token', ERR.AUTH_MISSING_FIELDS);
     }
 
-    // Kiểm tra trùng username / phone
+    // Normalize số điện thoại từ Firebase (thường đã có format +84...)
+    phone = this.normalizePhone(phone);
+
+    // Kiểm tra trùng username / phone (cần normalize phone khi check)
     const existingUser = await UserService.findByUsernameOrPhone(username, phone);
     if (existingUser) {
       throw new HTTP_ERROR.ConflictError('Username or phone already exists', ERR.USER_ALREADY_EXISTS);
@@ -50,8 +75,12 @@ class AuthService {
   }
 
   async login(phone, password, deviceInfo) {
-    // Kiem tra tai khoan
-    const user = await UserService.findByPhone(phone);
+    // Normalize số điện thoại để tìm user (hỗ trợ cả +84 và 0)
+    const normalizedPhone = this.normalizePhone(phone);
+    
+    // Kiem tra tai khoan (repository đã xử lý tìm kiếm với cả 2 format)
+    const user = await UserService.findByPhone(normalizedPhone);
+    
     if (!user) {
       throw new HTTP_ERROR.UnauthorizedError('Account with this phone does not exist', ERR.AUTH_INVALID_CREDENTIALS);
     }
