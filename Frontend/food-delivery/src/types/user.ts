@@ -5,6 +5,6 @@ export type UserProfile = {
   email: string;
   fullName: string;
   phone: string;
-  role: 'customer' | 'owner' | 'admin';
+  role: 'customer' | 'restaurant_owner' | 'admin';
   avatarUrl?: string;
 };
