@@ -5,8 +5,12 @@ const OrderController = require('../controllers/order.controller.js');
 const MenuItemController = require('../controllers/menuItem.controller.js');
 const revenueController = require('../controllers/revenue.controller');
 const { optionalAuth, requireAuth } = require('../middlewares/auth.middleware');
+const pagination = require('@/middlewares/pagination.middleware.js');
 const upload = require('@/middlewares/upload.middleware.js');
 
+router.get('/', pagination(20, 50), RestaurantsController.getAll);
+router.get('/search', pagination(20, 50), RestaurantsController.search);
+router.get('/recommend', RestaurantsController.getRecommend);
 router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
 router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
 router.post('/:restaurantId/menu-item', requireAuth, MenuItemController.createMenuItem);

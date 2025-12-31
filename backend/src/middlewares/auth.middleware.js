@@ -4,6 +4,7 @@ const ERR = require('../constants/errorCodes');
 
 const requireAuth = (req, res, next) => {
   const authHeader = req.headers['authorization'];
+
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return next(new HTTP_ERROR.UnauthorizedError('Missing access Token', ERR.AUTH_MISSING_ACCESS_TOKEN));
   }

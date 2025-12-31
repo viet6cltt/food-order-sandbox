@@ -21,18 +21,8 @@ class AuthController {
 
       const user = await AuthService.registerWithFirebase({ username, password, role, idToken });
       
-<<<<<<< HEAD
+
       return SUCCESS_RESPONSE.created(res, 'User registered successfully');
-=======
-      return SUCCESS_RESPONSE.created(res, 'User registered successfully', {
-        user: {
-          id: user._id,
-          username: user.username,
-          phone: user.phone,
-          role: user.role,
-        }
-      });
->>>>>>> origin/main
     } catch (err) {
       next(err);
     }

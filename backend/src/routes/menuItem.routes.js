@@ -2,10 +2,10 @@ const express = require('express');
 const router = express.Router();
 const MenuItemController = require('../controllers/menuItem.controller');
 
-const { optinalAuth, requireAuth } = require('../middlewares/auth.middleware');
+const { optionalAuth, requireAuth } = require('../middlewares/auth.middleware');
 
 // [GET] /api/menu-items/:menuItemId - Get menu item by ID (public, optional auth)
-router.get('/:menuItemId', optinalAuth, MenuItemController.getMenuItemInfo);
+router.get('/:menuItemId', optionalAuth, MenuItemController.getMenuItemInfo);
 
 // [PUT] /api/menu-items/:menuItemId - Update menu item (requires auth)
 router.put('/:menuItemId', requireAuth, MenuItemController.updateMenuItem);

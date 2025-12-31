@@ -102,7 +102,7 @@ class OrderService {
 
   async updateOrderInfo({ userId, orderId, deliveryAddress, paymentMethod }) {
     // get order
-    const order = await orderRepository.findByOrderId(orderId);
+    const order = await orderRepository.findById(orderId);
     if (!order) {
       throw new ERR_RESPONSE.NotFoundError("Order not found");
     }
@@ -159,11 +159,11 @@ class OrderService {
   }
 
   async getOrderById(orderId) {
-    return await orderRepository.findByOrderId(orderId);
+    return await orderRepository.findById(orderId);
   }
 
   async getOrder(userId, orderId) {
-    const order = await orderRepository.findByOrderId(orderId);
+    const order = await orderRepository.findById(orderId);
 
     if (!order) {
       throw new ERR_RESPONSE.NotFoundError("Order not found", ERR.ORDER_NOT_FOUND);
@@ -176,7 +176,7 @@ class OrderService {
   }
 
   async cancelOrder(userId, orderId) {
-    const order = await orderRepository.findByOrderId(orderId);
+    const order = await orderRepository.findById(orderId);
 
     if (!order) {
       throw new ERR_RESPONSE.NotFoundError("Order not found", ERR.ORDER_NOT_FOUND);
@@ -224,14 +224,14 @@ class OrderService {
   async getOrderByRestaurant(userId, restaurantId, orderId) {
     await restaurantService.checkOwner(restaurantId, userId);
 
-    return await orderRepository.findByOrderId(orderId);
+    return await orderRepository.findById(orderId);
   }
 
   async updateOrderStatusByRestaurant({ orderId, restaurantId, userId, status }) {
     await restaurantService.checkOwner(restaurantId, userId);
 
     // Get order
-    const order = await orderRepository.findByOrderId(orderId);
+    const order = await orderRepository.findById(orderId);
 
     if (!order) {
       throw new ERR_RESPONSE.NotFoundError("Order not found");
