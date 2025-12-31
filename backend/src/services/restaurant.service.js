@@ -107,6 +107,10 @@ class RestaurantService {
 
     return updated;
   }
+
+  async getRestaurantByOwnerId(userId) {
+    return await RestaurantRepository.findByOwnerId(userId);
+  }
 }
 
 module.exports = new RestaurantService();

@@ -103,5 +103,9 @@ class RestaurantRepository {
       }
     ]);
   }
+
+  async findByOwnerId(ownerId) {
+    return await Restaurant.findOne({ ownerId: ownerId });
+  }
 }
 module.exports = new RestaurantRepository();

@@ -65,6 +65,26 @@ class RestaurantController {
       next(err);
     }
   }
+
+  // [GET] /owner/restaurant
+  async getMyRestaurant(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const restaurant = await RestaurantService.getRestaurantByOwnerId(userId);
+      
+      if (!restaurant) {
+        throw new ERR_RESPONSE.NotFoundError("Restaurant not found for this owner", ERR.RESTAURANT_NOT_FOUND);
+      }
+
+      return SUCCESS_RESPONSE.success(res, "Get restaurant successfully", restaurant);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new RestaurantController();

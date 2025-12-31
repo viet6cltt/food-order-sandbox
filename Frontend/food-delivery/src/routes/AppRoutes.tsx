@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomeScreen from '../features/home/HomeScreen';
+import SearchScreen from '../features/home/SearchScreen';
+import CategoryRestaurantsScreen from '../features/home/CategoryRestaurantsScreen';
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import SignupScreen from '../features/auth/screens/SignupScreen';
 import OwnerRegisterScreen from '../features/owner/OwnerRegisterScreen';
@@ -29,6 +31,8 @@ const AppRoutes: React.FC = () => {
 
                 {/* Customer routes */}
                 <Route path="/" element={<HomeScreen />} />
+                <Route path="/search" element={<SearchScreen />} />
+                <Route path="/category/:categoryId" element={<CategoryRestaurantsScreen />} />
                 <Route path="/cart" element={
 					<ProtectedRoute allowedRoles={['customer']}>
 						<CartScreen />

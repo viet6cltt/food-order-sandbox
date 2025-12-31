@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import RestaurantCard, { type Restaurant } from './RestaurantCard'
-import { getRestaurants, searchRestaurants } from '../api'
+import { getRestaurants, getRestaurantsByCategory, searchRestaurants } from '../api'
 import { getMe } from '../../profile/api'
 
 const COLUMNS = 4
@@ -9,9 +9,10 @@ const PAGE_SIZE = COLUMNS * INITIAL_ROWS
 
 interface RestaurantCardListProps {
   searchKeyword?: string;
+  categoryId?: string;
 }
 
-const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }) => {
+const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword, categoryId }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [loading, setLoading] = useState(true)
   const [page, setPage] = useState(1)
@@ -58,8 +59,8 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
     let mounted = true
     setLoading(true)
     setError(null)
-    if (searchKeyword) {
-      setPage(1) // Reset to page 1 when search keyword changes
+    if (searchKeyword || categoryId) {
+      setPage(1) // Reset to page 1 when search keyword or category changes
     }
 
     async function fetchData() {
@@ -84,6 +85,16 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
             setRestaurants(prev => [...prev, ...items])
           }
           setTotal(null)
+        } else if (categoryId) {
+          const { items, meta } = await getRestaurantsByCategory(categoryId, page, PAGE_SIZE)
+          if (!mounted) return
+          setTotal(meta?.total ?? null)
+          if (page === 1) {
+            setRestaurants(items)
+          } else {
+            // append next page
+            setRestaurants(prev => [...prev, ...items])
+          }
         } else {
           const { items, meta } = await getRestaurants(page, PAGE_SIZE)
           if (!mounted) return
@@ -95,9 +106,10 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
             setRestaurants(prev => [...prev, ...items])
           }
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         if (!mounted) return
-        setError(err?.message ?? 'Failed to load restaurants')
+        const errorMessage = err instanceof Error ? err.message : 'Failed to load restaurants'
+        setError(errorMessage)
         setRestaurants([])
       } finally {
         if (mounted) setLoading(false)
@@ -108,10 +120,10 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
     return () => {
       mounted = false
     }
-  }, [page, searchKeyword, location])
+  }, [page, searchKeyword, categoryId, location])
 
   function handleSeeMore() {
-    if (searchKeyword) {
+    if (searchKeyword || categoryId) {
       setPage(p => p + 1)
       return
     }
@@ -150,6 +162,12 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
         </div>
       )}
 
+      {categoryId && restaurants.length === 0 && !loading && (
+        <div className="text-center py-8 text-gray-500">
+          Không có nhà hàng nào trong danh mục này
+        </div>
+      )}
+
       {searchKeyword && restaurants.length > 0 && (
         <div className="mt-4 text-center text-sm text-gray-600">
           Tìm thấy {restaurants.length} nhà hàng
@@ -159,7 +177,7 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
       <div className="mt-6 flex items-center justify-center space-x-4">
         {loading && restaurants.length > 0 && <div className="text-sm text-gray-500">Loading...</div>}
 
-        {searchKeyword && !loading && restaurants.length > 0 && restaurants.length >= PAGE_SIZE && (
+        {(searchKeyword || categoryId) && !loading && restaurants.length > 0 && restaurants.length >= PAGE_SIZE && (
           <button
             onClick={handleSeeMore}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -168,7 +186,7 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
           </button>
         )}
 
-        {!searchKeyword && !loading && total !== null && restaurants.length < total && (
+        {!searchKeyword && !categoryId && !loading && total !== null && restaurants.length < total && (
           <button
             onClick={handleSeeMore}
             className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -177,7 +195,7 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword }
           </button>
         )}
 
-        {!searchKeyword && !loading && total !== null && restaurants.length >= (total ?? 0) && total > PAGE_SIZE && (
+        {!searchKeyword && !categoryId && !loading && total !== null && restaurants.length >= (total ?? 0) && total > PAGE_SIZE && (
           <button
             onClick={handleShowLess}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"

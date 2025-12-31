@@ -53,9 +53,8 @@ function SearchModal({ onClose }: { onClose: () => void }) {
     if (!trimmedQuery) return
 
     onClose()
-    // Navigate to search results or home with query
-    // For now, navigate to home and can filter/search there
-    navigate(`/?search=${encodeURIComponent(trimmedQuery)}`)
+    // Navigate to search screen with query
+    navigate(`/search?search=${encodeURIComponent(trimmedQuery)}`)
   }
 
   function handleBackdropClick(e: React.MouseEvent) {

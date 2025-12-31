@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/user.controller.js');
 const restaurantRequestController = require("../controllers/restaurantRequest.controller.js");
+const RestaurantController = require('../controllers/restaurant.controller.js');
 
 const { requireAuth } = require('../middlewares/auth.middleware.js');
 
@@ -14,5 +15,8 @@ router.put('/me', requireAuth, UserController.updateMe); // dùng khi người d
 // request restaurant
 router.get("/restaurant-requests/me", requireAuth, restaurantRequestController.getMyRequest);
 router.post("/restaurant-requests",requireAuth, restaurantRequestController.submit);
+
+// owner restaurant
+router.get("/owner/restaurant", requireAuth, RestaurantController.getMyRestaurant);
 
 module.exports = router;
