@@ -1,6 +1,11 @@
+
+
 const RestaurantRepository = require('../repositories/restaurant.repository');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const ERR = require('../constants/errorCodes');
+const restaurantRepository = require('../repositories/restaurant.repository');
+const cloudinary = require("../config/cloudinary.config");
+const fs = require('fs');
 
 function isWithinBusinessHours(current, open, close) {
   // current, open, close đều dạng "HH:MM"
@@ -26,17 +31,12 @@ class RestaurantService {
   
   // get restaurant info 
   async getRestaurantInfo(restaurantId) {
-    if (!restaurantId) {
-      throw new ERR_RESPONSE.BadRequestError("Missing restaurant ID", ERR.INVALID_INPUT);
-    }
+    return await RestaurantRepository.getById(restaurantId);
+  }
 
-    const restaurant = await RestaurantRepository.getById(restaurantId);
-    
-    if (!restaurant) {
-      throw new ERR_RESPONSE.NotFoundError("Restaurant not found", ERR.RESTAURANT_NOT_FOUND);
-    }
-
-    return restaurant;
+  // create restaurant
+  async createRestaurant(data) {
+    return await RestaurantRepository.create(data);
   }
 
   // check owner 
@@ -60,35 +60,36 @@ class RestaurantService {
 
     return isWithinBusinessHours(currentTime, restaurant.opening_time, restaurant.closing_time);
   }
-}
 
-// Standalone functions for backward compatibility
-async function getList({ page = 1, limit = 16 } = {}) {
-  const p = Math.max(1, parseInt(page, 10) || 1)
-  const l = Math.max(1, parseInt(limit, 10) || 16)
-  const offset = (p - 1) * l
+  async searchRestaurants({ keyword, lat, lng, limit, skip }) {
+    return restaurantRepository.search({
+      keyword,
+      lat: Number(lat),
+      lng: Number(lng),
+      skip: Number(skip),
+      limit: Number(limit)
+    });
+  }
 
-  const { items, total } = await RestaurantRepository.getAll({ limit: l, offset })
+  async uploadBanner(id, file) {
+    const restaurant = await restaurantRepository.getById(id);
+    if (!restaurant) throw new ERR_RESPONSE.NotFoundError("Restaurant not found");
 
-  return {
-    items,
-    meta: {
-      page: p,
-      limit: l,
-      total: typeof total === 'number' ? total : items.length,
-    },
+    // upload file to cloudinary
+    const result = await cloudinary.uploader.upload(file.path, {
+      folder: `food-order/restaurants/${id}`,
+      public_id: `banner-${Date.now()}`,
+      overwrite: true,
+    });
+
+    // delete temp file
+    fs.unlinkSync(file.path);
+
+    // update DB
+    const updated = await restaurantRepository.updateBannerUrl(id, result.secure_url);
+
+    return updated;
   }
 }
 
-async function getRestaurantInfo(restaurantId) {
-  const service = new RestaurantService();
-  return await service.getRestaurantInfo(restaurantId);
-}
-
-const restaurantService = new RestaurantService();
-
-module.exports = Object.assign(restaurantService, {
-  getList, 
-  getRestaurantInfo,
-  RestaurantService
-})
+module.exports = new RestaurantService();

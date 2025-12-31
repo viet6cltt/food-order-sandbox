@@ -6,6 +6,13 @@ const menuItemRoutes = require('./menuItem.routes.js');
 const cartRoutes = require('./cart.routes.js');
 const orderRoutes = require('./order.routes.js');
 const paymentRoutes = require('./payment.routes.js');
+const revenueRoutes = require('./revenue.routes.js');
+const reviewRoutes = require('./app/reviews.routes.js');
+
+const adminUserRoutes = require('./admin/adminUser.routes.js');
+const adminCategoryRoutes = require('./admin/adminCategory.routes.js');
+const adminRestaurantRequestRoutes = require('./admin/adminRestaurantRequest.routes.js');
+
 const errorHandler = require('../middlewares/error.middleware');
 
 function route(app) {
@@ -18,8 +25,13 @@ function route(app) {
   apiRouter.use('/carts', cartRoutes);
   apiRouter.use('/orders', orderRoutes);
   apiRouter.use('/payments', paymentRoutes);
-
-
+  apiRouter.use('/revenue', revenueRoutes);
+  apiRouter.use('/reviews', reviewRoutes);
+  // admin
+  apiRouter.use('/admin/users', adminUserRoutes);
+  apiRouter.use('/admin/categories', adminCategoryRoutes);
+  apiRouter.use('/admin/restaurant-requests', adminRestaurantRequestRoutes);
+  
   app.use('/api', apiRouter); // add all with /api
 
   // Handler err

@@ -41,7 +41,7 @@ class AuthService {
     return `+84${cleaned}`;
   }
 
-  async registerWithFirebase({ username, password, idToken }) {
+  async registerWithFirebase({ username, password, role, idToken }) {
     //  Xác minh ID token do Firebase gửi về 
     const decoded = await admin.auth().verifyIdToken(idToken);
     let phone = decoded.phone_number;
@@ -68,6 +68,7 @@ class AuthService {
       passwordHash,
       phone,
       phoneVerifiedAt: new Date(),
+      role,
       providers: [{ provider: 'firebase' }],
     });
 
@@ -92,11 +93,11 @@ class AuthService {
     }
 
     // Create token
-    const accessToken = authHelper.generateAccessToken(user._id);
+    const accessToken = authHelper.generateAccessToken(user._id, user.role);
 
     await AuthRepository.revokeSessionByUserId(user._id);
 
-    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, user.role);
     await AuthRepository.createAuthSession({
       userId: user._id,
       refreshTokenId: refreshTokenId,
@@ -118,9 +119,9 @@ class AuthService {
     const user = await UserService.findById(userId);
     if (!user) throw new HTTP_ERROR.UnauthorizedError('Account does not exist', ERR.AUTH_INVALID_CREDENTIALS);
 
-    const accessToken = authHelper.generateAccessToken(user._id);
+    const accessToken = authHelper.generateAccessToken(user._id, user.role);
 
-    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, role);
 
     await AuthRepository.createAuthSession({
       userId,
@@ -149,7 +150,7 @@ class AuthService {
       }
 
       // tạo access token mới
-      const newAccessToken = authHelper.generateAccessToken(decoded.userId);
+      const newAccessToken = authHelper.generateAccessToken(decoded.userId, decoded.role);
 
       return newAccessToken;
 

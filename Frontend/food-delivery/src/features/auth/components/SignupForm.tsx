@@ -10,6 +10,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<'customer' | 'restaurant_owner' | 'admin'>('customer');
   const [phone, setPhone] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [step, setStep] = useState<'phone' | 'otp' | 'register'>('phone');
@@ -92,7 +93,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password || !idToken) {
+    if (!username || !password || !role || !idToken) {
       setError('Vui lòng điền đầy đủ thông tin');
       return;
     }
@@ -101,8 +102,13 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
     setError(null);
 
     try {
-      await register(username, password, idToken);
-      navigate('/');
+      await register(username, password, role, idToken);
+      // Redirect theo role
+      if (role === 'restaurant_owner') {
+        navigate('/owner/dashboard');
+      } else {
+        navigate('/');
+      }
     } catch (err: unknown) {
       let errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
       if (err && typeof err === 'object' && 'response' in err) {
@@ -243,17 +249,28 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
                 </p>
               </div>
 
-              <div className="mb-4">
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Tên người dùng</label>
-                <input 
-                  type="text" 
-                  required 
-                  value={username} 
-                  onChange={e => setUsername(e.target.value)} 
-                  placeholder="Nhập tên người dùng"
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 transition"
-                />
-              </div>
+          <label className="block mb-4">
+            <span className="text-sm font-medium text-gray-700">Role</span>
+            <select
+              required
+              value={role}
+              onChange={e => setRole(e.target.value as 'customer' | 'restaurant_owner' | 'admin')}
+              className="mt-1 block w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            >
+              <option value="customer">Customer</option>
+              <option value="restaurant_owner">Restaurant Owner</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+          <button 
+            type="submit" 
+            disabled={loading} 
+            className="w-full bg-green-600 text-white py-2 rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed transition-colors"
+          >
+            {loading ? 'Đang đăng ký...' : 'Hoàn tất đăng ký'}
+          </button>
+        </form>
+      )}
 
               <div className="mb-6">
                 <label className="block text-sm font-semibold text-gray-700 mb-2">Mật khẩu</label>

@@ -17,7 +17,7 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
     try {
       await login(phone, password);
-      navigate('/');
+      navigate('/redirect');
     } catch (err: unknown) {
       const errorMessage = (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data?.error || (err as { response?: { data?: { message?: string } } })?.response?.data?.message || (err as Error).message || 'Đăng nhập thất bại. Vui lòng thử lại.';
       setError(errorMessage);

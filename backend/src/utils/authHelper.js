@@ -43,6 +43,7 @@ function generateToken(userId, tokenTypeConfig, additionalPayload = {}) {
   const payload = {
     userId: userId,
     type: tokenTypeConfig.type,
+    role: additionalPayload.role,
     ...additionalPayload,
   };
 
@@ -72,19 +73,19 @@ function verifyToken(token, tokenTypeConfig) {
   return decoded;
 }
 
-function generateRefreshToken(userId) {
+function generateRefreshToken(userId, {role}) {
     const refreshTokenId = uuidv4(); 
     const config = tokenConfig.getTokenConfig().REFRESH;
 
-    return generateToken(userId, config, { refreshTokenId });
+    return generateToken(userId, config, { role, refreshTokenId });
 }
 
-function generateAccessToken(userId) {
+function generateAccessToken(userId, role) {
     const config = tokenConfig.getTokenConfig().ACCESS;
-    return generateToken(userId, config);
+    return generateToken(userId, config, { role });
 }
 
-function verifyRefreshToken(token) {
+function verifyRefreshToken(token, role) {
     const config = tokenConfig.getTokenConfig().REFRESH;
     return verifyToken(token, config);
 }

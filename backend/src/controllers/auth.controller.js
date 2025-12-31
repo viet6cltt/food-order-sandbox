@@ -13,19 +13,20 @@ class AuthController {
   // [POST] /register
   async register(req, res, next) {
     try {
-      const { username, password, idToken } = req.body;
+      const { username, password, role, idToken } = req.body;
 
-      if (!username || !password || !idToken) {
-        throw new HTTP_ERROR.BadRequestError('Missing username, password or idToken', ERR.AUTH_MISSING_FIELDS);
+      if (!username || !password || !idToken || !role) {
+        throw new HTTP_ERROR.BadRequestError('Missing username, password, role or idToken', ERR.AUTH_MISSING_FIELDS);
       }
 
-      const user = await AuthService.registerWithFirebase({ username, password, idToken });
+      const user = await AuthService.registerWithFirebase({ username, password, role, idToken });
       
       return SUCCESS_RESPONSE.created(res, 'User registered successfully', {
         user: {
           id: user._id,
           username: user.username,
           phone: user.phone,
+          role: user.role,
         }
       });
     } catch (err) {
