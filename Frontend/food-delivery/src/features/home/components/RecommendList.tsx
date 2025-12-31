@@ -1,49 +1,88 @@
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import RestaurantCard, { type Restaurant } from './RestaurantCard';
-
-const MOCK_RESTAURANTS: Restaurant[] = [
-  {
-    id: 1,
-    name: 'Phở Thìn Lò Đúc',
-    address: '13 Lò Đúc, Hà Nội',
-    bannerUrl: 'https://images.unsplash.com/photo-1582878826629-29b7ad1cdc43?auto=format&fit=crop&w=800&q=80',
-    rating: 4.5
-  },
-  {
-    id: 2,
-    name: 'Bánh Mì Dân Tổ',
-    address: 'Cao Thắng, Hà Nội',
-    bannerUrl: 'https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?auto=format&fit=crop&w=800&q=80',
-    rating: 4.2
-  },
-  {
-    id: 3,
-    name: 'Cơm Tấm Sài Gòn',
-    address: 'Quận 1, TP.HCM',
-    bannerUrl: 'https://images.unsplash.com/photo-1603360946369-dc9bb6258143?auto=format&fit=crop&w=800&q=80',
-    rating: 4.8
-  },
-  {
-    id: 4,
-    name: 'Trà Sữa Phúc Long',
-    address: 'Hàng Điếu, Hà Nội',
-    bannerUrl: 'https://images.unsplash.com/photo-1556679343-c7306c1976bc?auto=format&fit=crop&w=800&q=80',
-    rating: 4.6
-  },
-];
+import { getRecommendRestaurants } from '../api';
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 
 const RecommendList: React.FC = () => {
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  const fetchRecommend = async () => {
+    setLoading(true);
+    try {
+      const items = await getRecommendRestaurants();
+      setRestaurants(items);
+    } catch (err: unknown) {
+      setError('Không thể tải danh sách gợi ý.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRecommend();
+  }, []);
+
+  // Hàm scroll tay cho mượt
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const { scrollLeft, clientWidth } = scrollRef.current;
+      const scrollTo = direction === 'left' ? scrollLeft - clientWidth : scrollLeft + clientWidth;
+      scrollRef.current.scrollTo({ left: scrollTo, behavior: 'smooth' });
+    }
+  };
+
+  if (loading) return <RecommendSkeleton />;
+
+  if (error) return <div className="py-10 text-center text-red-500 font-medium">{error}</div>;
+
   return (
-    <div className="w-full py-4">
-      <div className="flex overflow-x-auto space-x-4 pb-4 px-1 scrollbar-hide">
-        {MOCK_RESTAURANTS.map((res) => (
-          <div key={res.id} className="w-64 flex-shrink-0">
+    <div className="group relative w-full py-4">
+      {/* Nút điều hướng Trái - Chỉ hiện khi hover vào vùng list */}
+      <button
+        onClick={() => scroll('left')}
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 p-2 rounded-full shadow-lg border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block"
+      >
+        <ChevronLeftIcon className="h-6 w-6 text-gray-700" />
+      </button>
+
+      {/* Container cuộn */}
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto space-x-6 pb-6 px-1 scrollbar-hide snap-x snap-mandatory"
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+      >
+        {restaurants.map((res) => (
+          <div key={res.id} className="w-64 flex-shrink-0 snap-start transform transition-transform hover:scale-[1.02]">
             <RestaurantCard restaurant={res} />
           </div>
         ))}
       </div>
+
+      {/* Nút điều hướng Phải */}
+      <button
+        onClick={() => scroll('right')}
+        className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white/90 p-2 rounded-full shadow-lg border border-gray-100 opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block"
+      >
+        <ChevronRightIcon className="h-6 w-6 text-gray-700" />
+      </button>
     </div>
   );
 };
+
+// --- Component Skeleton để hiển thị lúc đang load ---
+const RecommendSkeleton = () => (
+  <div className="flex space-x-6 overflow-hidden py-4">
+    {[1, 2, 3, 4].map((i) => (
+      <div key={i} className="w-64 flex-shrink-0 animate-pulse">
+        <div className="bg-gray-200 h-40 rounded-2xl mb-3"></div>
+        <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    ))}
+  </div>
+);
 
 export default RecommendList;

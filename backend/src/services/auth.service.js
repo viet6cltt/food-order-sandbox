@@ -220,6 +220,16 @@ class AuthService {
       )
     }
 
+    // Kiểm tra token reset password chưa dùng
+    const existingToken = await TokenService.findOne(user._id, 'reset_password');
+
+    if (existingToken) {
+      throw new HTTP_ERROR.UnprocessableEntityError(
+        'A reset password email has already been sent. Please check your email.',
+        ERR.AUTH_PASSWORD_RESET_ALREADY_SENT
+      );
+    }
+
     const token = await TokenService.createResetPasswordToken(user._id);
 
     if (!token) {

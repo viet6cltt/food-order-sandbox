@@ -16,28 +16,28 @@ export interface NormalizedCategory {
   isActive?: boolean;
 }
 
-export async function getCategories(page = 1, limit = 100): Promise<NormalizedCategory[]> {
-  try {
-    const res = await api.get('/categories', { params: { page, limit } });
-    let data = res.data?.data;
-    if (!data && Array.isArray(res.data)) {
-      data = res.data;
-    }
-    if (!Array.isArray(data)) {
-      data = [];
-    }
-    return data.map((category: Category) => ({
-      ...category,
-      id: category.id || category._id || '',
-      name: category.name,
-      description: category.description,
-      isActive: category.isActive,
-    })).filter((cat: NormalizedCategory): cat is NormalizedCategory => !!cat.id && cat.isActive !== false);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    throw error;
-  }
-}
+// export async function getCategories(page = 1, limit = 100): Promise<NormalizedCategory[]> {
+//   try {
+//     const res = await api.get('/categories', { params: { page, limit } });
+//     let data = res.data?.data;
+//     if (!data && Array.isArray(res.data)) {
+//       data = res.data;
+//     }
+//     if (!Array.isArray(data)) {
+//       data = [];
+//     }
+//     return data.map((category: Category) => ({
+//       ...category,
+//       id: category.id || category._id || '',
+//       name: category.name,
+//       description: category.description,
+//       isActive: category.isActive,
+//     })).filter((cat: NormalizedCategory): cat is NormalizedCategory => !!cat.id && cat.isActive !== false);
+//   } catch (error) {
+//     console.error('Error fetching categories:', error);
+//     throw error;
+//   }
+// }
 
 export async function getRestaurants(page = 1, limit = 16) {
   const res = await api.get('/restaurants', { params: { page, limit } })
@@ -56,33 +56,45 @@ export async function getRestaurants(page = 1, limit = 16) {
 }
 
 export async function getRestaurantsByCategory(categoryId: string, page = 1, limit = 16) {
-  const res = await api.get('/restaurants', { params: { page, limit } })
-  const items = Array.isArray(res.data?.data) ? res.data.data : []
-  const meta = res.data?.meta ?? { page, limit, total: items.length }
+  // Gửi categoryId như một query parameter
+  const res = await api.get('/restaurants', { 
+    params: { 
+      categoryId, 
+      page, 
+      limit,
+      sortBy: 'rating' 
+    } 
+  });
+
+  const items = Array.isArray(res.data?.data?.items) ? res.data.data.items : [];
+  const meta = res.data?.data?.meta ?? { page, limit, total: items.length };
   
-  // Filter restaurants by categoryId
-  const filteredItems = items.filter((item: unknown) => {
-    const restaurant = item as { categoriesId?: (string | { _id?: string })[] }
-    const categoriesId = restaurant.categoriesId || []
-    return categoriesId.some((catId: string | { _id?: string }) => {
-      if (typeof catId === 'string') {
-        return String(catId) === String(categoryId)
-      }
-      if (typeof catId === 'object' && catId !== null && '_id' in catId) {
-        return String(catId._id) === String(categoryId)
-      }
-      return false
-    })
-  })
+  const normalizedItems = items.map((item: any) => ({
+    ...item,
+    id: item.id || (item._id ? String(item._id) : undefined)
+  }));
+
+  return { items: normalizedItems, meta };
+}
+
+export async function getRecommendRestaurants() {
+  const res = await api.get('/restaurants/recommend'); // BE trả về 5 item
+  const items = Array.isArray(res.data?.data) ? res.data.data : [];
+  const normalizedItems = items.map(item => ({
+    ...item,
+    id: item.id || (item._id ? String(item._id) : undefined),
+  }));
+  return normalizedItems;
+}
+
+export async function getCategories() {
+  const res = await api.get('/categories');
+
+  const categories = res.data.data || [];
+
+  console.log(categories);
   
-  const normalizedItems = filteredItems.map((item: unknown) => {
-    const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
-    return {
-      ...restaurant,
-      id: restaurant.id || (restaurant._id ? String(restaurant._id) : undefined)
-    }
-  })
-  return { items: normalizedItems, meta: { ...meta, total: filteredItems.length } }
+  return categories.filter((category: any) => category.isActive === true);
 }
 
 export async function searchRestaurants(keyword: string, options?: { lat?: number; lng?: number; page?: number; limit?: number }): Promise<Restaurant[]> {

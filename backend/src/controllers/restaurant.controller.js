@@ -2,14 +2,30 @@ const RestaurantService = require('../services/restaurant.service');
 const ERR = require('../constants/errorCodes');
 const ERR_RESPONSE = require('../utils/httpErrors');
 const SUCCESS_RESPONSE = require('../utils/successResponse');
+const { Types } = require('mongoose');
 
 class RestaurantController {
+  // [GET] /recommend
+  async recommend(req, res, next) {
+    try {
+      const limit = Math.max(1, Math.min(50, parseInt(req.query.limit, 10) || 5));
+      const items = await RestaurantService.getRecommend({ limit });
+      return res.json({ success: true, data: items });
+    } catch (err) {
+      next(err);
+    }
+  }
+
   // [GET] /:restaurantId
   async getInfo(req, res, next) {
     try {
       const { restaurantId } = req.params;
       if (!restaurantId) {
         throw new ERR_RESPONSE.BadRequestError("Missing restaurant ID", ERR.INVALID_INPUT);
+      }
+
+      if (!Types.ObjectId.isValid(restaurantId)) {
+        throw new ERR_RESPONSE.BadRequestError("Invalid restaurant ID", ERR.INVALID_INPUT);
       }
 
       const restaurantInfo = await RestaurantService.getRestaurantInfo(restaurantId);

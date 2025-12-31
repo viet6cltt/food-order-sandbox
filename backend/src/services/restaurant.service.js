@@ -78,6 +78,11 @@ class RestaurantService {
     };
   }
 
+  async getRecommend({ limit = 5 } = {}) {
+    const l = Math.max(1, Math.min(50, parseInt(limit, 10) || 5));
+    return await RestaurantRepository.getRecommend({ limit: l });
+  }
+
   async searchRestaurants({ keyword, lat, lng, limit, skip }) {
     return restaurantRepository.search({
       keyword,

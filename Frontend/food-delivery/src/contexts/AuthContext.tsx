@@ -1,78 +1,114 @@
-import React, { createContext, useEffect, useState } from 'react';
-import { login as apiLogin, register as apiRegister } from '../features/auth/api';
+import React, { createContext, useState, type ReactNode, useEffect, useCallback } from 'react';
+import api from '../services/apiClient';
 
-type User = {
-  id?: string;
-  name?: string;
-  email?: string;
-  role?: string;
+export type Provider = {
+  provider: 'local' | 'google' | 'firebase';
+  providerId?: string;
+  emailAtProvider?: string;
+  avatarUrl?: string;
 };
 
-type AuthContextValue = {
+export type User = {
+  id: string;
+  username: string;
+  phone: string;
+  phoneVerifiedAt?: string | null;
+  email?: string;
+  emailVerifiedAt?: string | null;
+
+  providers: Provider[];
+
+  role: 'customer' | 'restaurant_owner' | 'admin';
+  status: 'active' | 'banned' | 'pending';
+
+  // profile info
+  firstname?: string;
+  lastname?: string;
+  avatarUrl?: string;
+  dateOfBirth?: string;
+
+  address?: {
+    street?: string;
+    city?: string;
+    geo?: {
+      type: 'Point';
+      coordinates: [number, number]; // [longitude, latitude]
+    };
+  };
+
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+export type AuthContextValue = {
   user: User | null;
-  token: string | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (phone: string, password: string) => Promise<void>;
   register: (username: string, password: string, idToken: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>; // Để component khác gọi khi cần update profile
 };
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchUser = useCallback(async () => {
+    try {
+      // Endpoint lấy info user hiện tại
+      const res = await api.get('/users/me'); 
+      setUser(res.data.data.user);
+      console.log(res.data.data.user);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      fetchUser();
+    } else {
+      setIsLoading(false);
+    }
+  }, [fetchUser]);
 
   const login = async (phone: string, password: string) => {
-    const data = await apiLogin({ phone, password });
-    const t = data.data?.accessToken ?? data.accessToken ?? null;
-    if (t) {
-      localStorage.setItem('token', t);
-      setToken(t);
-    }
-    const userData = data.data?.user ?? data.user ?? null;
-    if (userData) {
-      setUser({
-        id: userData.id ?? String(userData._id),
-        name: userData.username,
-        email: userData.email,
-        role: userData.role,
-      });
-    }
+    const res = await api.post('/auth/login', { phone, password });
+    const { accessToken, user: userData } = res.data.data;
+    localStorage.setItem('accessToken', accessToken);
+    setUser(userData);
   };
 
   const register = async (username: string, password: string, idToken: string) => {
-    const data = await apiRegister({ username, password, idToken });
-    const t = data.data?.accessToken ?? data.accessToken ?? null;
-    if (t) {
-      localStorage.setItem('token', t);
-      setToken(t);
-    }
-    const userData = data.data?.user ?? data.user ?? null;
-    if (userData) {
-      setUser({
-        id: userData.id,
-        name: userData.username,
-        email: userData.email,
-      });
-    }
+    await api.post('/auth/register', { username, password, idToken });
   };
 
   const logout = () => {
-    localStorage.removeItem('token');
-    setToken(null);
     setUser(null);
+    localStorage.removeItem('accessToken');
     window.location.href = '/login';
   };
 
-  const value: AuthContextValue = {
-    user,
-    token,
-    isAuthenticated: !!token,
-    login,
-    register,
-    logout,
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: !!user,
+        isLoading,
+        login,
+        register,
+        logout,
+        refreshUser: fetchUser,
+      }}
+    >
+      {/* Trong khi đang kiểm tra token, không render app để tránh nhảy trang */}
+      {!isLoading ? children : <div className="loading-spinner">Loading...</div>}
+    </AuthContext.Provider>
+  );
 };

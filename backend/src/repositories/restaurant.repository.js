@@ -28,6 +28,14 @@ class RestaurantRepository {
     return { items, total };
   }
 
+  async getRecommend({ limit = 5 } = {}) {
+    const l = Math.max(1, Math.min(50, parseInt(limit, 10) || 5));
+    return await Restaurant.find({ isActive: true })
+      .sort({ rating: -1, reviewCount: -1, createdAt: -1 })
+      .limit(l)
+      .select('name address rating description bannerUrl reviewCount _id');
+  }
+
   async search({ keyword, lat, lng, limit = 0, skip = 20 }) {
     return Restaurant.aggregate([
       {

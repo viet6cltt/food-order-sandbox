@@ -11,6 +11,9 @@ const ReviewController = require('../controllers/app/review.controller');
 
 router.get('/', RestaurantsController.list);
 
+// recommend (must be declared before '/:restaurantId')
+router.get('/recommend', RestaurantsController.recommend);
+
 router.get('/search', pagination(20, 50), RestaurantsController.search);
 
 router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);

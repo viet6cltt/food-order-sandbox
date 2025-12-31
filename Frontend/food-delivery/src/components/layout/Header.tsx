@@ -1,8 +1,7 @@
 import React from 'react'
-import useAuth from '../../hooks/useAuth'
-import SearchButton from '../ui/SearchButton'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
+import SearchButton from '../ui/SearchButton'
 import useUser from '../../hooks/useUser'
 
 type Props = {
@@ -10,117 +9,120 @@ type Props = {
 }
 
 const Header: React.FC<Props> = ({ className = '' }) => {
-  const { user, isAuthenticated } = useAuth()
   const navigate = useNavigate();
-  const userProfile = useUser();
+  const { user, isAuthenticated, isLoading } = useUser();
 
-  const handleOnClickOwnerRegistration = () => {
-    // Logic for owner registration click
-    navigate('/owner/register');
-  }
-  
-  const handleOnClickCartIcon = () => {
-    // Logic for cart icon click
-    navigate('/cart');
-  } 
-
-  const handleOnClickProfile = () => {
-    // Logic for profile click
-    navigate('/profile');
-  }
-
-  const handleOnClickLogin = () => {
-    // Logic for login click
-    navigate('/login');
-  }
-
-  const handleOnClickHome = () => {
-    // Logic for home click
-    navigate('/');
+  if (isLoading) {
+    return (
+      <header className={`sticky top-0 z-30 bg-white h-16 border-b border-gray-100 ${className}`}>
+        <div className="max-w-7xl mx-auto px-4 h-full flex items-center justify-between">
+           <div className="h-8 w-32 bg-gray-100 animate-pulse rounded" />
+           <div className="h-10 w-64 bg-gray-100 animate-pulse rounded-full hidden md:block" />
+           <div className="h-8 w-8 bg-gray-100 animate-pulse rounded-full" />
+        </div>
+      </header>
+    );
   }
 
   return (
-    <header className={`sticky top-0 z-30 bg-white/50 backdrop-blur-sm shadow-sm ${className}`}>
+    <header className={`sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-gray-100 shadow-sm ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-left space-x-4">
-            <button className="text-xl font-semibold text-green-600" type="button" onClick={handleOnClickHome}>Food Delivery</button>
+        <div className="flex justify-between items-center h-16 gap-4">
+          
+          {/* LOGO */}
+          <div className="flex-shrink-0">
+            <button 
+              className="text-xl font-bold text-green-600 tracking-tight" 
+              onClick={() => navigate('/')}
+            >
+              Food Delivery
+            </button>
           </div>
 
-          {userProfile.getRole() === 'customer' && (
-            <div>
-              <button type="button" 
-                      className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
-                      aria-label="Đăng ký chủ nhà hàng"
-                      onClick={handleOnClickOwnerRegistration}>
-                Đăng ký chủ nhà hàng
-              </button>
+          {/* SEARCH BUTTON - Thêm vào vị trí trung tâm */}
+          <div className="flex-1 max-w-md hidden md:block">
+            <SearchButton />
+          </div>
+
+          {/* RIGHT SIDE: NAV, CART & PROFILE */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            
+            {/* Role-based Navigation */}
+            <div className="hidden lg:flex items-center space-x-4 mr-2">
+              {isAuthenticated && (
+                <>
+                  {user?.role === 'customer' && (
+                    <button
+                      className="text-sm font-medium text-gray-600 hover:text-green-600 transition"
+                      onClick={() => navigate('/owner/register')}
+                    >
+                      Owner Registration
+                    </button>
+                  )}
+                  {user?.role === 'restaurant_owner' && (
+                    <div className="flex space-x-4 text-sm font-medium">
+                      <button className="hover:text-green-600" onClick={() => navigate('/owner/dashboard')}>Dashboard</button>
+                      <button className="hover:text-green-600" onClick={() => navigate('/owner/menu-list')}>Menu</button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
-          )}
 
-          {
-            userProfile.getRole() === 'restaurant_owner' && (
-              <div className='flex flex-row items-center space-x-6'>
-                <div>
-                  <button type="button" 
-                          className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
-                          aria-label="Owner Dashboard"
-                          onClick={() => navigate('/owner/dashboard')}>
-                    Owner Dashboard
-                  </button>
-                 </div>
-                 <div>
-                    <button type="button" 
-                            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                            aria-label="Add Food"
-                            onClick={() => navigate('/owner/add-food')}>
-                      Add Food
-                    </button>
-                  </div>
-                  <div>
-                    <button type="button" 
-                            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300"
-                            aria-label="Add Food"
-                            onClick={() => navigate('/owner/menu-list')}>
-                      Menu List
-                    </button>
-                  </div>
-              </div>
-            )
-          }
+            {/* Mobile Search Icon (nếu SearchButton của bạn chỉ hiện trên desktop) */}
+            <div className="md:hidden">
+               <SearchButton isMobileIconOnly /> 
+            </div>
 
-          <div className='flex direction-row items-center space-x-6'>
-            <nav className="hidden sm:flex sm:space-x-6" aria-label="Main">
-              <SearchButton />
-            </nav>
-
-              <div className="flex items-center space-x-4">
-                {isAuthenticated && user ? (
-                  <div className='flex flex-row items-center space-x-4'>
-                    <button type="button" 
-                        className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
-                        aria-label="Cart Icon"
-                        onClick={handleOnClickCartIcon}>
-                        <ShoppingCartIcon className="h-5 w-5" />
-                    </button>
-                    <button type='button' 
-                        className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 transparent focus:outline-none focus:ring-2 focus:ring-indigo-300" 
-                        aria-label="Profile"
-                        onClick={handleOnClickProfile}>
-                      <UserIcon className="h-5 w-5" />
-                    </button>
+            {isAuthenticated ? (
+              <>
+                {/* Giỏ hàng */}
+                <button 
+                  onClick={() => navigate('/cart')} 
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition relative"
+                >
+                  <ShoppingCartIcon className="h-6 w-6" />
+                  {/* Có thể thêm badge số lượng item ở đây */}
+                </button>
+                
+                {/* Profile */}
+                <button 
+                  onClick={() => navigate('/profile')} 
+                  className="flex items-center space-x-2 p-1 pr-3 rounded-full hover:bg-gray-100 border border-transparent hover:border-gray-200 transition"
+                >
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt="avatar" 
+                      className="h-8 w-8 rounded-full object-cover border border-gray-200" 
+                    />
+                  ) : (
+                    <div className="bg-green-100 p-1.5 rounded-full">
+                      <UserIcon className="h-5 w-5 text-green-600" />
+                    </div>
+                  )}
+                  <div className="hidden sm:block text-left">
+                    <p className="text-xs text-gray-400 leading-none mb-1">Welcome,</p>
+                    <p className="text-sm font-bold text-gray-700 leading-none">
+                      {user?.firstname || user?.username}
+                    </p>
                   </div>
-                ) : (
-                  <button type='button' onClick={handleOnClickLogin}>
-                    <span className="text-sm text-gray-700 hover:text-gray-900">Login</span>
-                  </button>
-                )}
-              </div>
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={() => navigate('/login')}
+                className="px-5 py-2 text-sm font-bold text-white bg-green-600 rounded-full hover:bg-green-700 transition shadow-md shadow-green-100"
+              >
+                Login
+              </button>
+            )}
           </div>
+          
         </div>
       </div>
-      </header>
-  )
+    </header>
+  );
 }
 
-export default Header
+export default Header;
