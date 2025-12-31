@@ -3,11 +3,25 @@ import type { MenuItemDto } from '../restaurant/components/FoodItem'
 
 export async function getMenuItemById(menuItemId: string): Promise<MenuItemDto> {
   const res = await apiClient.get(`/menu-items/${menuItemId}`)
+  // Backend returns: { success: true, message: "...", data: { menuItem: {...} } }
   const menuItem = res.data?.data?.menuItem ?? res.data?.menuItem ?? res.data
   if (!menuItem) {
     throw new Error('Menu item not found')
   }
-  return menuItem as MenuItemDto
+  
+  // Normalize _id field - ensure _id is present
+  const normalized: MenuItemDto = {
+    ...menuItem,
+    _id: menuItem._id || menuItem.id || menuItemId,
+    // Ensure restaurantId is a string
+    restaurantId: menuItem.restaurantId 
+      ? (typeof menuItem.restaurantId === 'string' 
+          ? menuItem.restaurantId 
+          : String(menuItem.restaurantId))
+      : undefined,
+  }
+  
+  return normalized
 }
 
 export type Review = {

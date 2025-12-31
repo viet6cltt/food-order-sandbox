@@ -1,13 +1,76 @@
-const PlaceOrderButton: React.FC<{className? : string}> = ({className = ''}) => {
-    const basePrice = 100000;
-    const shippingFee = 15000;
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import type { Order } from '../../../types/order';
+import * as orderApi from '../../order/api';
+import * as paymentApi from '../api';
+
+interface PlaceOrderButtonProps {
+    className?: string;
+    order: Order;
+    paymentMethod: 'COD' | 'BANK_TRANSFER';
+    deliveryAddress: { full: string; lat: number; lng: number } | null;
+}
+
+const PlaceOrderButton: React.FC<PlaceOrderButtonProps> = ({ 
+    className = '', 
+    order,
+    paymentMethod,
+    deliveryAddress,
+}) => {
+    const navigate = useNavigate();
+    const [loading, setLoading] = useState(false);
+
+    const basePrice = order.totalFoodPrice || 0;
+    const shippingFee = order.shippingFee || 0; // Will be calculated by backend when updating order
     const totalPrice = basePrice + shippingFee;
 
     const fmt = (v: number) => v.toLocaleString('vi-VN') + '₫';
 
-    const handleClickOrder = () => {
-        // Xử lý đặt hàng ở đây
-        alert('Chức năng này đang được phát triển!');
+    const handleClickOrder = async () => {
+        if (!deliveryAddress) {
+            toast.error('Vui lòng chọn địa chỉ nhận hàng');
+            return;
+        }
+
+        try {
+            setLoading(true);
+
+            const updatedOrder = await orderApi.updateOrderInfo(order._id, {
+                deliveryAddress: deliveryAddress,
+                paymentMethod,
+            });
+
+            // Step 2: If payment method is BANK_TRANSFER, create payment
+            if (paymentMethod === 'BANK_TRANSFER') {
+                await paymentApi.createPayment({
+                    orderId: updatedOrder._id,
+                });
+            }
+
+            toast.success('Đặt hàng thành công!');
+            
+            // Navigate to order list
+            navigate('/order-list');
+        } catch (err: unknown) {
+            let errorMessage = 'Không thể đặt hàng';
+            if (err && typeof err === 'object' && 'response' in err) {
+                const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } };
+                if (axiosError.response?.status === 401) {
+                    navigate('/login');
+                    return;
+                } else {
+                    errorMessage = axiosError.response?.data?.message || 
+                                   axiosError.response?.data?.error || 
+                                   errorMessage;
+                }
+            } else if (err instanceof Error) {
+                errorMessage = err.message;
+            }
+            toast.error(errorMessage);
+        } finally {
+            setLoading(false);
+        }
     }
 
     return (
@@ -34,8 +97,19 @@ const PlaceOrderButton: React.FC<{className? : string}> = ({className = ''}) => 
                     </div>
                     <button 
                         onClick={handleClickOrder}
-                        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-md shadow-md">
-                        Đặt hàng
+                        disabled={loading || !deliveryAddress}
+                        className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-3 rounded-md shadow-md transition flex items-center gap-2">
+                        {loading ? (
+                            <>
+                                <svg className="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span>Đang xử lý...</span>
+                            </>
+                        ) : (
+                            'Đặt hàng'
+                        )}
                     </button>
                     <div className="sm:hidden mt-3 w-full text-center text-sm text-gray-700">
                         <div className="font-medium">{fmt(totalPrice)}</div>
