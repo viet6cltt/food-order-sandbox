@@ -1,6 +1,11 @@
 const User = require('../models/User');
 
 class UserRepository {
+
+  async findAll(filter = {}) {
+    return User.find(filter);
+  }
+
   async findByUsernameOrPhone(username, phone) {
     const query = { $or: [] };
     if (username) query.$or.push({ username });
@@ -111,6 +116,8 @@ class UserRepository {
       { new: true }
     );
   }
+
+
 }
 
 module.exports = new UserRepository();

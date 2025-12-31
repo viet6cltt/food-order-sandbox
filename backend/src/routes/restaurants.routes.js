@@ -3,12 +3,16 @@ const router = express.Router();
 const RestaurantsController = require('../controllers/restaurant.controller.js');
 const OrderController = require('../controllers/order.controller.js');
 const MenuItemController = require('../controllers/menuItem.controller.js');
-const { optinalAuth, requireAuth } = require('../middlewares/auth.middleware');
+const revenueController = require('../controllers/revenue.controller');
+const { optionalAuth, requireAuth } = require('../middlewares/auth.middleware');
+const upload = require('@/middlewares/upload.middleware.js');
 
-router.get('/', RestaurantsController.list);
-router.get('/:restaurantId', optinalAuth, RestaurantsController.getInfo);
-router.get('/:restaurantId/menu-items', optinalAuth, MenuItemController.getMenuItems);
+router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
+router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
 router.post('/:restaurantId/menu-item', requireAuth, MenuItemController.createMenuItem);
+
+// update
+router.patch("/:restaurantId/banner", upload.single("file"), RestaurantsController.uploadBanner);
 
 // order
 router.get('/:restaurantId/orders', requireAuth, OrderController.getOrdersOfRestaurant); // get all orders of a restaurant
@@ -19,6 +23,11 @@ router.patch("/:restaurantId/orders/:orderId/deliver", requireAuth, OrderControl
 router.patch("/:restaurantId/orders/:orderId/cancel", requireAuth, OrderController.cancelOrderStatus);
 
 router.patch('/:restaurantId/orders/:orderId/complete', requireAuth, OrderController.completeOrderStatus);
+
+// revenue
+router.get('/:restaurantId/revenue/day', revenueController.getDayRevenue);
+router.get('/:restaurantId/revenue/week', revenueController.getWeekRevenue);
+router.get('/:restaurantId/revenue/total', revenueController.getTotal);
 
 
 module.exports = router;

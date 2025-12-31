@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomeScreen from '../features/home/HomeScreen';
-import LoginScreen from '../features/auth/LoginScreen';
-import SignupScreen from '../features/auth/SignupScreen';
+import LoginScreen from '../features/auth/screens/LoginScreen';
+import SignupScreen from '../features/auth/screens/SignupScreen';
 import OwnerRegisterScreen from '../features/owner/OwnerRegisterScreen';
 import RestaurantDetailScreen from '../features/restaurant/RestaurantDetailScreen';
 import CartScreen from '../features/cart/CartScreen';

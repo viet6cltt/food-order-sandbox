@@ -31,6 +31,40 @@ class RestaurantController {
       next(err);
     }
   }
+
+  async search(req, res, next) {
+    try {
+      const { keyword, lat, lng } = req.query;
+      const { skip, limit } = req.pagination;
+
+      const data = await RestaurantService.searchRestaurants({ keyword, lat, lng, skip, limit });
+
+      return SUCCESS_RESPONSE.success(res, `search restaurants by keyword ${keyword}`, data);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async uploadBanner(req, res, next) {
+    try {
+      const { restaurantId } = req.params;
+      const file = req.file;
+
+      if (!restaurantId) {
+        throw new ERR_RESPONSE.BadRequestError("Missing id if Restaurant", ERR.INVALID_INPUT);
+      }
+
+      if (!file) {
+        throw new ERR_RESPONSE.BadRequestError("File is required");
+      }
+
+      const updated = await RestaurantService.uploadBanner(id, file);
+
+      return SUCCESS_RESPONSE.success(res, `Banner updated successfully`, updated);
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new RestaurantController();
