@@ -37,6 +37,11 @@ const PaymentSchema = new mongoose.Schema(
       default: "pending",
     },
 
+    paidAt: {
+      type: Date,
+      default: null,
+    },
+
     transactionId: {
       type: String,
       default: null,

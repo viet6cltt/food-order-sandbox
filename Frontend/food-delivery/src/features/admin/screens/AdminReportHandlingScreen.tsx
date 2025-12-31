@@ -5,6 +5,7 @@ import ActionPanel from '../components/report-handling/ActionPanel';
 import { FlagIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { getReviewReports, handleReviewReport } from '../api'; // Giả định file api của bạn
 import { type Report } from '../../../types/report';
+import { toast } from 'react-toastify';
 
 const AdminReportHandlingScreen: React.FC = () => {
     const [reports, setReports] = useState<Report[]>([]);
@@ -40,9 +41,9 @@ const AdminReportHandlingScreen: React.FC = () => {
             setReports(prev => prev.map(r => 
                 r._id === id ? { ...r, status: 'RESOLVED' as const, adminNote } : r
             ));
-            alert('Đã xử lý khiếu nại thành công.');
+            toast.success('Đã xử lý khiếu nại thành công.');
         } catch (error) {
-            alert('Không thể cập nhật trạng thái.');
+            toast.error('Không thể cập nhật trạng thái.');
         }
     };
 
@@ -56,7 +57,7 @@ const AdminReportHandlingScreen: React.FC = () => {
                 r._id === id ? { ...r, status: 'REJECTED' as const } : r
             ));
         } catch (error) {
-            alert('Thao tác thất bại.');
+            toast.error('Thao tác thất bại.');
         }
     };
 

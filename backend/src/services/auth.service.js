@@ -121,7 +121,7 @@ class AuthService {
 
     const accessToken = authHelper.generateAccessToken(user._id, user.role);
 
-    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, role);
+    const { refreshToken, refreshTokenId } = authHelper.generateRefreshToken(user._id, user.role);
 
     await AuthRepository.createAuthSession({
       userId,

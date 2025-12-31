@@ -21,6 +21,34 @@ export type CreatePaymentPayload = {
 };
 
 /**
+ * Confirm BANK_TRANSFER payment (owner action)
+ */
+export async function confirmPayment(paymentId: string): Promise<Payment> {
+  const res = await apiClient.patch(`/payments/${paymentId}/confirm`);
+  const payment = res.data?.data?.payment ?? res.data?.payment;
+
+  if (payment) {
+    payment._id = payment._id || payment.id || paymentId;
+  }
+
+  return payment as Payment;
+}
+
+/**
+ * Mark BANK_TRANSFER payment as failed (owner action)
+ */
+export async function failPayment(paymentId: string): Promise<Payment> {
+  const res = await apiClient.patch(`/payments/${paymentId}/fail`);
+  const payment = res.data?.data?.payment ?? res.data?.payment;
+
+  if (payment) {
+    payment._id = payment._id || payment.id || paymentId;
+  }
+
+  return payment as Payment;
+}
+
+/**
  * Create payment for BANK_TRANSFER order
  */
 export async function createPayment(payload: CreatePaymentPayload): Promise<Payment> {

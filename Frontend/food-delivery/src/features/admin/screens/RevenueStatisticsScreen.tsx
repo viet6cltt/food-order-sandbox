@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout'; // ✅ Bật lại Layou
 import RevenueChartDetail from '../components/revenue-statistics/RevenueChartDetail';
 import ExportButton from '../components/revenue-statistics/ExportButton';
 import { CurrencyDollarIcon, BanknotesIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 // --- MOCK DATA ---
 const generateRevenueData = () => {
@@ -31,7 +32,7 @@ const RevenueStatisticsScreen: React.FC = () => {
         setIsExporting(true);
         setTimeout(() => {
             setIsExporting(false);
-            alert('Đã tải xuống báo cáo doanh thu thành công!');
+            toast.success('Đã tải xuống báo cáo doanh thu thành công!');
         }, 1500);
     };
 

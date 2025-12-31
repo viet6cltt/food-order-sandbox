@@ -44,18 +44,6 @@ authSessionSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 // Index theo user đang active
 authSessionSchema.index({ userId: 1, revokedAt: 1 }, { name: 'idx_userId_revokedAt' });
 
-// Index với web session, hiện tại không cần lắm nhưng cần cho sau khi có thêm mobile
-authSessionSchema.index(
-  { userId: 1, 'device.platform': 1 },
-  {
-    unique: true,
-    partialFilterExpression: {
-      'device.platform': 'web',
-      revokedAt: null,
-    },
-    name: 'idx_userId_device',
-  }
-);
 
 const AuthSession = mongoose.model('AuthSession', authSessionSchema);
 

@@ -5,6 +5,8 @@ import SearchScreen from '../features/home/SearchScreen';
 import CategoryRestaurantsScreen from '../features/home/CategoryRestaurantsScreen';
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import SignupScreen from '../features/auth/screens/SignupScreen';
+import CompleteProfileScreen from '../features/auth/screens/CompleteProfileScreen.tsx';
+import OAuthSuccessScreen from '../features/auth/screens/OAuthSuccessScreen.tsx';
 import OwnerRegisterScreen from '../features/owner/OwnerRegisterScreen';
 import RestaurantDetailScreen from '../features/restaurant/RestaurantDetailScreen';
 import CartScreen from '../features/cart/CartScreen';
@@ -14,7 +16,9 @@ import OrderListScreen from '../features/order/OrderListScreen';
 import OwnerDashboardScreen from '../features/owner/screens/OwnerDashboardScreen';
 import AddFoodScreen from '../features/owner/screens/AddFoodScreen';
 import OwnerRestaurantInfoScreen from '../features/owner/screens/OwnerRestaurantInfoScreen';
+import OwnerMenuListScreen from '../features/owner/screens/OwnerMenuListScreen.tsx';
 import ProtectedRoute from './ProtectedRoute';
+import PublicRoute from './PublicRoute';
 import ResetPasswordRequestScreen from '../features/auth/screens/ResetPasswordRequestScreen';
 import ResetPasswordScreen from '../features/auth/screens/ResetPasswordScreen';
 import RoleBasedRedirect from './RoleBasedRedirect';
@@ -28,8 +32,24 @@ const AppRoutes: React.FC = () => {
 		<BrowserRouter>
 			<Routes>
 				<Route path="/" element={<HomeScreen />} />
-				<Route path="/login" element={<LoginScreen />} />
-				<Route path="/signup" element={<SignupScreen />} />
+				<Route
+					path="/login"
+					element={
+						<PublicRoute>
+							<LoginScreen />
+						</PublicRoute>
+					}
+				/>
+				<Route
+					path="/signup"
+					element={
+						<PublicRoute>
+							<SignupScreen />
+						</PublicRoute>
+					}
+				/>
+				<Route path="/auth/complete-profile" element={<CompleteProfileScreen />} />
+				<Route path="/auth/oauth-success" element={<OAuthSuccessScreen />} />
 				<Route path="/order-list" element={<OrderListScreen />} />
 				<Route path="/reset-password-request" element={<ResetPasswordRequestScreen />} />
 				<Route path="/reset-password" element={<ResetPasswordScreen />} />
@@ -99,25 +119,9 @@ const AppRoutes: React.FC = () => {
 
 				<Route path="/orders" element={<OrderListScreen />} />
 
-				{/* Owner routes */}
-				<Route path="/owner/dashboard/*" element={
-						<ProtectedRoute allowedRoles={['restaurant_owner']}>
-								<OwnerDashboardScreen />
-						</ProtectedRoute>
-				} />
-				{/* <Route path="/owner/menu-list/*" element={
+				<Route path="/owner/menu-list" element={
 						<ProtectedRoute allowedRoles={['restaurant_owner']}>
 								<OwnerMenuListScreen />
-						</ProtectedRoute>
-				} /> */}
-				<Route path="/owner/add-food/*" element={
-						<ProtectedRoute allowedRoles={['restaurant_owner']}>
-								<AddFoodScreen />
-						</ProtectedRoute>
-				} />
-				<Route path="/owner/restaurant-info/*" element={
-						<ProtectedRoute allowedRoles={['restaurant_owner']}>
-								<OwnerRestaurantInfoScreen />
 						</ProtectedRoute>
 				} />
 

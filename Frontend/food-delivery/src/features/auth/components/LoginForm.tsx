@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getOAuthUrl } from '../api';
 import useAuth from '../../../hooks/useAuth';
+import { toast } from 'react-toastify';
 
 const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
   const navigate = useNavigate();
@@ -40,11 +41,11 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
       if (res.success && res.data?.url) {
         window.location.href = res.data.url;
       } else {
-        alert('Không lấy được URL đăng nhập Google');
+        toast.error('Không lấy được URL đăng nhập Google');
       }
     } catch (err) {
       console.error(err);
-      alert('Lỗi khi lấy OAuth URL');
+      toast.error('Lỗi khi lấy OAuth URL');
     }
   };
 

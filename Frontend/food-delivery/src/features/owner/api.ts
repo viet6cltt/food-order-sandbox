@@ -117,6 +117,13 @@ export interface Restaurant {
   isAcceptingOrders?: boolean;
   opening_time?: string;
   closing_time?: string;
+  openingHours?: Array<{ day: number; open: string; close: string; isClosed: boolean }>;
+  paymentInfo?: {
+    bankName?: string | null;
+    bankAccountNumber?: string | null;
+    bankAccountName?: string | null;
+    qrImageUrl?: string | null;
+  };
   isActive?: boolean;
   rating?: number;
   reviewCount?: number;
@@ -169,6 +176,68 @@ export async function getMyRestaurant(): Promise<Restaurant | null> {
     console.error('Error fetching my restaurant:', error);
     throw error;
   }
+}
+
+export type UpdateMyRestaurantPayload = {
+  name?: string;
+  description?: string;
+  phone?: string;
+  address?: {
+    full?: string;
+    street?: string;
+    ward?: string;
+    district?: string;
+    city?: string;
+  };
+  categoriesId?: string[];
+  opening_time?: string;
+  closing_time?: string;
+  openingHours?: Array<{ day: number; open: string; close: string; isClosed: boolean }>;
+  paymentInfo?: {
+    bankName?: string | null;
+    bankAccountNumber?: string | null;
+    bankAccountName?: string | null;
+    qrImageUrl?: string | null;
+  };
+};
+
+export async function updateMyRestaurant(payload: UpdateMyRestaurantPayload): Promise<Restaurant> {
+  const res = await api.patch('/users/owner/restaurant', payload);
+  const restaurant = res.data?.data || res.data;
+  return {
+    ...restaurant,
+    id: restaurant.id || restaurant._id || '',
+  };
+}
+
+export async function uploadRestaurantBanner(restaurantId: string, file: File): Promise<Restaurant> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await api.patch(`/restaurants/${restaurantId}/banner`, formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  const restaurant = res.data?.data || res.data;
+  return {
+    ...restaurant,
+    id: restaurant.id || restaurant._id || '',
+  };
+}
+
+export async function uploadMyRestaurantPaymentQr(file: File): Promise<Restaurant> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await api.patch('/users/owner/restaurant/payment-qr', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  const restaurant = res.data?.data || res.data;
+  return {
+    ...restaurant,
+    id: restaurant.id || restaurant._id || '',
+  };
 }
 
 export async function getRestaurantOrders(
@@ -264,15 +333,15 @@ export interface DayRevenueResponse {
   }[];
 }
 
-function normalizeDataArray<T>(payload: any): T[] {
+function normalizeDataArray<T>(payload: unknown): T[] {
   // Supports:
   // - { success: true, data: [...] }
   // - { success: true, data: { data: [...] } }
   // - { data: [...] }
   // - [...]
-  const maybe = payload?.data ?? payload;
+  const maybe = (payload as { data?: unknown })?.data ?? payload;
   if (Array.isArray(maybe)) return maybe as T[];
-  if (Array.isArray(maybe?.data)) return maybe.data as T[];
+  if (Array.isArray((maybe as { data?: unknown })?.data)) return (maybe as { data: T[] }).data;
   return [];
 }
 

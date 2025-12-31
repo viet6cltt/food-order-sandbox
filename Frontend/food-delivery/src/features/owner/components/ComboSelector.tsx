@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { XMarkIcon, CheckCircleIcon, GiftIcon } from '@heroicons/react/24/outline';
 import { CheckIcon } from '@heroicons/react/24/solid';
+import { toast } from 'react-toastify';
 
 // Định nghĩa lại Type đơn giản để không phụ thuộc file khác
 interface FoodItem {
@@ -39,7 +40,7 @@ const ComboSelector: React.FC<Props> = ({ items, onClose, onSave }) => {
 
     const handleConfirm = () => {
         if (!comboName || selectedIds.length < 2) {
-            alert("Vui lòng nhập tên combo và chọn ít nhất 2 món!");
+            toast.warning("Vui lòng nhập tên combo và chọn ít nhất 2 món!");
             return;
         }
         onSave(selectedIds, comboName, discountPrice || originalTotal);

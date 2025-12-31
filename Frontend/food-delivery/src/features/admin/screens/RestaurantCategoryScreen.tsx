@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout'; // Bật lại Layout ch
 import PendingRestaurantsList from '../components/restaurant-category/PendingRestaurantsList';
 import CategoryList from '../components/restaurant-category/CategoryList';
 import CategoryForm from '../components/restaurant-category/CategoryForm';
+import { toast } from 'react-toastify';
 
 // --- MOCK DATA ---
 const MOCK_PENDING = [
@@ -36,11 +37,11 @@ const RestaurantCategoryScreen: React.FC = () => {
         const reason = window.prompt("Vui lòng nhập lý do từ chối để gửi email cho chủ quán:");
         if (reason !== null) {
             if (reason.trim() === "") {
-                alert("Bạn chưa nhập lý do! Không thể từ chối.");
+                toast.warn("Bạn chưa nhập lý do! Không thể từ chối.");
                 return;
             }
             setPendingList(prev => prev.filter(r => r.id !== id));
-            alert(`Đã gửi email từ chối với lý do: "${reason}"`);
+            toast.success(`Đã gửi email từ chối với lý do: "${reason}"`);
         }
     };
 

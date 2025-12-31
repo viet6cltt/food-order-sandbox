@@ -44,11 +44,12 @@ class MenuItemController {
       const userId = req.userId;
 
       const data = req.body;
+      const file = req.file;
       if (!restaurantId) {
         throw new ERR_RESPONSE.BadRequestError('Missing restaurantId', ERR.INVALID_INPUT);
       }
 
-      const menuItem = await MenuItemService.createMenuItem(restaurantId, userId, data);
+      const menuItem = await MenuItemService.createMenuItem(restaurantId, userId, data, file);
 
       return SUCCESS_RESPONSE.success(res, 'Create new Menu Item successfully', { menuItem });
     } catch (err) {

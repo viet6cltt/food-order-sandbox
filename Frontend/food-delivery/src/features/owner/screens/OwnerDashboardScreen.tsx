@@ -33,20 +33,18 @@ const OwnerDashboardScreen: React.FC = () => {
                         <div>
                             <h1 className="text-2xl font-bold text-gray-900 flex items-center">
                                 <ChartBarIcon className="w-8 h-8 mr-3 text-green-600" />
-                                Tổng Quan Nhà Hàng {restaurant.name}
+                                Tổng Quan Nhà Hàng: {restaurant.name}
                             </h1>
                             <p className="text-gray-500 mt-1 ml-11">Chào mừng trở lại! Đây là tình hình kinh doanh hôm nay.</p>
                         </div>
-                        <div className="flex flex-row items-center gap-2">
-                            <p className="text-black text-sm text-center mt-4">Restaurant information</p>
-                            <button
-                                type="button" 
-                                className="mt-4 p-2 bg-white rounded-full shadow-sm hover:bg-gray-100 text-gray-600 opacity-75 hover:opacity-100 transition-opacity"
-                                onClick={() => navigate('/owner/restaurant-info')}
-                            >
-                                <Cog6ToothIcon className="w-6 h-6 text-black opacity-75 hover:opacity-100 transition-opacity" />
-                            </button>
-                        </div>
+                        <button
+                            type="button" 
+                            className="flex flex-row items-center gap-2 mt-4 p-4 bg-green-200 rounded-full shadow-sm hover:bg-gray-100 text-gray-600 opacity-75 hover:opacity-100 transition-opacity"
+                            onClick={() => navigate('/owner/restaurant-info')} 
+                        >
+                            <p className="text-black text-sm text-center -translate-y-0.5">Thông tin nhà hàng</p>    
+                            <Cog6ToothIcon className="w-6 h-6 text-black opacity-75 hover:opacity-100 transition-opacity" />
+                        </button>
                     </div>
 
                     {/* Revenue Widget */}

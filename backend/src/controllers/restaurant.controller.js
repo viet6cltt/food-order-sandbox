@@ -70,11 +70,15 @@ class RestaurantController {
         throw new ERR_RESPONSE.BadRequestError("Missing id if Restaurant", ERR.INVALID_INPUT);
       }
 
+      if (!Types.ObjectId.isValid(restaurantId)) {
+        throw new ERR_RESPONSE.BadRequestError("Invalid restaurant ID", ERR.INVALID_INPUT);
+      }
+
       if (!file) {
         throw new ERR_RESPONSE.BadRequestError("File is required");
       }
 
-      const updated = await RestaurantService.uploadBanner(id, file);
+      const updated = await RestaurantService.uploadBanner(restaurantId, file);
 
       return SUCCESS_RESPONSE.success(res, `Banner updated successfully`, updated);
     } catch (err) {
@@ -97,6 +101,41 @@ class RestaurantController {
       }
 
       return SUCCESS_RESPONSE.success(res, "Get restaurant successfully", restaurant);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /owner/restaurant
+  async updateMyRestaurant(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const updated = await RestaurantService.updateRestaurantByOwnerId(userId, req.body || {});
+      return SUCCESS_RESPONSE.success(res, 'Update restaurant successfully', updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /owner/restaurant/payment-qr
+  async uploadMyPaymentQr(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const file = req.file;
+      if (!file) {
+        throw new ERR_RESPONSE.BadRequestError("File is required", ERR.INVALID_INPUT);
+      }
+
+      const updated = await RestaurantService.uploadPaymentQrByOwnerId(userId, file);
+      return SUCCESS_RESPONSE.success(res, 'Payment QR updated successfully', updated);
     } catch (err) {
       next(err);
     }

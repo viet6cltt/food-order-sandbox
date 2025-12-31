@@ -1,5 +1,16 @@
 const mongoose = require('mongoose');
 
+const openingHoursSchema = new mongoose.Schema(
+  {
+    // 0 = Monday, 6 = Sunday
+    day: { type: Number, min: 0, max: 6, required: true },
+    open: { type: String, trim: true, default: "08:00" },
+    close: { type: String, trim: true, default: "22:00" },
+    isClosed: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
 const restaurantSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
 
@@ -38,6 +49,9 @@ const restaurantSchema = new mongoose.Schema({
 
   opening_time: { type: String, trim: true, default: "08:00" },
   closing_time: { type: String, trim: true, default: "22:00" },
+
+  // Optional per-day schedule (0 = Monday ... 6 = Sunday)
+  openingHours: { type: [openingHoursSchema], default: undefined },
 
   isActive: { type: Boolean, default: true },
 

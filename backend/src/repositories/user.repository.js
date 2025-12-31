@@ -80,6 +80,7 @@ class UserRepository {
   }
 
   async findByEmail(email) {
+    if (!email) return null;
     return await User.findOne({ email });
   }
 

@@ -24,6 +24,8 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [lat, setLat] = useState<number | null>(null);
+  const [lng, setLng] = useState<number | null>(null);
 
   useEffect(() => {
     setFirstname(user.firstname || '');
@@ -32,6 +34,8 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     setDateOfBirth(user.dateOfBirth || '');
     setStreet(user.address?.street || '');
     setCity(user.address?.city || '');
+    setLat(user.address?.geo ? user.address.geo.coordinates[1] : null);
+    setLng(user.address?.geo ? user.address.geo.coordinates[0] : null);
   }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -57,6 +61,10 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         address: {
           street: street.trim() || undefined,
           city: city.trim() || undefined,
+          geo: (lat !== null && lng !== null) ? {
+            type: 'Point',
+            coordinates: [lng, lat],
+          } : undefined,
         },
       };
 
@@ -133,6 +141,12 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
           <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Địa chỉ giao hàng mặc định</h3>
           <InputGroup label="Số nhà, tên đường" value={street} onChange={setStreet} placeholder="Vd: 123 Nguyễn Huệ" />
           <InputGroup label="Thành phố / Tỉnh" value={city} onChange={setCity} placeholder="Vd: Hà Nội" />
+        </div>
+
+        <div className="space-y-4 pt-4 border-t border-gray-50">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Tọa độ</h3>
+          <InputGroup label="Vĩ độ (Latitude)" type="number" value={lat !== null ? lat.toString() : ''} onChange={(val) => setLat(val ? parseFloat(val) : null)} placeholder="Vd: 21.0285" />
+          <InputGroup label="Kinh độ (Longitude)" type="number" value={lng !== null ? lng.toString() : ''} onChange={(val) => setLng(val ? parseFloat(val) : null)} placeholder="Vd: 105.8542" />
         </div>
 
         <div className="flex gap-4 pt-6">

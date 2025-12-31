@@ -2,6 +2,8 @@ const MenuItemRepository = require('../repositories/menuItem.repository');
 const RestaurantService = require('./restaurant.service');
 const ERR_RESPONSE = require('../utils/httpErrors.js');
 const ERR = require('../constants/errorCodes');
+const cloudinary = require('../config/cloudinary.config');
+const fs = require('fs');
 
 class MenuItemService {
   // get menu items by restaurantId
@@ -15,7 +17,7 @@ class MenuItemService {
   }
 
   // create menu item
-  async createMenuItem(restaurantId, userId, data) {
+  async createMenuItem(restaurantId, userId, data, file) {
     // Validate restaurant
     const restaurant = await RestaurantService.getRestaurantInfo(restaurantId);
     if (!restaurant) {
@@ -27,9 +29,22 @@ class MenuItemService {
       throw new ERR_RESPONSE.ForbiddenError('You are not allowed to create menu items for this restaurant', ERR.RESTAURANT_UNAUTHORIZED_ACTION);
     }
 
+    // Optional: upload single image file to Cloudinary and set imageUrl
+    let imageUrl = data?.imageUrl;
+    if (file?.path) {
+      const result = await cloudinary.uploader.upload(file.path, {
+        folder: `food-order/restaurants/${restaurantId}/menu-items`,
+        public_id: `menu-item-${Date.now()}`,
+        overwrite: true,
+      });
+      fs.unlinkSync(file.path);
+      imageUrl = result.secure_url;
+    }
+
     // Create
     const newItem = await MenuItemRepository.create({
       ...data,
+      imageUrl,
       restaurantId
     });
 

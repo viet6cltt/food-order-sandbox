@@ -18,7 +18,7 @@ router.get('/search', pagination(20, 50), RestaurantsController.search);
 
 router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
 router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
-router.post('/:restaurantId/menu-item', requireAuth, MenuItemController.createMenuItem);
+router.post('/:restaurantId/menu-item', requireAuth, upload.single('file'), MenuItemController.createMenuItem);
 
 // update
 router.patch("/:restaurantId/banner", upload.single("file"), RestaurantsController.uploadBanner);

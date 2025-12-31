@@ -115,5 +115,9 @@ class RestaurantRepository {
   async findByOwnerId(ownerId) {
     return await Restaurant.findOne({ ownerId: ownerId });
   }
+
+  async updateById(restaurantId, update) {
+    return await Restaurant.findByIdAndUpdate(restaurantId, update, { new: true, runValidators: true });
+  }
 }
 module.exports = new RestaurantRepository();

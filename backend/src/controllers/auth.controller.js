@@ -231,11 +231,12 @@ class AuthController {
 
           // Nếu user cần bổ sung thông tin
           if (status === ERR.REQUIRE_PHONE_USERNAME_PASSWORD) {
-            return SUCCESS_RESPONSE.accepted(
-              res, 
-              ERR.REQUIRE_PHONE_USERNAME_PASSWORD,
-              'Please complete your profile to continue'
-            );
+            // In browser-based OAuth flow, redirect back to FE to complete profile.
+            // returnUrl is verified via OAuth state.
+            const completeUrl = new URL('/auth/complete-profile', st.returnUrl);
+            completeUrl.searchParams.set('userId', userId);
+            completeUrl.searchParams.set('provider', provider);
+            return res.redirect(302, completeUrl.toString());
           }
 
           // nếu đầy đủ -> cấp token
@@ -252,7 +253,15 @@ class AuthController {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000,
           })
-            
+
+          // Browser OAuth flow: redirect back to FE if returnUrl exists.
+          if (st?.returnUrl) {
+            const okUrl = new URL('/auth/oauth-success', st.returnUrl);
+            okUrl.searchParams.set('accessToken', accessToken);
+            return res.redirect(302, okUrl.toString());
+          }
+
+          // Fallback for API clients
           return SUCCESS_RESPONSE.success(res, 'Login successfully via OAuth', {
             accessToken,
             user: {

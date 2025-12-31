@@ -61,6 +61,15 @@ const OrderList: React.FC = () => {
         fetchOrders();
     }, [restaurantId]);
 
+    const refreshOrders = async () => {
+        if (!restaurantId) return;
+        const result = await getRestaurantOrders(restaurantId, {
+            page: 1,
+            limit: 50,
+        });
+        setOrders(result.orders || []);
+    };
+
 
     const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
         if (!restaurantId) {
@@ -94,11 +103,7 @@ const OrderList: React.FC = () => {
             toast.success('Cập nhật trạng thái đơn hàng thành công!');
             
             // Refresh orders list
-            const result = await getRestaurantOrders(restaurantId, {
-                page: 1,
-                limit: 50,
-            });
-            setOrders(result.orders || []);
+            await refreshOrders();
         } catch (err: any) {
             const errorMessage = err.response?.data?.message || err.message || 'Không thể cập nhật trạng thái đơn hàng.';
             toast.error(errorMessage);
@@ -146,6 +151,7 @@ const OrderList: React.FC = () => {
         <OrderTable 
             orders={normalizedOrders} 
             onUpdateStatus={handleUpdateStatus}
+            onRefresh={refreshOrders}
         />
     );
 };

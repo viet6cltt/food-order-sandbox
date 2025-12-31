@@ -3,6 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout'; // ✅ Đã bật lại 
 import UserList from '../components/user-statistics/UserList';
 import PenaltyAccountList from '../components/user-statistics/PenaltyAccountList';
 import OwnerRegisterList from '../components/user-statistics/OwnerRegisterList';
+import { toast } from 'react-toastify';
 
 // --- MOCK DATA ---
 const MOCK_USERS = [
@@ -48,7 +49,7 @@ const UserStatisticsScreen: React.FC = () => {
             // Xóa khỏi danh sách chờ
             setRequests(prev => prev.filter(r => r.id !== id));
 
-            alert('Đã duyệt thành công!');
+            toast.success('Đã duyệt thành công!');
         }
     };
 
@@ -77,7 +78,7 @@ const UserStatisticsScreen: React.FC = () => {
             // Xóa khỏi danh sách phạt
             setPenaltyList(prev => prev.filter(u => u.id !== id));
 
-            alert('Đã mở khóa tài khoản!');
+            toast.success('Đã mở khóa tài khoản!');
         }
     };
 
@@ -100,7 +101,7 @@ const UserStatisticsScreen: React.FC = () => {
             // Xóa khỏi danh sách User
             setUsers(prev => prev.filter(u => u.id !== id));
 
-            alert(`Đã khóa user với lý do: ${reason}`);
+            toast.success(`Đã khóa user với lý do: ${reason}`);
         }
     };
 

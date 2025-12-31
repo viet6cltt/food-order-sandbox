@@ -139,7 +139,7 @@ const OrderItem: React.FC<OrderItemProps> = ({ order, restaurantName = 'Nhà hà
   }
 
   const handleContactSeller = () => {
-    alert('Chức năng liên hệ nhà hàng đang phát triển')
+    toast.info('Chức năng liên hệ nhà hàng đang phát triển')
   }
 
   const handleContinuePayment = () => {
