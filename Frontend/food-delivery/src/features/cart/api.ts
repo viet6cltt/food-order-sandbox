@@ -1,4 +1,8 @@
 import apiClient from '../../services/apiClient'
+import type { Order } from '../../types/order'
+
+// Re-export Order type for convenience
+export type { Order }
 
 export type CartItem = {
   _id: string
@@ -50,27 +54,43 @@ export type UpdateItemPayload = {
 }
 
 export async function getCart(): Promise<Cart | null> {
-  const res = await apiClient.get('/cart')
+  const res = await apiClient.get('/carts')
   return res.data?.data?.cart ?? res.data?.cart ?? null
 }
 
 export async function addItem(payload: AddItemPayload): Promise<Cart> {
-  const res = await apiClient.post('/cart/items', payload)
-  return res.data?.data?.cart ?? res.data?.cart
+  const res = await apiClient.post('/carts/items', payload)
+  const cart = res.data?.data?.cart ?? res.data?.cart
+  if (!cart) {
+    throw new Error('Failed to add item to cart')
+  }
+  return cart
 }
 
 export async function updateItem(itemId: string, payload: UpdateItemPayload): Promise<Cart> {
-  const res = await apiClient.put(`/cart/items/${itemId}`, payload)
-  return res.data?.data?.cart ?? res.data?.cart
+  const res = await apiClient.put(`/carts/items/${itemId}`, payload)
+  const cart = res.data?.data?.cart ?? res.data?.cart
+  if (!cart) {
+    throw new Error('Failed to update cart item')
+  }
+  return cart
 }
 
 export async function deleteItem(itemId: string): Promise<Cart> {
-  const res = await apiClient.delete(`/cart/items/${itemId}`)
-  return res.data?.data?.cart ?? res.data?.cart
+  const res = await apiClient.delete(`/carts/items/${itemId}`)
+  const cart = res.data?.data?.cart ?? res.data?.cart
+  if (!cart) {
+    throw new Error('Failed to delete cart item')
+  }
+  return cart
 }
 
-export async function checkout(): Promise<{ order: any }> {
-  const res = await apiClient.post('/cart/checkout')
-  return res.data?.data ?? res.data
+export async function checkout(): Promise<Order> {
+  const res = await apiClient.post('/carts/checkout')
+  const order = res.data?.data?.order ?? res.data?.order
+  if (!order) {
+    throw new Error('Failed to checkout')
+  }
+  return order as Order
 }
 

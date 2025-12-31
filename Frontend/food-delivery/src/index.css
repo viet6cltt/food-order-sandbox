@@ -1,4 +1,5 @@
 @import "tailwindcss";
+<<<<<<< HEAD
 
 /* Áp dụng cho tất cả input, textarea, select */
 input::placeholder,
@@ -6,3 +7,6 @@ textarea::placeholder,
 select::placeholder {
   @apply text-gray-400;
 }
+=======
+@import "react-toastify/dist/ReactToastify.css";
+>>>>>>> origin/main

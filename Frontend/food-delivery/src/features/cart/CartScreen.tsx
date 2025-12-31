@@ -1,72 +1,11 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useEffect, useState, useCallback } from 'react'
+import { Navigate, useNavigate } from 'react-router-dom'
 import AppLayout from '../../layouts/AppLayout'
 import useAuth from '../../hooks/useAuth'
 import CartList from './components/CartList'
 import CheckoutSummary from './components/CheckoutSummary'
 import * as cartApi from './api'
-import type { Cart, CartItem } from './api'
-
-// Mock data tạm thời
-const MOCK_CART_ITEMS: CartItem[] = [
-  {
-    _id: 'cart-item-1',
-    menuItemId: '6750abc123f9ab0012345678',
-    name: 'Cơm Tấm Sườn Bì Chả',
-    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-    basePrice: 85000,
-    qty: 2,
-    selectedOptions: [
-      {
-        groupName: 'Size',
-        optionName: 'Lớn',
-        price: 10000,
-      },
-    ],
-    finalPrice: 190000, // (85000 + 10000) * 2
-  },
-  {
-    _id: 'cart-item-2',
-    menuItemId: '6750abc123f9ab0012345679',
-    name: 'Bánh Mì Thịt Nướng',
-    imageUrl: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800',
-    basePrice: 35000,
-    qty: 1,
-    selectedOptions: [],
-    finalPrice: 35000,
-  },
-  {
-    _id: 'cart-item-3',
-    menuItemId: '6750abc123f9ab0012345680',
-    name: 'Phở Bò Tái',
-    imageUrl: 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=800',
-    basePrice: 65000,
-    qty: 1,
-    selectedOptions: [
-      {
-        groupName: 'Thêm',
-        optionName: 'Thêm bò viên',
-        price: 15000,
-      },
-    ],
-    finalPrice: 80000,
-  },
-]
-
-const MOCK_CART: Cart = {
-  _id: 'cart-123',
-  userId: 'user-123',
-  restaurantId: '6918b712a1dcc94af903df9d',
-  items: MOCK_CART_ITEMS,
-  totalItems: 4, // 2 + 1 + 1
-  totalPrice: 305000, // 190000 + 35000 + 80000
-  createdAt: '2024-01-15T10:00:00Z',
-  updatedAt: '2024-01-15T10:30:00Z',
-}
-
-// Flag để bật/tắt mock mode
-// Đặt USE_MOCK_DATA = false khi đã có API thật từ backend
-const USE_MOCK_DATA = true
+import type { Cart } from './api'
 
 const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
   const navigate = useNavigate()
@@ -76,81 +15,67 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
   const [checkoutLoading, setCheckoutLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login')
-      return
-    }
-
-    loadCart()
-  }, [isAuthenticated, navigate])
-
-  function calculateCartTotals(items: CartItem[]) {
-    const totalItems = items.reduce((sum, item) => sum + item.qty, 0)
-    const totalPrice = items.reduce((sum, item) => sum + item.finalPrice, 0)
-    return { totalItems, totalPrice }
-  }
-
-  async function loadCart() {
-    if (USE_MOCK_DATA) {
-      // Sử dụng mock data
-      setLoading(true)
-      setTimeout(() => {
-        setCart({ ...MOCK_CART })
-        setLoading(false)
-      }, 500) // Simulate API delay
-      return
-    }
-
+  const loadCart = useCallback(async () => {
     try {
       setLoading(true)
       setError(null)
       const data = await cartApi.getCart()
       setCart(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải giỏ hàng')
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể tải giỏ hàng'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
+        if (axiosError.response?.status === 401) {
+          navigate('/login')
+          return
+        } else if (axiosError.response?.status === 404) {
+          // Cart not found - this is OK, means empty cart
+          setCart(null)
+          setLoading(false)
+          return
+        } else {
+          errorMessage = axiosError.response?.data?.message || 
+                         axiosError.response?.data?.error || 
+                         errorMessage
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
       setCart(null)
     } finally {
       setLoading(false)
     }
-  }
+  }, [navigate])
 
-  async function handleUpdateQty(itemId: string, qty: number) {
-    if (qty < 1) return
-
-    if (USE_MOCK_DATA) {
-      // Mock: cập nhật số lượng trong cart
-      if (!cart) return
-
-      const updatedItems = cart.items.map((item) => {
-        if (item._id === itemId) {
-          const newFinalPrice = ((item.basePrice + item.selectedOptions.reduce((sum, opt) => sum + opt.price, 0)) * qty)
-          return {
-            ...item,
-            qty,
-            finalPrice: newFinalPrice,
-          }
-        }
-        return item
-      })
-
-      const { totalItems, totalPrice } = calculateCartTotals(updatedItems)
-
-      setCart({
-        ...cart,
-        items: updatedItems,
-        totalItems,
-        totalPrice,
-        updatedAt: new Date().toISOString(),
-      })
+  useEffect(() => {
+    if (!isAuthenticated) {
       return
     }
 
+    loadCart()
+  }, [isAuthenticated, loadCart])
+
+  async function handleUpdateQty(itemId: string, qty: number) {
+    if (qty < 1 || !cart) return
+
     try {
+      setError(null)
       const updatedCart = await cartApi.updateItem(itemId, { qty })
       setCart(updatedCart)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể cập nhật số lượng')
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể cập nhật số lượng'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string } } }
+        errorMessage = axiosError.response?.data?.message || 
+                       axiosError.response?.data?.error || 
+                       errorMessage
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
+      // Reload cart on error to sync state
+      await loadCart()
     }
   }
 
@@ -159,68 +84,61 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
       return
     }
 
-    if (USE_MOCK_DATA) {
-      // Mock: xóa item khỏi cart
-      if (!cart) return
-
-      const updatedItems = cart.items.filter((item) => item._id !== itemId)
-      const { totalItems, totalPrice } = calculateCartTotals(updatedItems)
-
-      setCart({
-        ...cart,
-        items: updatedItems,
-        totalItems,
-        totalPrice,
-        updatedAt: new Date().toISOString(),
-      })
-      return
-    }
-
     try {
+      setError(null)
       const updatedCart = await cartApi.deleteItem(itemId)
       setCart(updatedCart)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể xóa món')
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể xóa món'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string } } }
+        errorMessage = axiosError.response?.data?.message || 
+                       axiosError.response?.data?.error || 
+                       errorMessage
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
+      // Reload cart on error to sync state
+      await loadCart()
     }
   }
 
   async function handleCheckout() {
     if (!cart || cart.items.length === 0) return
 
-    if (USE_MOCK_DATA) {
-      // Mock: simulate checkout process
-      try {
-        setCheckoutLoading(true)
-        setError(null)
-
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1500))
-
-        // Redirect to order list
-        navigate('/payment')
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Không thể đặt hàng')
-      } finally {
-        setCheckoutLoading(false)
-      }
-      return
-    }
-
     try {
       setCheckoutLoading(true)
       setError(null)
-      await cartApi.checkout()
-      // Redirect to order detail or order list
-      navigate('/orders')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể đặt hàng')
+      
+      // Call checkout API to create draft order
+      const order = await cartApi.checkout()
+      
+      // Navigate to payment screen with orderId
+      navigate(`/payment?orderId=${order._id}`)
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể đặt hàng'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
+        if (axiosError.response?.status === 401) {
+          navigate('/login')
+          return
+        } else {
+          errorMessage = axiosError.response?.data?.message || 
+                         axiosError.response?.data?.error || 
+                         errorMessage
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
     } finally {
       setCheckoutLoading(false)
     }
   }
 
   if (!isAuthenticated) {
-    return null
+    return <Navigate to="/login" replace />
   }
 
   if (loading) {
@@ -228,6 +146,7 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
       <AppLayout className={className}>
         <div className="max-w-5xl mx-auto px-4 py-6">
           <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
             <p className="text-gray-500">Đang tải giỏ hàng...</p>
           </div>
         </div>
@@ -238,21 +157,48 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
   return (
     <AppLayout className={className}>
       <div className="max-w-5xl mx-auto px-4 py-6">
-        <h1 className="text-2xl font-bold mb-6">Giỏ hàng</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold">Giỏ hàng</h1>
+          {cart && cart.items.length > 0 && (
+            <button
+              type="button"
+              onClick={loadCart}
+              className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+            >
+              Làm mới
+            </button>
+          )}
+        </div>
 
         {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
-            {error}
+          <div className="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-lg text-red-700 flex items-start gap-3">
+            <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+            </svg>
+            <div className="flex-1">
+              <p>{error}</p>
+              <button
+                type="button"
+                onClick={loadCart}
+                className="mt-2 text-sm underline hover:no-underline"
+              >
+                Thử lại
+              </button>
+            </div>
           </div>
         )}
 
-        {!cart || cart.items.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">Giỏ hàng của bạn đang trống</p>
+        {!cart || !cart.items || cart.items.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-lg shadow-sm">
+            <svg className="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+            </svg>
+            <p className="text-gray-500 text-lg mb-2">Giỏ hàng của bạn đang trống</p>
+            <p className="text-gray-400 text-sm mb-6">Thêm món ăn vào giỏ hàng để tiếp tục</p>
             <button
               type="button"
               onClick={() => navigate('/')}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+              className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-semibold"
             >
               Tiếp tục mua sắm
             </button>
@@ -269,10 +215,11 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
 
             <div className="lg:col-span-1">
               <CheckoutSummary
-                totalItems={cart.totalItems}
-                totalPrice={cart.totalPrice}
+                totalItems={cart.totalItems || 0}
+                totalPrice={cart.totalPrice || 0}
                 onCheckout={handleCheckout}
                 isLoading={checkoutLoading}
+                disabled={!cart || cart.items.length === 0}
               />
             </div>
           </div>

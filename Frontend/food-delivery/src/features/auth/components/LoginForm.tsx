@@ -18,8 +18,8 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
     setError(null);
 
     try {
-      await login(phone, password); // dùng context
-      navigate('/'); // redirect sau login thành công
+      await login(phone, password);
+      navigate('/redirect');
     } catch (err: unknown) {
       const errorMessage =
         (err as { response?: { data?: { error?: string; message?: string } } })?.response?.data?.error ||

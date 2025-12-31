@@ -41,7 +41,7 @@ class AuthService {
     return `+84${cleaned}`;
   }
 
-  async registerWithFirebase({ username, password, idToken }) {
+  async registerWithFirebase({ username, password, role, idToken }) {
     //  Xác minh ID token do Firebase gửi về 
     const decoded = await admin.auth().verifyIdToken(idToken);
     let phone = decoded.phone_number;
@@ -68,6 +68,7 @@ class AuthService {
       passwordHash,
       phone,
       phoneVerifiedAt: new Date(),
+      role,
       providers: [{ provider: 'firebase' }],
     });
 

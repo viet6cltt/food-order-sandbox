@@ -10,61 +10,7 @@ import * as cartApi from '../cart/api'
 import type { MenuItemDto } from '../restaurant/components/FoodItem'
 import type { Review } from './api'
 import useAuth from '../../hooks/useAuth'
-
-// Mock data tạm thời
-const MOCK_FOOD: MenuItemDto = {
-  _id: '6750abc123f9ab0012345678',
-  name: 'Cơm Tấm Sườn Bì Chả',
-  description: 'Cơm tấm với sườn nướng thơm lừng, bì giòn tan và chả trứng đậm đà. Món ăn đặc trưng của miền Nam Việt Nam, kèm theo nước mắm pha chua ngọt và rau sống tươi ngon.',
-  price: 85000,
-  imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
-  isAvailable: true,
-  rating: 4.7,
-  restaurantId: '6918b712a1dcc94af903df9d',
-}
-
-const MOCK_REVIEWS: Review[] = [
-  {
-    _id: 'rev1',
-    userId: 'user1',
-    userName: 'Nguyễn Văn A',
-    menuItemId: '6750abc123f9ab0012345678',
-    rating: 5,
-    comment: 'Món ăn rất ngon, sườn nướng thơm lừng, bì giòn tan. Nhà hàng phục vụ nhanh và nhiệt tình. Sẽ quay lại!',
-    createdAt: '2024-01-15T10:30:00Z',
-  },
-  {
-    _id: 'rev2',
-    userId: 'user2',
-    userName: 'Trần Thị B',
-    menuItemId: '6750abc123f9ab0012345678',
-    rating: 4,
-    comment: 'Cơm tấm ngon, giá cả hợp lý. Phần ăn đủ no. Điểm trừ là hơi đợi lâu một chút.',
-    createdAt: '2024-01-14T14:20:00Z',
-  },
-  {
-    _id: 'rev3',
-    userId: 'user3',
-    userName: 'Lê Văn C',
-    menuItemId: '6750abc123f9ab0012345678',
-    rating: 5,
-    comment: 'Tuyệt vời! Món ăn đúng như mô tả, rất đậm đà và thơm ngon.',
-    createdAt: '2024-01-13T18:45:00Z',
-  },
-  {
-    _id: 'rev4',
-    userId: 'user4',
-    userName: 'Phạm Thị D',
-    menuItemId: '6750abc123f9ab0012345678',
-    rating: 4,
-    comment: '',
-    createdAt: '2024-01-12T12:00:00Z',
-  },
-]
-
-// Flag để bật/tắt mock mode
-// Đặt USE_MOCK_DATA = false khi đã có API thật từ backend
-const USE_MOCK_DATA = true
+import { toast } from 'react-toastify'
 
 const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
   const params = useParams<{ foodId?: string }>()
@@ -81,23 +27,26 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
   async function loadFoodDetails() {
     if (!foodId) return
 
-    if (USE_MOCK_DATA) {
-      // Sử dụng mock data
-      setLoading(true)
-      setTimeout(() => {
-        setFood(MOCK_FOOD)
-        setLoading(false)
-      }, 500) // Simulate API delay
-      return
-    }
-
     try {
       setLoading(true)
       setError(null)
       const data = await foodApi.getMenuItemById(foodId)
       setFood(data)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể tải thông tin món ăn')
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể tải thông tin món ăn'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
+        if (axiosError.response?.status === 404) {
+          errorMessage = 'Không tìm thấy món ăn'
+        } else {
+          errorMessage = axiosError.response?.data?.message || 
+                         axiosError.response?.data?.error || 
+                         errorMessage
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
       setFood(null)
     } finally {
       setLoading(false)
@@ -107,19 +56,10 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
   async function loadReviews() {
     if (!foodId) return
 
-    if (USE_MOCK_DATA) {
-      // Sử dụng mock data
-      setTimeout(() => {
-        setReviews(MOCK_REVIEWS)
-      }, 600) // Simulate API delay
-      return
-    }
-
     try {
       const data = await foodApi.getReviews(foodId)
       setReviews(data)
     } catch (err) {
-      // Silently fail for reviews - they're optional
       console.error('Failed to load reviews:', err)
       setReviews([])
     }
@@ -156,12 +96,31 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
         imageUrl: food.imageUrl,
         basePrice: food.price,
         qty: payload.qty,
+        selectedOptions: [], // TODO: Add option selection UI later
       })
 
-      // Optionally show success message or navigate to cart
-      // For now, just clear the loading state
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Không thể thêm vào giỏ hàng')
+      toast.success('Đã thêm vào giỏ hàng thành công!')
+    } catch (err: unknown) {
+      let errorMessage = 'Không thể thêm vào giỏ hàng'
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
+        if (axiosError.response?.status === 401) {
+          errorMessage = 'Vui lòng đăng nhập để thêm vào giỏ hàng'
+          navigate('/login')
+        } else if (axiosError.response?.status === 400) {
+          errorMessage = axiosError.response?.data?.message || 
+                         axiosError.response?.data?.error || 
+                         'Dữ liệu không hợp lệ'
+        } else {
+          errorMessage = axiosError.response?.data?.message || 
+                         axiosError.response?.data?.error || 
+                         errorMessage
+        }
+      } else if (err instanceof Error) {
+        errorMessage = err.message
+      }
+      setError(errorMessage)
+      toast.error(errorMessage)
     } finally {
       setCartLoading(false)
     }
@@ -170,28 +129,12 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
   async function handleReviewSubmit(payload: { rating: number; comment?: string }) {
     if (!foodId) return
 
-    if (USE_MOCK_DATA) {
-      // Mock: thêm review mới vào danh sách
-      const newReview: Review = {
-        _id: `rev${Date.now()}`,
-        userId: 'currentUser',
-        userName: 'Bạn',
-        menuItemId: foodId,
-        rating: payload.rating,
-        comment: payload.comment,
-        createdAt: new Date().toISOString(),
-      }
-      setReviews((prev) => [newReview, ...prev])
-      return
-    }
-
     await foodApi.createReview({
       menuItemId: foodId,
       rating: payload.rating,
       comment: payload.comment,
     })
 
-    // Reload reviews after submission
     await loadReviews()
   }
 
@@ -272,13 +215,9 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
               itemId={food._id}
               price={food.price}
               onAdd={handleAddToCart}
+              loading={cartLoading}
               className="md:rounded-lg"
             />
-            {cartLoading && (
-              <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-                <p className="text-sm text-gray-600">Đang thêm vào giỏ hàng...</p>
-              </div>
-            )}
           </div>
         )}
 

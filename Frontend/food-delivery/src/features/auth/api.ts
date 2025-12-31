@@ -36,12 +36,14 @@ export type RegisterResponse = {
         user: {
             id: string;
             username: string;
+            role: string;
             phone: string;
         };
     };
     user?: {
         _id: string;
         username: string;
+        role: string;
         phone: string;
     };
 };
