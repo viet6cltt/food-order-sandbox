@@ -92,7 +92,7 @@ class RestaurantController {
         throw new ERR_RESPONSE.BadRequestError("File is required");
       }
 
-      const updated = await RestaurantService.uploadBanner(id, file);
+      const updated = await RestaurantService.uploadBanner(restaurantId, file);
 
       return SUCCESS_RESPONSE.success(res, `Banner updated successfully`, updated);
     } catch (err) {

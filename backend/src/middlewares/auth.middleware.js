@@ -15,6 +15,8 @@ const requireAuth = (req, res, next) => {
     const decoded = authHelper.verifyAccessToken(token);
     req.userId = decoded.userId;
     req.role = decoded.role;
+
+    console.log(req.role, req.userId);
     next();
   } catch(err) {
     return next(new HTTP_ERROR.UnauthorizedError('Invalid or expired token', ERR.AUTH_INVALID_TOKEN));

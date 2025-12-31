@@ -5,11 +5,28 @@ class CategoryRepository {
     return await Category.create(data);
   }
 
-  async getAll({ limit = 50, skip = 0 }) {
-    return await Category.find()
-      .skip(skip)
-      .limit(limit)
-      .sort({ name: 1 });
+  async getAll({ limit = 10, page = 1 }) {
+    console.log(page);
+    const skip = (page - 1) * limit;
+
+    // Chạy song song cả 2 query để tối ưu hiệu suất
+    const [categories, total] = await Promise.all([
+      Category.find()
+        .skip(skip)
+        .limit(limit)
+        .sort({ name: 1 }),
+      Category.countDocuments() // Đếm tổng số bản ghi để tính số trang
+    ]);
+
+    return {
+        categories,
+        pagination: {
+          total,
+          page: Number(page),
+          limit: Number(limit),
+          totalPages: Math.ceil(total / limit)
+        }
+    };
   }
 
   async getById(id) {

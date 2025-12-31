@@ -12,7 +12,8 @@ import {
   UsersIcon, 
   HomeIcon,
   ClipboardDocumentCheckIcon, 
-  ExclamationTriangleIcon 
+  ExclamationTriangleIcon,
+  TagIcon
 } from '@heroicons/react/24/outline';
 
 const AdminDashboardScreen: React.FC = () => {
@@ -35,6 +36,15 @@ const AdminDashboardScreen: React.FC = () => {
             {/* 2. Quick Actions - Các nút điều hướng nhanh */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
                 <button 
+                    onClick={() => navigate('/admin/categories')}
+                    className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-indigo-500 hover:shadow-md transition-all group"
+                >
+                    <div className="p-2 bg-indigo-50 rounded-lg group-hover:bg-indigo-100 mr-4">
+                        <TagIcon className="w-6 h-6 text-indigo-600" />
+                    </div>
+                    <span className="font-semibold text-gray-700">Danh mục</span>
+                </button>
+                <button 
                     onClick={() => navigate('/admin/users')}
                     className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-indigo-500 hover:shadow-md transition-all group"
                 >
@@ -52,16 +62,6 @@ const AdminDashboardScreen: React.FC = () => {
                         <ClipboardDocumentCheckIcon className="w-6 h-6 text-green-600" />
                     </div>
                     <span className="font-semibold text-gray-700">Yêu cầu mở quán</span>
-                </button>
-
-                <button 
-                    onClick={() => navigate('/owner/register')}
-                    className="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-100 hover:border-orange-500 hover:shadow-md transition-all group"
-                >
-                    <div className="p-2 bg-green-50 rounded-lg group-hover:bg-green-100 mr-4">
-                        <HomeIcon className="w-6 h-6 text-green-600" />
-                    </div>
-                    <span className="font-semibold text-gray-700">Đăng ký Owner</span>
                 </button>
 
                 <button 

@@ -10,7 +10,7 @@ class AdminUserController {
       const { role, status } = req.query;
       const users = await adminUserService.listUsers({ role, status });
 
-      return SUCCESS_RESPONSE.success(req, "Get users successfully", users);
+      return SUCCESS_RESPONSE.success(res, "Get users successfully", users);
     } catch (err) {
       next(err);
     }
@@ -23,7 +23,7 @@ class AdminUserController {
 
       const user = await adminUserService.getUserDetail(userId);
       
-      return SUCCESS_RESPONSE.success(req, "Get user detail succesfully", user);
+      return SUCCESS_RESPONSE.success(res, "Get user detail succesfully", user);
     } catch (err) {
       next(err);
     }
@@ -35,7 +35,7 @@ class AdminUserController {
       if (!userId) throw new ERR_RESPONSE.BadRequestError("Missing userId");
 
       const user = await adminUserService.blockUser(userId);
-      return success.ok(res, user);
+      return SUCCESS_RESPONSE.success(res, "Block this user is successful", user);
     } catch (err) {
       next(err);
     }
@@ -47,7 +47,7 @@ class AdminUserController {
       if (!userId) throw new ERR_RESPONSE.BadRequestError("Missing userId");
 
       const user = await adminUserService.unlockUser(userId);
-      return success.ok(res, user);
+      return SUCCESS_RESPONSE.success(res, "Unlock this user is successful", user);
     } catch (err) {
       next(err);
     }
