@@ -27,17 +27,10 @@ app.use(express.json());
 
 app.use(
   cors({
-    origin: true, 
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Thêm PATCH nếu có dùng
-    allowedHeaders: [
-      'Content-Type', 
-      'Authorization', 
-      'X-Requested-With', 
-      'Accept', 
-      'Origin',
-      'if-none-match' // BẮT BUỘC thêm dòng này để sửa lỗi bạn đang gặp
-    ],
+    origin: true, // Tự động chấp nhận domain từ phía gửi request (Netlify)
+    credentials: true, // Cho phép gửi Cookie và Authorization header
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: '*', // DẤU SAO CHO PHÉP TẤT CẢ CÁC LOẠI HEADER (Sửa triệt để lỗi của bạn)
   })
 );
 app.use(passport.initialize());
