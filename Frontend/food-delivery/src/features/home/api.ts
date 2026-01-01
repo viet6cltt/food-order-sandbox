@@ -91,13 +91,29 @@ export async function getRestaurantsByCategory(categoryId: string, page = 1, lim
 export async function getRecommendRestaurants() {
   const res = await api.get('/restaurants/recommend'); // BE trả về 5 item
   const items: unknown[] = Array.isArray(res.data?.data) ? res.data.data : [];
-  const normalizedItems = items.map((item: unknown) => {
-    const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
-    return {
-      ...restaurant,
-      id: restaurant.id || (restaurant._id ? String(restaurant._id) : undefined),
-    }
-  })
+  const normalizedItems: Restaurant[] = items
+    .map((item: unknown) => {
+      const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
+
+      const mongoId =
+        typeof restaurant._id === 'string'
+          ? restaurant._id
+          : restaurant._id && typeof restaurant._id === 'object'
+            ? restaurant._id.$oid
+            : undefined
+
+      const id = (restaurant.id ?? mongoId ?? '') as string | number
+
+      return {
+        ...restaurant,
+        id,
+        name: restaurant.name ?? '',
+        address: restaurant.address ?? '',
+        rating: restaurant.rating ?? 0,
+      } as Restaurant
+    })
+    .filter((r) => Boolean(r.id) && Boolean(r.name))
+
   return normalizedItems;
 }
 

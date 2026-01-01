@@ -6,9 +6,6 @@ import Banner3 from '../../../../public/PromoBanner_3.png';
 import Banner4 from '../../../../public/PromoBanner_4.png';
 import Banner5 from '../../../../public/PromoBanner_5.png';
 import Banner6 from '../../../../public/PromoBanner_6.png';
-import Banner7 from '../../../../public/PromoBanner_7.png';
-import Banner8 from '../../../../public/PromoBanner_8.png';
-import Banner9 from '../../../../public/PromoBanner_9.png';
 
 type Slide = {
   id: number;

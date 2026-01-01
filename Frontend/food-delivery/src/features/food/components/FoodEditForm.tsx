@@ -6,7 +6,7 @@ import React, { useState } from 'react';
 import { type FoodItem } from '../../../types/food';
 import StatusToggle from './StatusToggle';
 import DeleteConfirmModal from './DeleteConfirmModal';
-import { PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { TrashIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 
 interface FoodEditFormProps {

@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom'
 import AppLayout from '../../layouts/AppLayout'
 import FoodInfo from './components/FoodInfo'
 import ReviewList from './components/ReviewList'
-import ReviewForm from './components/ReviewForm'
 import AddToCartBar from './components/AddToCartBar'
 import * as foodApi from './api'
 import * as cartApi from '../cart/api'
@@ -131,42 +130,6 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
       toast.error(errorMessage)
     } finally {
       setCartLoading(false)
-    }
-  }
-
-  async function handleReviewSubmit(payload: { rating: number; comment?: string; orderId?: string }) {
-    if (!food?.restaurantId) {
-      toast.error('Không thể tạo đánh giá. Vui lòng chọn đơn hàng từ danh sách đơn hàng đã hoàn thành.')
-      return
-    }
-
-    if (!payload.orderId) {
-      toast.error('Vui lòng tạo đánh giá từ đơn hàng đã hoàn thành.')
-      return
-    }
-
-    try {
-      await reviewApi.createReview({
-        orderId: payload.orderId,
-        restaurantId: food.restaurantId,
-        rating: payload.rating,
-        comment: payload.comment,
-      })
-
-      toast.success('Đánh giá đã được gửi thành công!')
-      await loadReviews()
-    } catch (err: unknown) {
-      let errorMessage = 'Không thể gửi đánh giá'
-      if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
-        errorMessage = axiosError.response?.data?.message || 
-                      axiosError.response?.data?.error || 
-                      errorMessage
-      } else if (err instanceof Error) {
-        errorMessage = err.message
-      }
-      toast.error(errorMessage)
-      throw err
     }
   }
 

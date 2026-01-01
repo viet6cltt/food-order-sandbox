@@ -2,7 +2,6 @@ import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import HomeScreen from '../features/home/HomeScreen';
 import SearchScreen from '../features/home/SearchScreen';
-import CategoryRestaurantsScreen from '../features/home/CategoryRestaurantsScreen';
 import LoginScreen from '../features/auth/screens/LoginScreen';
 import SignupScreen from '../features/auth/screens/SignupScreen';
 import CompleteProfileScreen from '../features/auth/screens/CompleteProfileScreen.tsx';

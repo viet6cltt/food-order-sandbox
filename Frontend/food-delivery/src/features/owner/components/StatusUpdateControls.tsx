@@ -7,6 +7,8 @@ interface Props {
 }
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = {
+    draft: { label: 'Nháp', color: 'bg-gray-100 text-gray-800' },
+    pending: { label: 'Chờ xử lý', color: 'bg-yellow-100 text-yellow-800' },
     confirmed: { label: 'Đã nhận đơn', color: 'bg-blue-100 text-blue-800' },
     preparing: { label: 'Đang chế biến', color: 'bg-orange-100 text-orange-800' },
     delivering: { label: 'Đang giao', color: 'bg-purple-100 text-purple-800' },

@@ -13,7 +13,7 @@ const UserStatisticsScreen: React.FC = () => {
     // Data States
     const [users, setUsers] = useState<any[]>([]);
     const [penaltyList, setPenaltyList] = useState<any[]>([]);
-    const [requests, setRequests] = useState<any[]>([]);
+    const [requests] = useState<any[]>([]);
 
     // Hàm lấy dữ liệu dựa trên Tab
     const fetchData = useCallback(async () => {

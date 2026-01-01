@@ -1,7 +1,6 @@
 import React from 'react';
 import { 
     CheckIcon, 
-    XMarkIcon, 
     BuildingStorefrontIcon, 
     PhoneIcon, 
     MapPinIcon, 

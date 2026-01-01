@@ -29,25 +29,21 @@ const RevenueWidget: React.FC<RevenueWidgetProps> = ({ restaurant }) => {
   const [weekRevenue, setWeekRevenue] = useState<number>(0);
   const [selectedDate, setSelectedDate] = useState<string>(formatDate(new Date()));
   const [currentWeekStart, setCurrentWeekStart] = useState<string>(formatDate(new Date()));
-  const [loading, setLoading] = useState(true);
   const [loadingWeek, setLoadingWeek] = useState(false);
 
   // Fetch total revenue on mount
   useEffect(() => {
     if (!restaurant) {
-      setLoading(false);
       return;
     }
 
     const restaurantId = restaurant._id || restaurant.id;
     if (!restaurantId) {
-      setLoading(false);
       return;
     }
 
     const fetchTotalRevenue = async () => {
       try {
-        setLoading(true);
         const totalRevenueRes = await getTotalRevenue(restaurantId);
 
         // Parse total revenue response
@@ -57,8 +53,6 @@ const RevenueWidget: React.FC<RevenueWidgetProps> = ({ restaurant }) => {
       } catch (error) {
         console.error('Error fetching total revenue:', error);
         setTotalRevenue(0);
-      } finally {
-        setLoading(false);
       }
     };
 

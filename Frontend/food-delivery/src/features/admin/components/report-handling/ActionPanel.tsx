@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { type Report } from './ReportList';
+import type { Report } from '../../../../types/report';
 
 interface Props {
     report: Report | null;
@@ -24,7 +24,19 @@ const ActionPanel: React.FC<Props> = ({ report, onResolve, onDismiss }) => {
         );
     }
 
-    const isProcessed = report.status !== 'pending';
+    const isProcessed = report.status !== 'PENDING';
+
+    const reporterName =
+        report.reportedBy?.username ||
+        [report.reportedBy?.lastname, report.reportedBy?.firstname].filter(Boolean).join(' ') ||
+        'N/A';
+
+    const reviewContent =
+        typeof report.reviewId === 'object' && report.reviewId !== null
+            ? report.reviewId.content
+            : '';
+
+    const date = report.createdAt ? new Date(report.createdAt).toLocaleString('vi-VN') : '';
 
     return (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 h-[600px] flex flex-col">
@@ -33,11 +45,11 @@ const ActionPanel: React.FC<Props> = ({ report, onResolve, onDismiss }) => {
                 <div className="flex justify-between items-start">
                     <div>
                         <h2 className="text-xl font-bold text-gray-900 mb-1">{report.reason}</h2>
-                        <p className="text-sm text-gray-500">Mã: #{report.id} • Ngày gửi: {report.date}</p>
+                        <p className="text-sm text-gray-500">Mã: #{report._id} • Ngày gửi: {date}</p>
                     </div>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase
-                        ${report.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                            report.status === 'resolved' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}
+                        ${report.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' :
+                            report.status === 'RESOLVED' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}
                     `}>
                         {report.status}
                     </span>
@@ -49,18 +61,18 @@ const ActionPanel: React.FC<Props> = ({ report, onResolve, onDismiss }) => {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                     <div className="bg-gray-50 p-3 rounded-lg">
                         <p className="text-xs text-gray-500 uppercase font-bold mb-1">Người báo cáo</p>
-                        <p className="font-medium text-gray-900">{report.reporter}</p>
+                        <p className="font-medium text-gray-900">{reporterName}</p>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-lg">
                         <p className="text-xs text-gray-500 uppercase font-bold mb-1">Đối tượng bị báo cáo</p>
-                        <p className="font-medium text-gray-900">{report.target}</p>
+                        <p className="font-medium text-gray-900">Review</p>
                     </div>
                 </div>
 
                 <div className="mb-6">
                     <p className="text-sm font-bold text-gray-900 mb-2">Nội dung chi tiết:</p>
                     <div className="p-4 bg-gray-50 rounded-lg text-gray-700 border border-gray-200 text-sm leading-relaxed">
-                        {report.details}
+                        {reviewContent || '(Không có nội dung review)'}
                     </div>
                 </div>
 
@@ -89,13 +101,13 @@ const ActionPanel: React.FC<Props> = ({ report, onResolve, onDismiss }) => {
             {!isProcessed && (
                 <div className="p-6 border-t border-gray-100 bg-gray-50 flex justify-end space-x-3">
                     <button
-                        onClick={() => onDismiss(report.id)}
+                        onClick={() => onDismiss(report._id)}
                         className="px-4 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-100 transition"
                     >
                         Hủy báo cáo
                     </button>
                     <button
-                        onClick={() => onResolve(report.id, replyText)}
+                        onClick={() => onResolve(report._id, replyText)}
                         disabled={!replyText.trim()}
                         className="px-4 py-2 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                     >

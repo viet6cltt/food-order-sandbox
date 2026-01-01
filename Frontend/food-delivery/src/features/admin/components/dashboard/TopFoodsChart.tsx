@@ -29,7 +29,7 @@ const TopFoodsChart: React.FC = () => {
                             dataKey="value"
                             label
                         >
-                            {DATA.map((entry, index) => (
+                            {DATA.map((_, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>

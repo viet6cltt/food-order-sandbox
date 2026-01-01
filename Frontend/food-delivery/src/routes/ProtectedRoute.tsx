@@ -15,10 +15,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   redirectTo = '/login'
 }) => {
   const { isAuthenticated } = useAuth();
-  const { user, loading } = useUser();
+  const { user, isLoading } = useUser();
 
   // Đang load user info
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
