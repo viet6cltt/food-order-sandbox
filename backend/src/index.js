@@ -13,7 +13,7 @@ require('./config/passport.config');
 
 const route = require('./routes');
 const app = express();
-
+app.set('trust proxy', 1);
 // Avoid 304 (ETag) responses with empty bodies for API calls.
 // Axios/XHR does not reliably surface cached bodies on 304.
 app.disable('etag');
@@ -25,19 +25,12 @@ app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser());
 app.use(express.json());
 
-const corsOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean);
-
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      if (corsOrigins.includes(origin)) return callback(null, true);
-      return callback(new Error(`CORS blocked for origin: ${origin}`));
-    },
-    credentials: true,
+    origin: true, // Tự động chấp nhận domain từ phía yêu cầu (Netlify)
+    credentials: true, // Cho phép gửi Cookie/Token
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'], // Thêm PATCH vào đây
+    allowedHeaders: ['Content-Type', 'Authorization']
   })
 );
 app.use(passport.initialize());
