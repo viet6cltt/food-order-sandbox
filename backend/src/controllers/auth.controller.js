@@ -13,16 +13,16 @@ class AuthController {
   // [POST] /register
   async register(req, res, next) {
     try {
-      const { username, password, role, idToken } = req.body;
+      const { username, password, idToken } = req.body;
 
-      if (!username || !password || !idToken || !role) {
-        throw new HTTP_ERROR.BadRequestError('Missing username, password, role or idToken', ERR.AUTH_MISSING_FIELDS);
+      if (!username || !password || !idToken) {
+        throw new HTTP_ERROR.BadRequestError('Missing username, password or idToken', ERR.AUTH_MISSING_FIELDS);
       }
 
-      const user = await AuthService.registerWithFirebase({ username, password, role, idToken });
+      const user = await AuthService.registerWithFirebase({ username, password, idToken });
       
-
       return SUCCESS_RESPONSE.created(res, 'User registered successfully');
+
     } catch (err) {
       next(err);
     }
@@ -162,16 +162,37 @@ class AuthController {
       const { token, newPassword } = req.body;
 
       if (!token) {
-        throw new HTTP_ERROR.BadRequestError('Missing token', ARR.AUTH_MISSING_TOKEN);
+        throw new HTTP_ERROR.BadRequestError('Missing token', ERR.AUTH_MISSING_TOKEN);
       }
 
       if (!newPassword) {
-        throw new HTTP_ERROR.BadRequestError('Missing newPassword', ARR.AUTH_MISSING_FIELDS);
+        throw new HTTP_ERROR.BadRequestError('Missing newPassword', ERR.AUTH_MISSING_FIELDS);
       }
 
       await AuthService.resetPassword(token, newPassword);
 
       return SUCCESS_RESPONSE.success(res, 'Password has been reset successfully', {});
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [POST] /change-password (requires auth)
+  async changePassword(req, res, next) {
+    try {
+      const userId = req.userId;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!userId) {
+        throw new HTTP_ERROR.UnauthorizedError('No accessToken are provided', ERR.AUTH_MISSING_ACCESS_TOKEN);
+      }
+
+      if (!currentPassword || !newPassword) {
+        throw new HTTP_ERROR.BadRequestError('Missing currentPassword or newPassword', ERR.AUTH_MISSING_FIELDS);
+      }
+
+      await AuthService.changePassword(userId, currentPassword, newPassword);
+      return SUCCESS_RESPONSE.success(res, 'Password changed successfully', {});
     } catch (err) {
       next(err);
     }
@@ -231,11 +252,12 @@ class AuthController {
 
           // Nếu user cần bổ sung thông tin
           if (status === ERR.REQUIRE_PHONE_USERNAME_PASSWORD) {
-            return SUCCESS_RESPONSE.accepted(
-              res, 
-              ERR.REQUIRE_PHONE_USERNAME_PASSWORD,
-              'Please complete your profile to continue'
-            );
+            // In browser-based OAuth flow, redirect back to FE to complete profile.
+            // returnUrl is verified via OAuth state.
+            const completeUrl = new URL('/auth/complete-profile', st.returnUrl);
+            completeUrl.searchParams.set('userId', userId);
+            completeUrl.searchParams.set('provider', provider);
+            return res.redirect(302, completeUrl.toString());
           }
 
           // nếu đầy đủ -> cấp token
@@ -252,7 +274,15 @@ class AuthController {
             sameSite: 'strict',
             maxAge: 7 * 24 * 60 * 60 * 1000,
           })
-            
+
+          // Browser OAuth flow: redirect back to FE if returnUrl exists.
+          if (st?.returnUrl) {
+            const okUrl = new URL('/auth/oauth-success', st.returnUrl);
+            okUrl.searchParams.set('accessToken', accessToken);
+            return res.redirect(302, okUrl.toString());
+          }
+
+          // Fallback for API clients
           return SUCCESS_RESPONSE.success(res, 'Login successfully via OAuth', {
             accessToken,
             user: {

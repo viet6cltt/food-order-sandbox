@@ -7,6 +7,7 @@ import { type FoodItem } from '../../../types/food';
 import StatusToggle from './StatusToggle';
 import DeleteConfirmModal from './DeleteConfirmModal';
 import { PhotoIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-toastify';
 
 interface FoodEditFormProps {
     food: FoodItem; // Dữ liệu món ăn cần sửa
@@ -110,7 +111,7 @@ const FoodEditForm: React.FC<FoodEditFormProps> = ({ food }) => {
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={() => {
-                    alert('Đã xóa món ăn thành công!');
+                    toast.success('Đã xóa món ăn thành công!');
                     setShowDeleteModal(false);
                 }}
                 foodName={formData.name}

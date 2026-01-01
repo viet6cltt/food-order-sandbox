@@ -39,6 +39,10 @@ class UserRepository {
     return await User.findById(userId).lean();
   }
 
+  async findByIdWithPasswordHash(userId) {
+    return await User.findById(userId).select('+passwordHash');
+  }
+
   async findByProviderId(provider, providerId) {
     return await User.findOne({
       'providers.provider': provider,
@@ -80,6 +84,7 @@ class UserRepository {
   }
 
   async findByEmail(email) {
+    if (!email) return null;
     return await User.findOne({ email });
   }
 

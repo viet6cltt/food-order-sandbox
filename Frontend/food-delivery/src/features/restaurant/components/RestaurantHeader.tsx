@@ -4,7 +4,7 @@ import type { Restaurant } from '../../home/components/RestaurantCard'
 
 const RestaurantHeader: React.FC<{ data: Restaurant }> = ({ data }) => {
     return (
-        <header className="mb-6 w-2/3 flex flex-col h-full">
+        <header className="mb-0 w-full flex flex-col md:w-2/3 md:mb-6">
             <div className="flex items-start justify-between mb-4">
                 <div className='flex flex-row gap-2'>
                     <h1 className="text-3xl font-bold text-gray-900">{data.name}</h1>
@@ -22,7 +22,7 @@ const RestaurantHeader: React.FC<{ data: Restaurant }> = ({ data }) => {
                 </div>
             </div>
             {data.bannerUrl && (
-                <div className="w-full flex-1 min-h-[256px] rounded-lg overflow-hidden mt-auto">
+                <div className="w-full min-h-[256px] rounded-lg overflow-hidden">
                     <img
                         src={data.bannerUrl}
                         alt={data.name}

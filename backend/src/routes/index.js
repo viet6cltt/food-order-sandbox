@@ -29,6 +29,7 @@ function route(app) {
   apiRouter.use('/revenue', revenueRoutes);
   apiRouter.use('/reviews', reviewRoutes);
   apiRouter.use('/categories', categoryRoutes);
+
   // admin
   apiRouter.use('/admin/users', adminUserRoutes);
   apiRouter.use('/admin/categories', adminCategoryRoutes);

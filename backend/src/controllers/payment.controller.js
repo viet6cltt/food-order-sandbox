@@ -20,7 +20,6 @@ class PaymentController {
         {
           orderId,
           userId,
-          status: "BANK_TRANSFER",
         }
       );
 

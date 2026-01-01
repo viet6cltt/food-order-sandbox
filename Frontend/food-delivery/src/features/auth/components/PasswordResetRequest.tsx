@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { requestPasswordReset } from '../api';
 import { useNavigate } from 'react-router-dom'; // dùng navigate để chuyển màn hình
+import { toast } from 'react-toastify';
 
 interface PasswordResetRequestProps {}
 
@@ -25,7 +26,7 @@ const PasswordResetRequest: React.FC<PasswordResetRequestProps> = () => {
       const res = await requestPasswordReset({ email })
 
       if (res.success) {
-        alert('Email đã được gửi, vui lòng kiểm tra email')
+        toast.success('Email đã được gửi, vui lòng kiểm tra email')
         navigate('/login') // quay lại màn login
       } else {
         setError(res.message || 'Có lỗi xảy ra. Vui lòng thử lại')

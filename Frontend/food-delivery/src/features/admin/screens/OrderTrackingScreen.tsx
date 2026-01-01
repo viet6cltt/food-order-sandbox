@@ -7,7 +7,7 @@ import ActiveOrderList from '../components/order-tracking/ActiveOrderList';
 // Mock Data
 const MOCK_ORDERS = [
     { id: 'DH001', customer: 'Nguyễn Văn A', shipper: 'Trần Shipper', status: 'delivering' },
-    { id: 'DH002', customer: 'Lê Thị B', shipper: 'Phạm Shipper', status: 'cooking' },
+    { id: 'DH002', customer: 'Lê Thị B', shipper: 'Phạm Shipper', status: 'preparing' },
     { id: 'DH003', customer: 'Hoàng Văn C', shipper: 'Đang tìm...', status: 'confirmed' },
 ] as const;
 

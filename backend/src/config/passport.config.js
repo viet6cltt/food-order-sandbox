@@ -41,7 +41,7 @@ passport.use(
 
         // nếu chưa có provider
         // tìm user theo email
-        let existingUser = await UserService.findByEmail(email);
+        let existingUser = email ? await UserService.findByEmail(email) : null;
         // nếu có user theo email đó
         if (existingUser) {
           // nếu email đã verify 
@@ -61,10 +61,17 @@ passport.use(
         } else {
           // chưa có user nào đăng kí với email đó
           // tạo mới user nhưng phone thì null
+          // NOTE: Some MongoDB unique indexes treat missing fields as null.
+          // To avoid E11000 dup key on username/email in existing DB indexes,
+          // always provide a unique placeholder for OAuth-created accounts.
+          const safeEmail = email || `google_${googleId}@noemail.local`;
+          const safeUsername = `google_${googleId}`.toLowerCase();
+
           const newUser = await UserService.createUser(
             {
-              email, 
-              emailVerifiedAt: new Date(),
+              username: safeUsername,
+              email: safeEmail,
+              emailVerifiedAt: emailVerified ? new Date() : new Date(),
               providers: [
                 { provider, providerId, emailAtProvider, avatarUrl }
               ],

@@ -85,8 +85,7 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword, 
         }
 
         if (!mounted) return;
-
-        setTotal(meta?.total ?? null);
+setTotal(meta?.total ?? null);
         
         if (page === 1) {
           setRestaurants(items);
@@ -180,7 +179,7 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword, 
 
         {!searchKeyword && !categoryId && !loading && total !== null && restaurants.length >= (total ?? 0) && total > PAGE_SIZE && (
           <button
-            onClick={handleShowLess}
+onClick={handleShowLess}
             className="px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
           >
             Show less
@@ -191,4 +190,4 @@ const RestaurantCardList: React.FC<RestaurantCardListProps> = ({ searchKeyword, 
   )
 }
 
-export default RestaurantCardList
+export default RestaurantCardList;

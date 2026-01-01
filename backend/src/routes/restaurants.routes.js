@@ -5,18 +5,25 @@ const OrderController = require('../controllers/order.controller.js');
 const MenuItemController = require('../controllers/menuItem.controller.js');
 const revenueController = require('../controllers/revenue.controller');
 const { optionalAuth, requireAuth } = require('../middlewares/auth.middleware');
-const pagination = require('@/middlewares/pagination.middleware.js');
 const upload = require('@/middlewares/upload.middleware.js');
+const pagination = require('../middlewares/pagination.middleware');
+const ReviewController = require('../controllers/app/review.controller');
 
+// list/filter restaurants (supports categoryId, pagination)
 router.get('/', pagination(20, 50), RestaurantsController.getAll);
+
+// search and recommend (must be declared before '/:restaurantId')
 router.get('/search', pagination(20, 50), RestaurantsController.search);
 router.get('/recommend', RestaurantsController.getRecommend);
 router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
 router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
-router.post('/:restaurantId/menu-item', requireAuth, MenuItemController.createMenuItem);
+router.post('/:restaurantId/menu-item', requireAuth, upload.single('file'), MenuItemController.createMenuItem);
 
 // update
 router.patch("/:restaurantId/banner", upload.single("file"), RestaurantsController.uploadBanner);
+
+// review
+router.get('/:restaurantId/reviews', pagination(20, 50), ReviewController.listByRestaurant);
 
 // order
 router.get('/:restaurantId/orders', requireAuth, OrderController.getOrdersOfRestaurant); // get all orders of a restaurant
