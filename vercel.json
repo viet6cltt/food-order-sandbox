@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "Frontend/Food-Delivery/package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    },
+    {
+      "src": "Backend/api/index.js",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "Backend/api/index.js" },
+    { "handle": "filesystem" },
+    { "src": "/(.*)", "dest": "Frontend/Food-Delivery/dist/index.html" }
+  ]
+}
