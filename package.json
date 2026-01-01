@@ -1,4 +1,10 @@
 {
+  "name": "food-delivery-root",
+  "private": true,
+  "scripts": {
+    "vercel-build": "npm --prefix Frontend/Food-Delivery ci && npm --prefix Frontend/Food-Delivery run build",
+    "build": "npm --prefix Frontend/Food-Delivery ci && npm --prefix Frontend/Food-Delivery run build"
+  },
   "dependencies": {
     "module-alias": "^2.2.3"
   }
