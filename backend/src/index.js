@@ -24,15 +24,25 @@ app.use(express.static(path.join(__dirname, '../public')));
 // Middleware
 app.use(cookieParser());
 app.use(express.json());
-
+const FRONTEND = process.env.CORS_ORIGIN || "https://stunning-biscotti-ade2b9.netlify.app";
 app.use(
   cors({
-    origin: true, // Tự động chấp nhận domain từ phía gửi request (Netlify)
-    credentials: true, // Cho phép gửi Cookie và Authorization header
+    origin: FRONTEND,
+    credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: '*', // DẤU SAO CHO PHÉP TẤT CẢ CÁC LOẠI HEADER (Sửa triệt để lỗi của bạn)
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Cache-Control',
+      'Pragma',
+      'If-None-Match',
+      'If-Modified-Since',
+    ],
+    exposedHeaders: ['Set-Cookie'],
   })
 );
+
 app.use(passport.initialize());
 
 app.use(morgan('dev')); // Log HTTP requests
