@@ -87,13 +87,15 @@ class AuthService {
     }
 
     // Kiem tra mat khau
-    const isMatch = authHelper.comparePassword(password, user.passwordHash);
+    const isMatch = await authHelper.comparePassword(password, user.passwordHash);
     if (!isMatch) {
       throw new HTTP_ERROR.UnauthorizedError('Wrong password', ERR.AUTH_INVALID_CREDENTIALS);
     }
 
     // Create token
     const accessToken = authHelper.generateAccessToken(user._id, user.role);
+
+    console.log(user.role);
 
     await AuthRepository.revokeSessionByUserId(user._id);
 
@@ -255,6 +257,43 @@ class AuthService {
     await UserService.resetPassword(userId, newPassword);
 
     // revoke authsession(refresh token)
+    await AuthRepository.revokeAllSessionsForUser(userId);
+
+    return true;
+  }
+
+  async changePassword(userId, currentPassword, newPassword) {
+    if (!currentPassword || !newPassword) {
+      throw new HTTP_ERROR.BadRequestError('Missing currentPassword or newPassword', ERR.AUTH_MISSING_FIELDS);
+    }
+
+    if (typeof newPassword !== 'string' || newPassword.trim().length < 6) {
+      throw new HTTP_ERROR.BadRequestError('New password must be at least 6 characters', ERR.VALIDATION_FAILED);
+    }
+
+    if (currentPassword === newPassword) {
+      throw new HTTP_ERROR.BadRequestError('New password must be different from current password', ERR.VALIDATION_FAILED);
+    }
+
+    const user = await UserRepository.findByIdWithPasswordHash(userId);
+    if (!user) {
+      throw new HTTP_ERROR.NotFoundError('User not found', ERR.USER_NOT_FOUND);
+    }
+
+    if (!user.passwordHash) {
+      // OAuth accounts may not have local password set
+      throw new HTTP_ERROR.UnprocessableEntityError('Password is not set for this account', ERR.VALIDATION_FAILED);
+    }
+
+    const ok = await authHelper.comparePassword(currentPassword, user.passwordHash);
+    if (!ok) {
+      throw new HTTP_ERROR.BadRequestError('Current password is incorrect', ERR.USER_PASSWORD_INCORRECT);
+    }
+
+    const passwordHash = await authHelper.hashPassword(newPassword);
+    await UserRepository.updateUser(userId, { passwordHash });
+
+    // revoke auth sessions (refresh tokens)
     await AuthRepository.revokeAllSessionsForUser(userId);
 
     return true;

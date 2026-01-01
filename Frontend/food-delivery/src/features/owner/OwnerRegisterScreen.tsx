@@ -1,21 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import AppLayout from "../../layouts/AppLayout";
-import OwnerRegisterForm from "./components/OwnerRegisterForm";
 import RestaurantForm from "./components/RestaurantForm";
 import { useNavigate } from "react-router-dom";
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import { getCategories, submitRestaurantRequest, getMyRestaurantRequest, type NormalizedCategory, type RestaurantRequestResponse } from './api';
+import { getCategories, submitRestaurantRequestWithBanner, getMyRestaurantRequest, type NormalizedCategory, type RestaurantRequestResponse } from './api';
 import { toast } from 'react-toastify';
 
 const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
     const navigate = useNavigate();
-    const [step, setStep] = useState<1 | 2>(1);
-
-    // Owner information state
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [ownerErrors, setOwnerErrors] = useState<{ username?: string; email?: string; phone?: string }>({});
 
     // Restaurant information state
     const [name, setName] = useState('');
@@ -29,6 +20,9 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
     });
     const [restaurantPhone, setRestaurantPhone] = useState('');
     const [categoryId, setCategoryId] = useState('');
+    const [latitude, setLatitude] = useState('');
+    const [longitude, setLongitude] = useState('');
+    const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
     const [restaurantErrors, setRestaurantErrors] = useState<{
@@ -37,6 +31,8 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         address?: string;
         phone?: string;
         categoryId?: string;
+        latitude?: string;
+        longitude?: string;
     }>({});
 
     const [loading, setLoading] = useState(false);
@@ -78,29 +74,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         fetchCategories();
     }, []);
 
-    const validateOwnerInfo = (): boolean => {
-        const errors: { username?: string; email?: string; phone?: string } = {};
-        
-        if (!username.trim()) {
-            errors.username = 'Vui lòng nhập tên người dùng';
-        }
-        
-        if (!email.trim()) {
-            errors.email = 'Vui lòng nhập email';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            errors.email = 'Email không hợp lệ';
-        }
-        
-        if (!phone.trim()) {
-            errors.phone = 'Vui lòng nhập số điện thoại';
-        } else if (!/^[0-9]{10,11}$/.test(phone.replace(/\s/g, ''))) {
-            errors.phone = 'Số điện thoại không hợp lệ';
-        }
-        
-        setOwnerErrors(errors);
-        return Object.keys(errors).length === 0;
-    };
-
     const validateRestaurantInfo = (): boolean => {
         const errors: {
             name?: string;
@@ -108,6 +81,8 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
             address?: string;
             phone?: string;
             categoryId?: string;
+            latitude?: string;
+            longitude?: string;
         } = {};
         
         if (!name.trim()) {
@@ -127,23 +102,24 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         if (!categoryId.trim()) {
             errors.categoryId = 'Vui lòng chọn danh mục';
         }
+
+        const lat = Number(latitude);
+        const lng = Number(longitude);
+
+        if (!latitude.trim()) {
+            errors.latitude = 'Vui lòng nhập latitude';
+        } else if (Number.isNaN(lat) || lat < -90 || lat > 90) {
+            errors.latitude = 'Latitude phải nằm trong khoảng [-90, 90]';
+        }
+
+        if (!longitude.trim()) {
+            errors.longitude = 'Vui lòng nhập longitude';
+        } else if (Number.isNaN(lng) || lng < -180 || lng > 180) {
+            errors.longitude = 'Longitude phải nằm trong khoảng [-180, 180]';
+        }
         
         setRestaurantErrors(errors);
         return Object.keys(errors).length === 0;
-    };
-
-    const handleNext = () => {
-        if (step === 1) {
-            if (validateOwnerInfo()) {
-                setStep(2);
-            }
-        }
-    };
-
-    const handleBack = () => {
-        if (step === 2) {
-            setStep(1);
-        }
     };
 
     const handleSubmit = async () => {
@@ -155,6 +131,8 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         setError(null);
 
         try {
+            const lat = Number(latitude);
+            const lng = Number(longitude);
             const payload = {
                 restaurantName: name,
                 description: description || undefined,
@@ -164,12 +142,16 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                     ward: address.ward || undefined,
                     district: address.district || undefined,
                     city: address.city || undefined,
+                    geo: {
+                        type: 'Point' as const,
+                        coordinates: [lng, lat] as [number, number],
+                    },
                 },
                 phone: restaurantPhone,
                 categoriesId: [categoryId],
             };
 
-            await submitRestaurantRequest(payload);
+            await submitRestaurantRequestWithBanner(payload, bannerFile);
             
             toast.success('Yêu cầu đăng ký đã được gửi thành công. Vui lòng chờ xử lý.');
             navigate('/');
@@ -191,11 +173,11 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
     if (checkingRequest) {
         return (
             <AppLayout>
-                <div className={`min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
+                <div className={`min-h-screen flex flex-col justify-center items-center bg-white px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
                     <div className="w-full max-w-2xl">
-                        <div className="bg-white rounded-lg shadow-md p-6 text-center">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
-                            <p className="text-gray-600">Đang kiểm tra trạng thái đăng ký...</p>
+                        <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-8 text-center">
+                            <div className="animate-spin rounded-full h-12 w-12 border-2 border-black/10 border-t-emerald-600 mx-auto mb-4"></div>
+                            <p className="text-black/70">Đang kiểm tra trạng thái đăng ký...</p>
                         </div>
                     </div>
                 </div>
@@ -215,61 +197,61 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
 
         return (
             <AppLayout>
-                <div className={`min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
+                <div className={`min-h-screen flex flex-col justify-center items-center bg-white px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
                     <div className="w-full max-w-2xl">
-                        <div className="bg-white rounded-lg shadow-md p-8 text-center">
+                        <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-8 text-center">
                             <div className="mb-6">
-                                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-yellow-100 mb-4">
-                                    <svg className="h-8 w-8 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-600 mb-4">
+                                    <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                                <h2 className="text-2xl font-bold text-black mb-2">
                                     Yêu cầu đăng ký đang chờ xử lý
                                 </h2>
-                                <p className="text-gray-600 mb-4">
+                                <p className="text-black/70 mb-4">
                                     Bạn đã gửi yêu cầu đăng ký nhà hàng và đang chờ được xác thực.
                                 </p>
                             </div>
                             
-                            <div className="bg-gray-50 rounded-lg p-6 mb-6 text-left">
-                                <h3 className="font-semibold text-gray-900 mb-4">Thông tin yêu cầu:</h3>
+                            <div className="bg-white rounded-2xl border border-black/10 p-6 mb-6 text-left">
+                                <h3 className="font-semibold text-black mb-4">Thông tin yêu cầu:</h3>
                                 <div className="space-y-2 text-sm">
                                     <div className="flex justify-between">
-                                        <span className="text-gray-600">Tên nhà hàng:</span>
-                                        <span className="font-medium text-gray-900">{pendingRequest.restaurantName}</span>
+                                        <span className="text-black/70">Tên nhà hàng:</span>
+                                        <span className="font-medium text-black">{pendingRequest.restaurantName}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-600">Địa chỉ:</span>
-                                        <span className="font-medium text-gray-900">{pendingRequest.address.full}</span>
+                                        <span className="text-black/70">Địa chỉ:</span>
+                                        <span className="font-medium text-black">{pendingRequest.address.full}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-600">Số điện thoại:</span>
-                                        <span className="font-medium text-gray-900">{pendingRequest.phone}</span>
+                                        <span className="text-black/70">Số điện thoại:</span>
+                                        <span className="font-medium text-black">{pendingRequest.phone}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-600">Trạng thái:</span>
-                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                        <span className="text-black/70">Trạng thái:</span>
+                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-black text-white">
                                             Đang chờ xử lý
                                         </span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-600">Ngày gửi:</span>
-                                        <span className="font-medium text-gray-900">{requestDate}</span>
+                                        <span className="text-black/70">Ngày gửi:</span>
+                                        <span className="font-medium text-black">{requestDate}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <p className="text-sm text-blue-800">
-                                    <strong>Lưu ý:</strong> Yêu cầu của bạn đang được xem xét bởi quản trị viên. 
+                            <div className="bg-white border border-black/10 rounded-2xl p-4 mb-6">
+                                <p className="text-sm text-black/80">
+                                    <strong>Lưu ý:</strong> Yêu cầu của bạn đang được xem xét bởi quản trị viên.
                                     Vui lòng chờ thông báo qua email hoặc kiểm tra lại sau.
                                 </p>
                             </div>
 
                             <button
                                 onClick={() => navigate('/')}
-                                className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                className="px-6 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                             >
                                 Về trang chủ
                             </button>
@@ -282,110 +264,94 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
 
     return (
         <AppLayout>
-            <div className={`min-h-screen flex flex-col justify-center items-center bg-gray-50 px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
+            <div className={`min-h-screen flex flex-col justify-center items-center bg-white px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
                 <div className="w-full max-w-2xl">
-                    {/* Progress indicator */}
-                    <div className="mb-8">
-                        <div className="flex items-center justify-center space-x-4">
-                            <div className={`flex items-center ${step >= 1 ? 'text-green-600' : 'text-gray-400'}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                                    step >= 1 ? 'bg-green-600 border-green-600 text-white' : 'border-gray-300'
-                                }`}>
-                                    {step > 1 ? '✓' : '1'}
-                                </div>
-                                <span className="ml-2 font-medium">Thông tin chủ nhà hàng</span>
-                            </div>
-                            <div className={`w-16 h-0.5 ${step >= 2 ? 'bg-green-600' : 'bg-gray-300'}`}></div>
-                            <div className={`flex items-center ${step >= 2 ? 'text-green-600' : 'text-gray-400'}`}>
-                                <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${
-                                    step >= 2 ? 'bg-green-600 border-green-600 text-white' : 'border-gray-300'
-                                }`}>
-                                    2
-                                </div>
-                                <span className="ml-2 font-medium">Thông tin nhà hàng</span>
-                            </div>
-                        </div>
-                    </div>
-
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 rounded">
+                        <div className="mb-4 p-3 bg-white border border-black/10 text-black rounded-2xl">
                             {error}
                         </div>
                     )}
 
-                    {/* Step 1: Owner Information */}
-                    {step === 1 && (
-                        <div className="bg-white rounded-lg shadow-md p-6">
-                            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
-                                Thông tin chủ nhà hàng
+                    <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-6 sm:p-8">
+                        <div className="mb-6">
+                            <h2 className="text-2xl font-bold text-center text-black">
+                                Tạo nhà hàng
                             </h2>
-                            <OwnerRegisterForm
-                                username={username}
-                                email={email}
-                                phone={phone}
-                                onUsernameChange={setUsername}
-                                onEmailChange={setEmail}
-                                onPhoneChange={setPhone}
-                                errors={ownerErrors}
-                            />
-                            <div className="mt-6 flex justify-end">
-                                <button
-                                    type="button"
-                                    onClick={handleNext}
-                                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 flex items-center"
-                                >
-                                    Tiếp theo
-                                    <ChevronRightIcon className="ml-2 h-5 w-5" />
-                                </button>
-                            </div>
+                            <p className="text-center text-sm text-black/70 mt-2">
+                                Nhập thông tin nhà hàng và vị trí (latitude/longitude) để gửi yêu cầu duyệt.
+                            </p>
                         </div>
-                    )}
 
-                    {/* Step 2: Restaurant Information */}
-                    {step === 2 && (
-                        <div className="bg-white rounded-lg shadow-md p-6">
-                            <h2 className="text-2xl font-bold text-center text-gray-900 mb-6">
-                                Thông tin nhà hàng
-                            </h2>
-                            <RestaurantForm
-                                name={name}
-                                description={description}
-                                address={address}
-                                phone={restaurantPhone}
-                                categoryId={categoryId}
-                                categories={categories}
-                                onNameChange={setName}
-                                onDescriptionChange={setDescription}
-                                onAddressChange={(field, value) => setAddress(prev => ({ ...prev, [field]: value }))}
-                                onPhoneChange={setRestaurantPhone}
-                                onCategoryChange={setCategoryId}
-                                errors={restaurantErrors}
-                            />
-                            {loadingCategories && (
-                                <div className="text-center text-sm text-gray-500 mt-2">
-                                    Đang tải danh sách danh mục...
-                                </div>
-                            )}
-                            <div className="mt-6 flex justify-between">
-                                <button
-                                    type="button"
-                                    onClick={handleBack}
-                                    className="px-6 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 flex items-center"
-                                >
-                                    <ChevronLeftIcon className="mr-2 h-5 w-5" />
-                                    Quay lại
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={handleSubmit}
-                                    disabled={loading}
-                                    className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-green-500"
-                                >
-                                    {loading ? 'Đang xử lý...' : 'Hoàn tất đăng ký'}
-                                </button>
+                        <RestaurantForm
+                            name={name}
+                            description={description}
+                            address={address}
+                            phone={restaurantPhone}
+                            categoryId={categoryId}
+                            categories={categories}
+                            onNameChange={setName}
+                            onDescriptionChange={setDescription}
+                            onAddressChange={(field, value) => setAddress(prev => ({ ...prev, [field]: value }))}
+                            onPhoneChange={setRestaurantPhone}
+                            onCategoryChange={setCategoryId}
+                            onBannerFileChange={setBannerFile}
+                            errors={restaurantErrors}
+                        />
+
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-black mb-1">Latitude</label>
+                                <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={latitude}
+                                    onChange={(e) => setLatitude(e.target.value)}
+                                    className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                                        restaurantErrors.latitude ? 'border-black' : 'border-black/10'
+                                    }`}
+                                    placeholder="VD: 10.8231"
+                                />
+                                {restaurantErrors.latitude && (
+                                    <p className="mt-1 text-sm text-black/70">{restaurantErrors.latitude}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-black mb-1">Longitude</label>
+                                <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={longitude}
+                                    onChange={(e) => setLongitude(e.target.value)}
+                                    className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                                        restaurantErrors.longitude ? 'border-black' : 'border-black/10'
+                                    }`}
+                                    placeholder="VD: 106.6297"
+                                />
+                                {restaurantErrors.longitude && (
+                                    <p className="mt-1 text-sm text-black/70">{restaurantErrors.longitude}</p>
+                                )}
                             </div>
                         </div>
-                    )}
+
+                        {loadingCategories && (
+                            <div className="text-center text-sm text-black/60 mt-3">
+                                Đang tải danh sách danh mục...
+                            </div>
+                        )}
+
+                        <div className="mt-6 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={handleSubmit}
+                                disabled={loading}
+                                className="px-6 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 disabled:bg-emerald-400 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                            >
+                                {loading ? 'Đang xử lý...' : 'Gửi yêu cầu duyệt'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </AppLayout>

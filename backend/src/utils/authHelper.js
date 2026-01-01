@@ -73,7 +73,7 @@ function verifyToken(token, tokenTypeConfig) {
   return decoded;
 }
 
-function generateRefreshToken(userId, {role}) {
+function generateRefreshToken(userId, role) {
     const refreshTokenId = uuidv4(); 
     const config = tokenConfig.getTokenConfig().REFRESH;
 

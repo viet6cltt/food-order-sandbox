@@ -18,6 +18,10 @@ export interface RestaurantRequestPayload {
     ward?: string;
     district?: string;
     city?: string;
+    geo?: {
+      type: 'Point';
+      coordinates: [number, number];
+    };
   };
   phone: string;
   categoriesId: string[];
@@ -34,6 +38,10 @@ export interface RestaurantRequestResponse {
     ward?: string;
     district?: string;
     city?: string;
+    geo?: {
+      type: 'Point';
+      coordinates: [number, number];
+    };
   };
   phone: string;
   categoriesId: string[];
@@ -51,14 +59,15 @@ export interface NormalizedCategory {
 export async function getCategories(page = 1, limit = 100): Promise<NormalizedCategory[]> {
   try {
     const res = await api.get('/categories', { params: { page, limit } });
-    // Handle both direct array response and wrapped response
-    let data = res.data?.data;
-    if (!data && Array.isArray(res.data)) {
-      data = res.data;
-    }
-    if (!Array.isArray(data)) {
-      data = [];
-    }
+
+    // BE trả về: { success, message, data: { categories, pagination } }
+    // Một số endpoint/phiên bản cũ có thể trả mảng trực tiếp.
+    const data =
+      (Array.isArray(res.data?.data?.categories) && res.data.data.categories) ||
+      (Array.isArray(res.data?.data) && res.data.data) ||
+      (Array.isArray(res.data) && res.data) ||
+      [];
+
     // Normalize _id to id - ensure id is always present
     return data.map((category: Category) => ({
       ...category,
@@ -66,7 +75,7 @@ export async function getCategories(page = 1, limit = 100): Promise<NormalizedCa
       name: category.name,
       description: category.description,
       isActive: category.isActive,
-    })).filter((cat: NormalizedCategory): cat is NormalizedCategory => !!cat.id);
+    })).filter((cat: NormalizedCategory): cat is NormalizedCategory => !!cat.id && cat.isActive !== false);
   } catch (error) {
     console.error('Error fetching categories:', error);
     throw error;
@@ -97,6 +106,25 @@ export async function submitRestaurantRequest(payload: RestaurantRequestPayload)
     console.error('Error submitting restaurant request:', error);
     throw error;
   }
+}
+
+export async function submitRestaurantRequestWithBanner(
+  payload: RestaurantRequestPayload,
+  bannerFile?: File | null
+): Promise<RestaurantRequestResponse> {
+  if (!bannerFile) {
+    return submitRestaurantRequest(payload);
+  }
+
+  const formData = new FormData();
+  formData.append('file', bannerFile);
+  formData.append('data', JSON.stringify(payload));
+
+  const res = await api.post('/users/restaurant-requests', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  return res.data?.data;
 }
 
 export interface Restaurant {

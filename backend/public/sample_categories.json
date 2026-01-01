@@ -1,0 +1,182 @@
+[
+  {
+    "_id": { "$oid": "65c000000000000000000001" },
+    "name": "Cơm tấm",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?com-tam,vietnamese-food&sig=1",
+    "description": "Cơm tấm sườn bì chả, cơm phần",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-01T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-01T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000002" },
+    "name": "Phở & Bún",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?pho,bun,vietnamese-food&sig=2",
+    "description": "Phở, bún chả, bún bò, bún riêu",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-02T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-02T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000003" },
+    "name": "Hủ tiếu & Bánh canh",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?noodles,soup,vietnamese&sig=3",
+    "description": "Hủ tiếu, bánh canh, món nước sợi",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-03T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-03T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000004" },
+    "name": "Cà phê & Trà",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?vietnamese-coffee,coffee&sig=4",
+    "description": "Cà phê sữa đá, trà đào, trà tắc",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-04T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-04T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000005" },
+    "name": "Ăn vặt",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?street-food,vietnam&sig=5",
+    "description": "Bánh tráng trộn, cá viên, xiên que",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-05T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-05T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000006" },
+    "name": "Hải sản",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?seafood,grill&sig=6",
+    "description": "Tôm, cua, mực, sò",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-06T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-06T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000007" },
+    "name": "Lẩu",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?hotpot&sig=7",
+    "description": "Lẩu thái, lẩu hải sản, lẩu bò",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-07T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-07T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000008" },
+    "name": "Nướng",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?bbq,grill&sig=8",
+    "description": "Đồ nướng than, nướng giấy bạc",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-08T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-08T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000009" },
+    "name": "Món chay",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?vegetarian,asian-food&sig=9",
+    "description": "Chay thanh đạm, chay nhà làm",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-09T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-09T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c00000000000000000000a" },
+    "name": "Bánh mì",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?banh-mi,vietnamese&sig=10",
+    "description": "Bánh mì thịt, bánh mì chả, pate",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-10T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-10T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c00000000000000000000b" },
+    "name": "Xôi & Bánh",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?sticky-rice,asian-food&sig=11",
+    "description": "Xôi mặn, xôi gà, bánh truyền thống",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-11T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-11T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c00000000000000000000c" },
+    "name": "Chè & Tráng miệng",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?dessert,asian-dessert&sig=12",
+    "description": "Chè, sữa chua, món ngọt mát",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-12T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-12T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c00000000000000000000d" },
+    "name": "Gỏi cuốn & Cuốn",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?spring-rolls,vietnamese&sig=13",
+    "description": "Gỏi cuốn, nem cuốn, cuốn diếp",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-13T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-13T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c00000000000000000000e" },
+    "name": "Món gà",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?fried-chicken,asian-food&sig=14",
+    "description": "Gà chiên mắm, gà nướng, cơm gà",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-14T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-14T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c00000000000000000000f" },
+    "name": "Món bò",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?beef,asian-food&sig=15",
+    "description": "Bò lúc lắc, bò kho, bò nướng",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-15T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-15T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000010" },
+    "name": "Món heo",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?pork,asian-food&sig=16",
+    "description": "Sườn kho, thịt kho, ba chỉ nướng",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-16T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-16T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000011" },
+    "name": "Bún đậu",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?bun-dau,mam-tom,vietnamese&sig=17",
+    "description": "Bún đậu mắm tôm, nem rán",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-17T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-17T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000012" },
+    "name": "Bánh xèo & Bánh khọt",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?banh-xeo,vietnamese&sig=18",
+    "description": "Bánh xèo, bánh khọt, ăn kèm rau",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-18T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-18T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000013" },
+    "name": "Cơm văn phòng",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?rice-box,asian-food&sig=19",
+    "description": "Cơm phần, cơm trưa gọn nhanh",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-19T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-19T10:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "65c000000000000000000014" },
+    "name": "Nước giải khát",
+    "imageUrl": "https://source.unsplash.com/featured/800x600/?iced-tea,juice&sig=20",
+    "description": "Nước ép, trà trái cây, nước ngọt",
+    "isActive": true,
+    "createdAt": { "$date": "2025-12-20T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-12-20T10:00:00.000Z" }
+  }
+]

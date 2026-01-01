@@ -70,6 +70,44 @@ function getScheduleForToday(restaurant) {
 }
 
 class RestaurantService {
+
+  // get restaurants by categoryId
+  async getRestaurants({ categoryId, pagination, sortBy = 'rating' }) {
+    const { skip, limit, page } = pagination;
+
+    // Khởi tạo filter cơ bản
+    const filter = { isActive: true };
+    
+    // Nếu truyền categoryId, MongoDB sẽ quét trong mảng categories
+    if (categoryId) {
+      filter.categoriesId = categoryId; 
+    }
+
+    // Xử lý logic Sort (Mặc định: Rating cao nhất lên đầu)
+    let sortOptions = { rating: -1, createdAt: -1 };
+    if (sortBy === 'newest') {
+      sortOptions = { createdAt: -1 };
+    }
+
+    const { items, total } = await RestaurantRepository.findAll({
+      filter,
+      sort: sortOptions,
+      skip,
+      limit
+    });
+
+    console.log(items);
+
+    return {
+      items,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
   
   // get restaurant info 
   async getRestaurantInfo(restaurantId) {
@@ -78,7 +116,27 @@ class RestaurantService {
 
   // create restaurant
   async createRestaurant(data) {
-    return await RestaurantRepository.create(data);
+    const safe = { ...(data || {}) };
+
+    if (safe.address && typeof safe.address === 'object') {
+      const geo = safe.address.geo;
+      if (geo && typeof geo === 'object') {
+        const coords = geo.coordinates;
+        const isValidCoords =
+          Array.isArray(coords) &&
+          coords.length === 2 &&
+          typeof coords[0] === 'number' &&
+          typeof coords[1] === 'number' &&
+          Number.isFinite(coords[0]) &&
+          Number.isFinite(coords[1]);
+
+        if (!isValidCoords) {
+          safe.address.geo = { ...(geo || {}), coordinates: [10, 10] };
+        }
+      }
+    }
+
+    return await RestaurantRepository.create(safe);
   }
 
   // check owner 

@@ -4,6 +4,7 @@ import OwnerLayout from '../../../layouts/OwnerLayout';
 import { getMyRestaurant, type Restaurant } from '../api';
 import { getMenuItemsByRestaurant } from '../../restaurant/api';
 import type { MenuItemDto } from '../../restaurant/components/FoodItem';
+import { deleteMenuItem } from '../menuItemApi';
 
 const OwnerMenuListScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ const OwnerMenuListScreen: React.FC = () => {
   const [items, setItems] = useState<MenuItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [deletingIds, setDeletingIds] = useState<Record<string, boolean>>({});
 
   const restaurantId = useMemo(() => restaurant?._id || restaurant?.id || '', [restaurant]);
 
@@ -48,6 +50,29 @@ const OwnerMenuListScreen: React.FC = () => {
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
+  };
+
+  const handleDelete = async (menuItemId: string, menuItemName: string) => {
+    const ok = window.confirm(`Xóa món “${menuItemName}”? Hành động này không thể hoàn tác.`);
+    if (!ok) return;
+
+    try {
+      setDeletingIds((prev) => ({ ...prev, [menuItemId]: true }));
+      await deleteMenuItem(menuItemId);
+      setItems((prev) => prev.filter((x) => x._id !== menuItemId));
+    } catch (e: unknown) {
+      const msg =
+        (e as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (e as Error).message ||
+        'Xóa món ăn thất bại.';
+      window.alert(msg);
+    } finally {
+      setDeletingIds((prev) => {
+        const next = { ...prev };
+        delete next[menuItemId];
+        return next;
+      });
+    }
   };
 
   return (
@@ -128,6 +153,17 @@ const OwnerMenuListScreen: React.FC = () => {
                       <p className="text-xs text-gray-500 mt-2 line-clamp-2">{item.description}</p>
                     ) : null}
                     <div className="mt-3 text-sm font-bold text-gray-900">{formatCurrency(item.price)}</div>
+
+                    <div className="mt-4 flex items-center justify-end">
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item._id, item.name)}
+                        disabled={Boolean(deletingIds[item._id])}
+                        className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                      >
+                        {deletingIds[item._id] ? 'Đang xóa...' : 'Xóa'}
+                      </button>
+                    </div>
                   </div>
                 </article>
               ))}

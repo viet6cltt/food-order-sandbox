@@ -26,12 +26,12 @@ import ProfileScreen from '../features/profile/screens/ProfileScreen';
 import AdminDashboardScreen from '../features/admin/screens/AdminDashboardScreen';
 import RestaurantCategoryScreen from '../features/admin/screens/RestaurantCategoryScreen';
 import AdminReportHandlingScreen from '../features/admin/screens/AdminReportHandlingScreen';
-
+import UserStatisticsScreen from '../features/admin/screens/UserStatisticsScreen';
+import AdminRestaurantRequestsScreen from '../features/admin/screens/AdminRestaurantRequestScreen';
 const AppRoutes: React.FC = () => {
 	return (
 		<BrowserRouter>
 			<Routes>
-				<Route path="/" element={<HomeScreen />} />
 				<Route
 					path="/login"
 					element={
@@ -50,39 +50,47 @@ const AppRoutes: React.FC = () => {
 				/>
 				<Route path="/auth/complete-profile" element={<CompleteProfileScreen />} />
 				<Route path="/auth/oauth-success" element={<OAuthSuccessScreen />} />
-				<Route path="/order-list" element={<OrderListScreen />} />
 				<Route path="/reset-password-request" element={<ResetPasswordRequestScreen />} />
 				<Route path="/reset-password" element={<ResetPasswordScreen />} />
 
 
                 {/* Customer routes */}
-                <Route path="/" element={<HomeScreen />} />
                 <Route path="/search" element={<SearchScreen />} />
-                <Route path="/category/:categoryId" element={<CategoryRestaurantsScreen />} />
+                {/* <Route path="/category/:categoryId" element={<CategoryRestaurantsScreen />} /> */}
     
 				{/* Redirect sau khi đăng nhập */}
 				<Route path="/redirect" element={<RoleBasedRedirect />} />
 				
 				{/* Customer routes */}
-				<Route path="/" element={<HomeScreen />} />
+				<Route path="/" element={
+					<ProtectedRoute allowedRoles={['customer']}>
+						<HomeScreen />
+					</ProtectedRoute>
+				} />
 				<Route path="/cart" element={
 					<ProtectedRoute allowedRoles={['customer']}>
 						<CartScreen />
 					</ProtectedRoute>
 				} />
 				<Route path="/restaurants" element={<SearchScreen />} />
-				<Route path="/profile" element={
-
-						<ProfileScreen />
-
-				} />
+			
 				<Route path="/payment" element={
 					<ProtectedRoute allowedRoles={['customer']}>
 						<PaymentScreen />
 					</ProtectedRoute>
 				} />
-                <Route path="/restaurant/:restaurantId/*" element={<RestaurantDetailScreen />} />
-                <Route path="/food/:foodId" element={<FoodDetailScreen />} />
+                <Route path="/restaurant/:restaurantId/*" element={
+					<ProtectedRoute allowedRoles={['customer']}>
+						<RestaurantDetailScreen />
+					</ProtectedRoute>
+				} />
+
+                <Route path="/food/:foodId" element={
+					<ProtectedRoute allowedRoles={['customer']}>
+						<FoodDetailScreen />
+					</ProtectedRoute>
+				} />
+
                 <Route path="/owner/register" element={
 					<ProtectedRoute allowedRoles={['customer']}>
 						<OwnerRegisterScreen />
@@ -117,8 +125,6 @@ const AppRoutes: React.FC = () => {
                     </ProtectedRoute>
                 } />
 
-				<Route path="/orders" element={<OrderListScreen />} />
-
 				<Route path="/owner/menu-list" element={
 						<ProtectedRoute allowedRoles={['restaurant_owner']}>
 								<OwnerMenuListScreen />
@@ -132,7 +138,7 @@ const AppRoutes: React.FC = () => {
 						</ProtectedRoute>
 				} />
 
-				<Route path="/admin/category/*" element={
+				<Route path="/admin/categories/*" element={
 						<ProtectedRoute allowedRoles={['admin']}>
 								<RestaurantCategoryScreen />
 						</ProtectedRoute>
@@ -141,6 +147,18 @@ const AppRoutes: React.FC = () => {
 				<Route path="/admin/reports/*" element={
 						<ProtectedRoute allowedRoles={['admin']}>
 								<AdminReportHandlingScreen />
+						</ProtectedRoute>
+				} />
+
+				<Route path="/admin/users/*" element={
+						<ProtectedRoute allowedRoles={['admin']}>
+								<UserStatisticsScreen />
+						</ProtectedRoute>
+				} />
+
+				<Route path="/admin/restaurant-requests/*" element={
+						<ProtectedRoute allowedRoles={['admin']}>
+								<AdminRestaurantRequestsScreen />
 						</ProtectedRoute>
 				} />
 

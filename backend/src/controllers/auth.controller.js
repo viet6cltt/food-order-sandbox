@@ -162,16 +162,37 @@ class AuthController {
       const { token, newPassword } = req.body;
 
       if (!token) {
-        throw new HTTP_ERROR.BadRequestError('Missing token', ARR.AUTH_MISSING_TOKEN);
+        throw new HTTP_ERROR.BadRequestError('Missing token', ERR.AUTH_MISSING_TOKEN);
       }
 
       if (!newPassword) {
-        throw new HTTP_ERROR.BadRequestError('Missing newPassword', ARR.AUTH_MISSING_FIELDS);
+        throw new HTTP_ERROR.BadRequestError('Missing newPassword', ERR.AUTH_MISSING_FIELDS);
       }
 
       await AuthService.resetPassword(token, newPassword);
 
       return SUCCESS_RESPONSE.success(res, 'Password has been reset successfully', {});
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [POST] /change-password (requires auth)
+  async changePassword(req, res, next) {
+    try {
+      const userId = req.userId;
+      const { currentPassword, newPassword } = req.body;
+
+      if (!userId) {
+        throw new HTTP_ERROR.UnauthorizedError('No accessToken are provided', ERR.AUTH_MISSING_ACCESS_TOKEN);
+      }
+
+      if (!currentPassword || !newPassword) {
+        throw new HTTP_ERROR.BadRequestError('Missing currentPassword or newPassword', ERR.AUTH_MISSING_FIELDS);
+      }
+
+      await AuthService.changePassword(userId, currentPassword, newPassword);
+      return SUCCESS_RESPONSE.success(res, 'Password changed successfully', {});
     } catch (err) {
       next(err);
     }

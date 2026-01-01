@@ -112,12 +112,32 @@ class RestaurantRepository {
     ]);
   }
 
+
   async findByOwnerId(ownerId) {
     return await Restaurant.findOne({ ownerId: ownerId });
   }
 
   async updateById(restaurantId, update) {
     return await Restaurant.findByIdAndUpdate(restaurantId, update, { new: true, runValidators: true });
+  }
+
+  async getRecommend() {
+    return await Restaurant.find()
+      .sort({ rating: -1 }) // giảm dần theo rating
+      .limit(5);
+  }
+
+  async findAll({ filter, sort, skip, limit }) {
+    const [items, total] = await Promise.all([
+      Restaurant.find(filter)
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
+      Restaurant.countDocuments(filter)
+    ]);
+
+    return { items, total };
   }
 }
 module.exports = new RestaurantRepository();

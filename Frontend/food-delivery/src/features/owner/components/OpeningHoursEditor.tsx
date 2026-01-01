@@ -1,5 +1,5 @@
 // src/features/owner/components/OpeningHoursEditor.tsx
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ClockIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { getMyRestaurant, updateMyRestaurant } from '../api';
@@ -49,9 +49,8 @@ function normalizeSchedule(input: unknown, fallbackOpen: string, fallbackClose: 
 const OpeningHoursEditor: React.FC = () => {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
-    const [schedule, setSchedule] = useState<OpeningHour[]>(buildDefaultSchedule());
-
-    const dayLabelByIndex = useMemo(() => DAYS, []);
+    const [openTime, setOpenTime] = useState('08:00');
+    const [closeTime, setCloseTime] = useState('22:00');
 
     useEffect(() => {
         let alive = true;
@@ -63,8 +62,12 @@ const OpeningHoursEditor: React.FC = () => {
 
                 const fallbackOpen = restaurant?.opening_time || '08:00';
                 const fallbackClose = restaurant?.closing_time || '22:00';
-                const next = normalizeSchedule(restaurant?.openingHours, fallbackOpen, fallbackClose);
-                setSchedule(next);
+
+                // Prefer legacy top-level fields, fallback to openingHours[0] if present
+                const normalized = normalizeSchedule(restaurant?.openingHours, fallbackOpen, fallbackClose);
+                const first = normalized?.[0];
+                setOpenTime(fallbackOpen || first?.open || '08:00');
+                setCloseTime(fallbackClose || first?.close || '22:00');
             } catch (err) {
                 console.error(err);
                 toast.error('Không tải được giờ hoạt động');
@@ -78,23 +81,18 @@ const OpeningHoursEditor: React.FC = () => {
         };
     }, []);
 
-    const updateItem = (day: number, patch: Partial<OpeningHour>) => {
-        setSchedule(prev => prev.map(it => (it.day === day ? { ...it, ...patch } : it)));
-    };
-
     const onSave = async () => {
         try {
             setSaving(true);
 
-            // Keep legacy fields in sync (use first non-closed day, else defaults)
-            const firstOpenDay = schedule.find(s => !s.isClosed);
-            const opening_time = firstOpenDay?.open || '08:00';
-            const closing_time = firstOpenDay?.close || '22:00';
+            const opening_time = openTime || '08:00';
+            const closing_time = closeTime || '22:00';
+            const openingHours = buildDefaultSchedule(opening_time, closing_time);
 
             await updateMyRestaurant({
                 opening_time,
                 closing_time,
-                openingHours: schedule,
+                openingHours,
             });
 
             toast.success('Đã cập nhật giờ hoạt động');
@@ -108,52 +106,44 @@ const OpeningHoursEditor: React.FC = () => {
 
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full">
-            <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                <ClockIcon className="w-6 h-6 text-emerald-600 mr-2" />
-                Giờ Hoạt Động
-            </h2>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-lg font-bold text-gray-900 flex items-center">
+                    <ClockIcon className="w-6 h-6 text-emerald-600 mr-2" />
+                    Giờ Hoạt Động
+                </h2>
 
-            <div className="space-y-3">
-                {loading ? (
-                    <div className="text-sm text-gray-500">Đang tải...</div>
-                ) : (
-                    schedule.map((item) => (
-                    <div key={item.day} className="py-3 border-b border-gray-50 last:border-0">
-                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                            <span className="font-medium text-gray-700">{dayLabelByIndex[item.day]}</span>
+                <div className="w-full sm:w-auto">
+                    <div className="grid grid-cols-2 gap-2">
+                        <label className="sr-only" htmlFor="opening-time">
+                            Giờ mở cửa
+                        </label>
+                        <input
+                            id="opening-time"
+                            type="time"
+                            value={openTime}
+                            disabled={loading || saving}
+                            className="w-full sm:w-36 border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:ring-emerald-500 focus:border-emerald-500"
+                            onChange={(e) => setOpenTime(e.target.value)}
+                        />
 
-                            <div className="flex flex-wrap items-center gap-2">
-                                <input
-                                    type="time"
-                                    value={item.open}
-                                    disabled={item.isClosed}
-                                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-emerald-500 focus:border-emerald-500"
-                                    onChange={(e) => updateItem(item.day, { open: e.target.value })}
-                                />
-                                <span className="text-gray-400">-</span>
-                                <input
-                                    type="time"
-                                    value={item.close}
-                                    disabled={item.isClosed}
-                                    className="border border-gray-300 rounded-md px-2 py-1 text-sm focus:ring-emerald-500 focus:border-emerald-500"
-                                    onChange={(e) => updateItem(item.day, { close: e.target.value })}
-                                />
-                            </div>
-
-                            <label className="flex items-center gap-2 text-sm text-gray-500 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    checked={item.isClosed}
-                                    onChange={(e) => updateItem(item.day, { isClosed: e.target.checked })}
-                                    className="rounded text-emerald-600 focus:ring-emerald-500"
-                                />
-                                <span>Nghỉ</span>
-                            </label>
-                        </div>
+                        <label className="sr-only" htmlFor="closing-time">
+                            Giờ đóng cửa
+                        </label>
+                        <input
+                            id="closing-time"
+                            type="time"
+                            value={closeTime}
+                            disabled={loading || saving}
+                            className="w-full sm:w-36 border border-gray-300 rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:ring-emerald-500 focus:border-emerald-500"
+                            onChange={(e) => setCloseTime(e.target.value)}
+                        />
                     </div>
-                    ))
-                )}
+                </div>
             </div>
+
+            {loading ? (
+                <div className="mt-4 text-sm text-gray-500">Đang tải...</div>
+            ) : null}
 
             <div className="mt-4 pt-4 border-t">
                 <button

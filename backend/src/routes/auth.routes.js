@@ -19,6 +19,9 @@ router.post('/password-reset-request', AuthController.sendPasswordResetRequest);
 // cập nhật mật khẩu mới 
 router.post('/password-reset', AuthController.resetPassword);
 
+// đổi mật khẩu (khi đã đăng nhập)
+router.post('/change-password', requireAuth, AuthController.changePassword);
+
 /** Oauth */
 router.get('/oauth-url', AuthController.getOauthUrl);
 router.get('/:provider/callback', AuthController.oauthCallback);

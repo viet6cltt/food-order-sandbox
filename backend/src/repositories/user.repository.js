@@ -36,7 +36,11 @@ class UserRepository {
   }
 
   async findById(userId) {
-    return await User.findById(userId);
+    return await User.findById(userId).lean();
+  }
+
+  async findByIdWithPasswordHash(userId) {
+    return await User.findById(userId).select('+passwordHash');
   }
 
   async findByProviderId(provider, providerId) {

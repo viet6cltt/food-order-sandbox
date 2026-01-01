@@ -38,6 +38,7 @@ const restaurantSchema = new mongoose.Schema({
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
+        default: [10, 10],
         index: '2dsphere',
       },
     },

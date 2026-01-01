@@ -7,4 +7,3 @@ textarea::placeholder,
 select::placeholder {
   @apply text-gray-400;
 }
-

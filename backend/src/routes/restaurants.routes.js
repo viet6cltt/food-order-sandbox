@@ -9,13 +9,12 @@ const upload = require('@/middlewares/upload.middleware.js');
 const pagination = require('../middlewares/pagination.middleware');
 const ReviewController = require('../controllers/app/review.controller');
 
-router.get('/', RestaurantsController.list);
+// list/filter restaurants (supports categoryId, pagination)
+router.get('/', pagination(20, 50), RestaurantsController.getAll);
 
-// recommend (must be declared before '/:restaurantId')
-router.get('/recommend', RestaurantsController.recommend);
-
+// search and recommend (must be declared before '/:restaurantId')
 router.get('/search', pagination(20, 50), RestaurantsController.search);
-
+router.get('/recommend', RestaurantsController.getRecommend);
 router.get('/:restaurantId', optionalAuth, RestaurantsController.getInfo);
 router.get('/:restaurantId/menu-items', optionalAuth, MenuItemController.getMenuItems);
 router.post('/:restaurantId/menu-item', requireAuth, upload.single('file'), MenuItemController.createMenuItem);

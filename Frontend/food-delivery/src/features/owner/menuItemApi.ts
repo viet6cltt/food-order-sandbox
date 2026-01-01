@@ -30,3 +30,8 @@ export async function createMenuItem(
   const res = await api.post(`/restaurants/${restaurantId}/menu-item`, payload);
   return res.data?.data?.menuItem ?? res.data?.menuItem ?? res.data;
 }
+
+export async function deleteMenuItem(menuItemId: string) {
+  const res = await api.delete(`/menu-items/${menuItemId}`);
+  return res.data;
+}

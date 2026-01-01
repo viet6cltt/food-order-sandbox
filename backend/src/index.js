@@ -14,6 +14,10 @@ require('./config/passport.config');
 const route = require('./routes');
 const app = express();
 
+// Avoid 304 (ETag) responses with empty bodies for API calls.
+// Axios/XHR does not reliably surface cached bodies on 304.
+app.disable('etag');
+
 // Static files
 app.use(express.static(path.join(__dirname, 'public')));
 

@@ -1,6 +1,7 @@
 const repoRestaurantRequest = require('../../repositories/restaurantRequest.repository');
 const serviceRestaurant = require('../restaurant.service');
 const ERR_RESPONSE = require('../../utils/httpErrors');
+const userRepo = require('../../repositories/user.repository');
 
 class AdminRestaurantRequestService {
 
@@ -22,16 +23,26 @@ class AdminRestaurantRequestService {
       throw new ERR_RESPONSE.UnprocessableEntityError("This request was handled");
     }
 
-    const approveReq = await repoRestaurantRequest.approve(requestId);
+    const user = await userRepo.findById(request.userId);
+    if (!user) {
+      throw new ERR_RESPONSE.NotFoundError('User not found');
+    }
 
     const restaurant = await serviceRestaurant.createRestaurant({
       name: request.restaurantName,
       ownerId: request.userId,
       description: request.description,
+      bannerUrl: request.bannerUrl,
       address: request.address,
       phone: request.phone,
       categoriesId: request.categoriesId,
     });
+
+    if (user.role === 'customer') {
+      await userRepo.updateUser(request.userId, { role: 'restaurant_owner' });
+    }
+
+    const approveReq = await repoRestaurantRequest.approve(requestId);
 
     return { approveReq, restaurant };
   }

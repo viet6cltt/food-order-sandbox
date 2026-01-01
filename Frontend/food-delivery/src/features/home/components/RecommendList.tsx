@@ -14,7 +14,7 @@ const RecommendList: React.FC = () => {
     try {
       const items = await getRecommendRestaurants();
       setRestaurants(items);
-    } catch (err: unknown) {
+    } catch {
       setError('Không thể tải danh sách gợi ý.');
     } finally {
       setLoading(false);
@@ -55,8 +55,11 @@ const RecommendList: React.FC = () => {
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         {restaurants.map((res) => (
-          <div key={res.id} className="w-64 flex-shrink-0 snap-start transform transition-transform hover:scale-[1.02]">
-            <RestaurantCard restaurant={res} />
+          <div
+            key={res.id}
+            className="w-64 h-72 flex-shrink-0 snap-start transform transition-transform hover:scale-[1.02]"
+          >
+            <RestaurantCard restaurant={res} className="h-full" />
           </div>
         ))}
       </div>
@@ -76,10 +79,11 @@ const RecommendList: React.FC = () => {
 const RecommendSkeleton = () => (
   <div className="flex space-x-6 overflow-hidden py-4">
     {[1, 2, 3, 4].map((i) => (
-      <div key={i} className="w-64 flex-shrink-0 animate-pulse">
+      <div key={i} className="w-64 h-72 flex-shrink-0 animate-pulse">
         <div className="bg-gray-200 h-40 rounded-2xl mb-3"></div>
         <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
+        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
       </div>
     ))}
   </div>

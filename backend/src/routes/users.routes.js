@@ -15,7 +15,7 @@ router.put('/me', requireAuth, UserController.updateMe); // dùng khi người d
 
 // request restaurant
 router.get("/restaurant-requests/me", requireAuth, restaurantRequestController.getMyRequest);
-router.post("/restaurant-requests",requireAuth, restaurantRequestController.submit);
+router.post("/restaurant-requests", requireAuth, upload.single('file'), restaurantRequestController.submit);
 
 // owner restaurant
 router.get("/owner/restaurant", requireAuth, RestaurantController.getMyRestaurant);

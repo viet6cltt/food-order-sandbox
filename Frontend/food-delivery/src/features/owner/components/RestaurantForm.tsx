@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { uploadMyRestaurantPaymentQr, uploadRestaurantBanner, type NormalizedCategory } from '../api';
 
 interface RestaurantFormProps {
@@ -6,6 +6,7 @@ interface RestaurantFormProps {
     restaurantId?: string;
     bannerUrl?: string;
     onBannerUploaded?: (url: string) => void;
+    onBannerFileChange?: (file: File | null) => void;
     name: string;
     description: string;
     address: {
@@ -48,6 +49,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
     restaurantId,
     bannerUrl,
     onBannerUploaded,
+    onBannerFileChange,
     name,
     description,
     address,
@@ -73,6 +75,18 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
+
+    const previewUrl = useMemo(() => {
+        if (restaurantId) return '';
+        if (!selectedFile) return '';
+        return URL.createObjectURL(selectedFile);
+    }, [restaurantId, selectedFile]);
+
+    useEffect(() => {
+        return () => {
+            if (previewUrl) URL.revokeObjectURL(previewUrl);
+        };
+    }, [previewUrl]);
 
     const [selectedQrFile, setSelectedQrFile] = useState<File | null>(null);
     const [uploadingQr, setUploadingQr] = useState(false);
@@ -139,27 +153,36 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
                                 const file = e.target.files?.[0] || null;
                                 setSelectedFile(file);
                                 setUploadError(null);
+                                if (!restaurantId) {
+                                    onBannerFileChange?.(file);
+                                }
                             }}
                             className="w-full sm:flex-1 block text-sm text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
                         />
-                        <button
-                            type="button"
-                            disabled={!selectedFile || uploading || !restaurantId}
-                            onClick={handleUploadBanner}
-                            className="px-4 py-2 rounded-md font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
-                        >
-                            {uploading ? 'Đang tải...' : 'Tải lên'}
-                        </button>
+                        {restaurantId ? (
+                            <button
+                                type="button"
+                                disabled={!selectedFile || uploading || !restaurantId}
+                                onClick={handleUploadBanner}
+                                className="px-4 py-2 rounded-md font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
+                            >
+                                {uploading ? 'Đang tải...' : 'Tải lên'}
+                            </button>
+                        ) : (
+                            <div className="text-xs text-gray-500">
+                                Ảnh sẽ được tải lên khi bạn bấm “Gửi yêu cầu duyệt”.
+                            </div>
+                        )}
                     </div>
 
                     {uploadError && (
                         <p className="mt-2 text-sm text-red-600">{uploadError}</p>
                     )}
 
-                    {bannerUrl && (
+                    {(bannerUrl || previewUrl) && (
                         <div className="mt-3">
                             <img
-                                src={bannerUrl}
+                                src={bannerUrl || previewUrl}
                                 alt="Banner"
                                 className="w-full max-h-48 object-contain rounded-lg border border-gray-100"
                             />
