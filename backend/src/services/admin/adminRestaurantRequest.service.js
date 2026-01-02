@@ -1,6 +1,9 @@
 const repoRestaurantRequest = require('../../repositories/restaurantRequest.repository');
 const serviceRestaurant = require('../restaurant.service');
 const ERR_RESPONSE = require('../../utils/httpErrors');
+const userService = require('../user.service');
+const { UserRole } = require('@/constants/user.constants');
+const redisService = require('../redis.service');
 
 class AdminRestaurantRequestService {
 
@@ -20,6 +23,14 @@ class AdminRestaurantRequestService {
 
     if (request.status !== 'pending') {
       throw new ERR_RESPONSE.UnprocessableEntityError("This request was handled");
+    }
+
+    if (request.userId.role === UserRole.CUSTOMER) {
+      // Cập nhật DB
+      await userService.updateUser(request.userId._id, { role: UserRole.RESTAURANT_OWNER})
+
+      // XỬ LÍ BLACKLIST ĐỂ ĐỔI ROLE CÓ HIỆU LỰC NGAY
+      await redisService.setForceRefresh(request.userId._id);
     }
 
     const approveReq = await repoRestaurantRequest.approve(requestId);

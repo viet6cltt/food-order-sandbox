@@ -10,7 +10,6 @@ class RestaurantRequestService {
     if (exists) {
       throw new ERR_RESPONSE.UnprocessableEntityError("This user already has a pending request");
     }
-
     return await repoRestaurantRequest.createRequest({ ...data, userId });
   }
 }

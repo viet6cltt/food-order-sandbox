@@ -12,6 +12,8 @@ require('./config/passport.config');
 
 
 const route = require('./routes');
+const setupSwagger = require('./docs/swagger');
+
 const app = express();
 app.set('trust proxy', 1);
 // Avoid 304 (ETag) responses with empty bodies for API calls.
@@ -48,14 +50,15 @@ app.use(passport.initialize());
 app.use(morgan('dev')); // Log HTTP requests
 
 
-// Load and configure Swagger
-app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
-  const swaggerPath = path.resolve(__dirname, '../dist/swagger.json');
-  delete require.cache[swaggerPath];
-  const swaggerDocument = require(swaggerPath);
-  return swaggerUi.setup(swaggerDocument)(req, res, next);
-});
+// // Load and configure Swagger
+// app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
+//   const swaggerPath = path.resolve(__dirname, '../dist/swagger.json');
+//   delete require.cache[swaggerPath];
+//   const swaggerDocument = require(swaggerPath);
+//   return swaggerUi.setup(swaggerDocument)(req, res, next);
+// });
 
+setupSwagger(app);
 
 // Route init
 route(app);

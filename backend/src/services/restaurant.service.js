@@ -6,6 +6,7 @@ const ERR = require('../constants/errorCodes');
 const restaurantRepository = require('../repositories/restaurant.repository');
 const cloudinary = require("../config/cloudinary.config");
 const fs = require('fs');
+const { RestaurantStatus } = require('@/constants/restaurant.constants');
 
 function isWithinBusinessHours(current, open, close) {
   // current, open, close đều dạng "HH:MM"
@@ -29,39 +30,54 @@ function isWithinBusinessHours(current, open, close) {
 
 class RestaurantService {
 
+  // trả về restaurant nếu đúng là owner
+  async checkOwner(restaurantId, userId) {
+    const restaurant = await restaurantRepository.getById(restaurantId);
+
+    if (!restaurant) return null;
+
+    if (restaurant.ownerId.toString() !== userId.toString()) {
+      return null;
+    }
+
+    return restaurant;
+  }
+
   // get restaurants by categoryId
-  async getRestaurants({ categoryId, pagination, sortBy = 'rating' }) {
+  async getRestaurants({ categoryId, pagination, sortBy, lat, lng }) {
     const { skip, limit, page } = pagination;
 
-    // Khởi tạo filter cơ bản
-    const filter = { isActive: true };
-    
-    // Nếu truyền categoryId, MongoDB sẽ quét trong mảng categories
-    if (categoryId) {
-      filter.categoriesId = categoryId; 
-    }
+    const filter = {
+      status: RestaurantStatus.ACTIVE
+    };
 
-    // Xử lý logic Sort (Mặc định: Rating cao nhất lên đầu)
+    if (categoryId) filter.categoriesId = categoryId;
+
+    // sort khi không có tọa độ
+    // nếu sortBy là newest thì k quan tâm đến rating
     let sortOptions = { rating: -1, createdAt: -1 };
-    if (sortBy === 'newest') {
-      sortOptions = { createdAt: -1 };
-    }
+    if (sortBy === 'newest') sortOptions = { createdAt: -1 };
 
-    const { items, total } = await RestaurantRepository.findAll({
+    const { items, total } = await restaurantRepository.findAllWithScore({
       filter,
       sort: sortOptions,
-      skip,
-      limit
+      skip, limit,
+      lat: lat ? Number(lat) : null,
+      lng: lng ? Number(lng) : null,
     });
 
-    console.log(items);
+    // Xử lí giờ đóng cửa 
+    const currentTime = new Date().toTimeString().slice(0, 5);
+
+    const processedItems = items.map(item => ({
+      ...item,
+      isOpen: isWithinBusinessHours(currentTime, item.opening_time, item.closing_time),
+    }));
 
     return {
-      items,
+      items: processedItems,
       meta: {
-        total,
-        page,
-        limit,
+        total, page, limit,
         totalPages: Math.ceil(total / limit)
       }
     };
@@ -77,22 +93,18 @@ class RestaurantService {
     return await RestaurantRepository.create(data);
   }
 
-  // check owner 
-  async checkOwner(restaurantId, userId) {
-    console.log(restaurantId);
-    const restaurant = await this.getRestaurantInfo(restaurantId);
-
-    if (!restaurant) {
-      throw new ERR_RESPONSE.NotFoundError("Restaurant is not found", ERR.RESTAURANT_NOT_FOUND)
-    }
-    if (restaurant.ownerId.toString() !== userId.toString()) {
-      throw new ERR_RESPONSE.ForbiddenError("You are not the owner of this restaurant", ERR.RESTAURANT_NOT_OWNER);
+  async isOperational(restaurant) {
+    // check status (by admin)
+    if (restaurant.status !== RestaurantStatus.ACTIVE) {
+      return false;
     }
 
-    return restaurant;
-  }
+    // check isActive (by owner)
+    if (!restaurant.isActive) {
+      return false;
+    } 
 
-  async checkOpenTime(restaurant) {
+    // check Opening/Closed Time
     const now = new Date();
     const currentTime = now.toTimeString().slice(0, 5); // HH:MM
 
@@ -133,6 +145,10 @@ class RestaurantService {
     const data = await restaurantRepository.getRecommend();
 
     return data;
+  }
+
+  async updateRatingAndCount(id, { newRating, newCount }) {
+    return restaurantRepository.updateRatingAndCount(id, { newRating, newCount });
   }
 }
 

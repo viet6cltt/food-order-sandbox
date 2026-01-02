@@ -60,7 +60,7 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['admin', 'customer', 'restaurant_owner', 'brand_admin'],
+      enum: ['admin', 'customer', 'restaurant_owner'],
       default: 'customer'
     },
     status: {

@@ -3,7 +3,7 @@ const router = require('express').Router();
 const ctl = require('../../controllers/admin/adminRestaurantRequest.controller');
 
 const { requireAuth } = require('../../middlewares/auth.middleware');
-const { requireAdmin } = require('../../middlewares/admin.middleware');
+const { requireAdmin } = require('@/middlewares/role.middleware');
 
 router.use(requireAuth, requireAdmin);
 

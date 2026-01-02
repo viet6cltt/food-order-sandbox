@@ -5,6 +5,10 @@ class ReviewRepo {
     return await Review.create(data);
   }
 
+  async findByUserIdOrOrderId({ userId, orderId }) {
+    return await Review.findOne({ userId, orderId });
+  }
+
   async findPublishedByRestaurant(restaurantId, { skip, limit }) {
     const [items, total] = await Promise.all([
       Review.find({ restaurantId, status: "PUBLISHED" })
@@ -13,6 +17,19 @@ class ReviewRepo {
         .limit(limit)
         .populate("userId", "firstname lastname avatarUrl"),
       Review.countDocuments({ restaurantId, status: "PUBLISHED" }),
+    ]);
+
+    return { items, total };
+  }
+
+  async findPublishedByMenuItem(menuItemId, { skip, limit }) {
+    const [items, total] = await Promise.all([
+      Review.find({ items: menuItemId, status: "PUBLISHED" })
+        .sort("-createdAt")
+        .skip(skip)
+        .limit(limit)
+        .populate("userId", "firstname lastname avatarUrl"),
+      Review.countDocuments({ items: menuItemId, status: "PUBLISHED" }),
     ]);
 
     return { items, total };

@@ -1,18 +1,19 @@
 const express = require('express');
-const authRoutes = require('./auth.routes.js');
-const usersRoutes = require('./users.routes.js');
-const restaurantsRoutes = require('./restaurants.routes.js');
-const menuItemRoutes = require('./menuItem.routes.js');
-const cartRoutes = require('./cart.routes.js');
-const orderRoutes = require('./order.routes.js');
-const paymentRoutes = require('./payment.routes.js');
-const revenueRoutes = require('./revenue.routes.js');
+const authRoutes = require('./app/auth.routes.js');
+const usersRoutes = require('./app/users.routes.js');
+const restaurantsRoutes = require('./app/restaurants.routes.js');
+const menuItemRoutes = require('./app/menuItem.routes.js');
+const cartRoutes = require('./app/cart.routes.js');
+const orderRoutes = require('./app/order.routes.js');
+const paymentRoutes = require('./app/payment.routes.js');
 const reviewRoutes = require('./app/reviews.routes.js');
-const categoryRoutes = require('./category.routes.js');
+const categoryRoutes = require('./app/category.routes.js');
+
 const adminUserRoutes = require('./admin/adminUser.routes.js');
 const adminCategoryRoutes = require('./admin/adminCategory.routes.js');
 const adminRestaurantRequestRoutes = require('./admin/adminRestaurantRequest.routes.js');
-const adminReviewReport = require('./admin/adminReviewReport.routes.js');
+const adminReviewReport = require('./admin/adminReport.routes.js');
+const adminOrderRoutes = require('./admin/adminOrder.routes.js');
 
 const errorHandler = require('../middlewares/error.middleware');
 
@@ -26,14 +27,14 @@ function route(app) {
   apiRouter.use('/carts', cartRoutes);
   apiRouter.use('/orders', orderRoutes);
   apiRouter.use('/payments', paymentRoutes);
-  apiRouter.use('/revenue', revenueRoutes);
   apiRouter.use('/reviews', reviewRoutes);
   apiRouter.use('/categories', categoryRoutes);
   // admin
   apiRouter.use('/admin/users', adminUserRoutes);
   apiRouter.use('/admin/categories', adminCategoryRoutes);
   apiRouter.use('/admin/restaurant-requests', adminRestaurantRequestRoutes);
-  apiRouter.use('/review-reports', adminReviewReport)
+  apiRouter.use('/admin/reports', adminReviewReport)
+  apiRouter.use('/admin/orders', adminOrderRoutes);
   app.use('/api', apiRouter); // add all with /api
 
   // Handler err

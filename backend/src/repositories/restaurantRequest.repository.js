@@ -10,7 +10,7 @@ class RestaurantRequestRepository {
   }
 
   async getById(requestId) {
-    return await RestaurantRequest.findById(requestId);
+    return (await RestaurantRequest.findById(requestId)).populate('userId', 'role');
   }
 
   async getPendingRequestsByUserId(userId) {

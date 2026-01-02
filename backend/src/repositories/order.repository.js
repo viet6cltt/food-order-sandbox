@@ -1,3 +1,4 @@
+const { orderStatusObject, orderStatus } = require('@/constants/orderStatus');
 const Order = require('../models/Order');
 
 class OrderRepository {
@@ -45,6 +46,72 @@ class OrderRepository {
     },
     { new: true}
     );
+  }
+
+  /**
+   * Lấy dữ liệu 7 ngày nhất cho Dashboard Admin
+   */
+  async getDashboardStats(sinceDate) {
+    return await Order.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: sinceDate },
+          status: { $in: [orderStatusObject.completed, orderStatusObject.cancelled] }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt"} },
+            status: "$status"
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $group: {
+          _id: "$_id.date",
+          completed: {
+            $sum: { $cond: [{ $eq: ["$_id.status", "completed"] }, "$count", 0] }
+          },
+          cancelled: {
+            $sum: { $cond: [{ $eq: ["$_id.status", "cancelled"] }, "$count", 0] }
+          }
+        }
+      },
+      { $sort: { "_id": 1 } }
+    ]);
+  }
+
+  /**
+   * Thống kê chi tiết cho màn hình Order
+   */
+  async getStatusDistributionSummary(filters) {
+    const { startDate, endDate } = filters;
+    const match = {};
+    if (startDate || endDate) {
+      match.createdAt = {
+        ...(startDate && { $gte: new Date(startDate) }),
+        ...(endDate && { $lte: new Date(endDate) })
+      };
+    }
+
+    return await Order.aggregate([
+      { $match: match },
+      {
+        $facet: {
+          // Đếm tất cả trạng thái hiện có
+          byStatus: [
+            { $group: { _id: "$status", count: { $sum: 1 } } }
+          ],
+          // Tổng doanh thu từ đơn hoàn thành
+          revenue: [
+            { $match: { status: 'completed' } },
+            { $group: { _id: null, total: { $sum: "$totalPrice" } } }
+          ]
+        }
+      }
+    ]);
   }
 }
 

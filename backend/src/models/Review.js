@@ -23,6 +23,15 @@ const reviewSchema = new mongoose.Schema(
       index: true,
     },
 
+    // for better query
+    items: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "MenuItem",
+        index: true
+      }
+    ],
+
     rating: {
       type: Number,
       min: 1,

@@ -43,7 +43,6 @@ function generateToken(userId, tokenTypeConfig, additionalPayload = {}) {
   const payload = {
     userId: userId,
     type: tokenTypeConfig.type,
-    role: additionalPayload.role,
     ...additionalPayload,
   };
 
@@ -77,7 +76,7 @@ function generateRefreshToken(userId, role) {
     const refreshTokenId = uuidv4(); 
     const config = tokenConfig.getTokenConfig().REFRESH;
 
-    return generateToken(userId, config, { role, refreshTokenId });
+    return generateToken(userId, config, { refreshTokenId });
 }
 
 function generateAccessToken(userId, role) {

@@ -39,11 +39,18 @@ const restaurantSchema = new mongoose.Schema({
   opening_time: { type: String, trim: true, default: "08:00" },
   closing_time: { type: String, trim: true, default: "22:00" },
 
-  isActive: { type: Boolean, default: true },
+  isActive: { type: Boolean, default: true }, // biểu hiện trạng thái do restaurant set
+
+  // thể hiện trạng thái do admin set
+  status: {
+    type: String,
+    enum: ["ACTIVE", "BLOCKED"],
+    default: "ACTIVE"
+  },
 
   rating: {
     type: Number,
-    default: 4.5,
+    default: 0,
     min: 0,
     max: 5,
   },
@@ -84,5 +91,7 @@ restaurantSchema.index({ "address.geo": "2dsphere" });
 restaurantSchema.index({ ownerId: 1 });
 restaurantSchema.index({ isActive: 1 });
 restaurantSchema.index({ categoriesId: 1 });
+
+restaurantSchema.index({ status: 1 });
 
 module.exports = mongoose.model("Restaurant", restaurantSchema);

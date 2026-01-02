@@ -17,6 +17,31 @@ class RestaurantRepository {
     );
   }
 
+  async updateRatingAndCount(id, { newRating, newCount }) {
+    return await Restaurant.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          rating: newRating,
+          reviewCount: newCount
+        }
+      },
+      { new: true }
+    );
+  }
+
+  async updateStatus(restaurantId, status) {
+    return await Restaurant.findByIdAndUpdate(
+      restaurantId,
+      { 
+        $set: {
+          status
+        },
+      },
+      { new: true }
+    )
+  }
+
   async search({ keyword, lat, lng, limit = 0, skip = 20 }) {
     return Restaurant.aggregate([
       {
@@ -106,6 +131,68 @@ class RestaurantRepository {
         .skip(skip)
         .limit(limit)
         .lean(),
+      Restaurant.countDocuments(filter)
+    ]);
+
+    return { items, total };
+  }
+
+  async findAllWithScore({ filter, sort, skip, limit, lat, lng }) {
+    const pipeline = [];
+
+    // 1. Nếu có tọa độ, ưu tính tính khoảng cách bằng $geoNear
+    if (lat && lng) {
+      pipeline.push({
+        $geoNear: {
+          near: { type: "Point", coordinates: [lng, lat] },
+          distanceField: "distance", 
+          query: filter,
+          spherical: true,
+          //maxDistance: 15000, // giả định r tối đa 15km để tính điểm
+          key: "address.geo" // Specify which geospatial index to use
+        }
+      });
+
+      // 2. tính điểm
+      pipeline.push({
+        $addFields: {
+          distanceScore: {
+            $multiply: [
+              { $subtract: [1, { $min: [{ $divide: ["$distance", 15000] }, 1] }] },
+              10
+            ]
+          },
+          // Rating hiện tại thang 5 -> nhân 2
+          ratingScore: { $multiply: ["$rating", 2] }
+        }
+      });
+
+      pipeline.push({
+        $addFields: {
+          finalScore: {
+            $add: [
+              { $multiply: ["$ratingScore", 0.7] },
+              { $multiply: ["$distanceScore", 0.3] }
+            ]
+          }
+        }
+      });
+
+      // 3. Sắp xếp: isActive -> finalScore
+      pipeline.push({ $sort: { isActive: -1, finalScore: -1 } });
+    } else {
+      // Nếu k tọa độ, dùng filter và sort truyền thống
+      pipeline.push({ $match: filter });
+      pipeline.push({ $sort: { isActive: -1, ...sort }});
+    }
+
+    // 4. Pagination
+    pipeline.push({ $skip: skip });
+    pipeline.push({ $limit: limit });
+
+    // Truy vấn
+    const [items, total] = await Promise.all([
+      Restaurant.aggregate(pipeline),
       Restaurant.countDocuments(filter)
     ]);
 

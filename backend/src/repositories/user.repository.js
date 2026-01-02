@@ -2,8 +2,23 @@ const User = require('../models/User');
 
 class UserRepository {
 
-  async findAll(filter = {}) {
-    return User.find(filter);
+  // ==========================================
+  // NHÓM TÌM KIẾM (READ)
+  // ==========================================
+
+  async findAll(filter = {}, { limit = 10, skip = 0 }) {
+    const [users, total] = await Promise.all([
+      User.find(filter)
+        .skip(skip)
+        .limit(limit)
+        .sort({ createdAt: -1 }),
+      User.countDocuments(filter)
+    ]);
+    return { users, total };
+  }
+
+  async findById(userId) {
+    return await User.findById(userId);
   }
 
   async findByUsernameOrPhone(username, phone) {
@@ -35,8 +50,8 @@ class UserRepository {
     return user;
   }
 
-  async findById(userId) {
-    return await User.findById(userId).lean();
+  async findByEmail(email) {
+    return await User.findOne({ email });
   }
 
   async findByProviderId(provider, providerId) {
@@ -46,19 +61,26 @@ class UserRepository {
     });
   }
 
+  // ==========================================
+  // NHÓM CẬP NHẬT (WRITE/UPDATE)
+  // ==========================================
+
   async createUser(data) {
-    const user = new User(data);
-    return await user.save();
+    return await User.create(data);
   }
 
   async updateUser(userId, updateFields) {
-    return await User.findByIdAndUpdate(userId, updateFields, { new: true, runValidators: false });
-  }
-
-  async updateEmail(userId, email) {
     return await User.findByIdAndUpdate(
       userId,
-      { email, emailVerifiedAt: null },
+      { $set: updateFields },
+      { new: true, runValidators: true }
+    );
+  }
+
+  async updateStatus(userId, status) {
+    return await User.findByIdAndUpdate(
+      userId,
+      { $set: { status } },
       { new: true }
     );
   }
@@ -66,7 +88,7 @@ class UserRepository {
   async verifyEmail(userId) {
     return await User.findByIdAndUpdate(
       userId,
-      { emailVerifiedAt: new Date() },
+      { $set: { emailVerifiedAt: new Date() } },
       { new: true }
     );
   }
@@ -74,50 +96,30 @@ class UserRepository {
   async verifyPhone(userId) {
     return await User.findByIdAndUpdate(
       userId,
-      { phoneVerifiedAt: new Date() },
+      { $set: { phoneVerifiedAt: new Date() } },
       { new: true }
     );
-  }
-
-  async findByEmail(email) {
-    return await User.findOne({ email });
   }
 
   async updateProviderById(userId, providerObject) {
-    const { provider, providerId, emailAtProvider, avatarUrl } = providerObject;
+    const { provider } = providerObject;
 
-    const user = await User.findOne(
-      { _id: userId, 'providers.provider': provider},
-      { 'providers.$': 1}
+    // Cập nhật nếu đã có provider
+    const user = await User.findOneAndUpdate(
+      { _id: userId, 'providers.provider': provider },
+      { $set: { 'providers.$': providerObject } },
+      { new: true }
     );
-    
-    if (user) {
-      return await User.findOneAndUpdate(
-        { _id: userId, 'providers.provider': provider },
-        {
-          $set: {
-            'providers.$.providerId': providerId,
-            'providers.$.emailAtProvider': emailAtProvider,
-            'providers.$.avatarUrl': avatarUrl,
-          },
-        },
-        { new: true }
-      )
-    }
 
-    // nếu chưa có -> push
+    if (user) return user;
+
+    // Nếu chưa có provider thì push mới
     return await User.findByIdAndUpdate(
       userId,
-      {
-        $push: {
-          providers: providerObject,
-        },
-      },
+      { $push: { providers: providerObject } },
       { new: true }
     );
   }
-
-
 }
 
 module.exports = new UserRepository();
