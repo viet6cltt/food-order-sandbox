@@ -1,4 +1,4 @@
-const orderService = require("@/services/order.service");
+const orderService = require("@/services/app/order.service");
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse'); 

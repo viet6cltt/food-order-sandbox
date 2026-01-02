@@ -1,9 +1,9 @@
-const TokenRepository = require('../repositories/token.repository');
-const authHelper = require('../utils/authHelper');
-const tokenConfig = require('../config/token.config');
+const TokenRepository = require('@/repositories/token.repository');
+const authHelper = require('@/utils/authHelper');
+const tokenConfig = require('@/config/token.config');
 
-const HTTP_ERROR = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
+const HTTP_ERROR = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
 
 class TokenService {
   async createVerifyPhoneToken(userId, phone) {

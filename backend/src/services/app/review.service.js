@@ -1,6 +1,6 @@
 const reviewRepo = require("@/repositories/review.repository");
 const orderRepo = require("@/repositories/order.repository");
-const restaurantService = require('@/services/restaurant.service');
+const restaurantService = require('@/services/app/restaurant.service');
 
 const ERR = require("@/utils/httpErrors");
 const cloudinary = require('@/config/cloudinary.config');

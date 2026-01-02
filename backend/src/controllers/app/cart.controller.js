@@ -1,4 +1,4 @@
-const CartService = require("@/services/cart.service");
+const CartService = require("@/services/app/cart.service");
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse'); 

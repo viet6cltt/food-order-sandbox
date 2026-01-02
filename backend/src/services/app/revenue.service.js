@@ -1,4 +1,4 @@
-const revenueRepository = require('../repositories/revenue.repository');
+const revenueRepository = require('@/repositories/revenue.repository');
 
 
 class RevenueService {

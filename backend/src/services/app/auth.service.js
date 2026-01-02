@@ -1,16 +1,16 @@
 
-const admin = require('../config/firebaseConfig');
+const admin = require('@/config/firebaseConfig');
 const UserService = require('./user.service');
 const TokenService = require('./token.service');
 const EmailService = require('./email.service');
 const OauthService = require('./oauth.service');
-const authHelper = require('../utils/authHelper');
-const tokenConfig = require('../config/token.config');
-const UserRepository = require('../repositories/user.repository');
-const AuthRepository = require('../repositories/auth.repository');
+const authHelper = require('@/utils/authHelper');
+const tokenConfig = require('@/config/token.config');
+const UserRepository = require('@/repositories/user.repository');
+const AuthRepository = require('@/repositories/auth.repository');
 
-const HTTP_ERROR = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
+const HTTP_ERROR = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
 
 class AuthService {
   /**

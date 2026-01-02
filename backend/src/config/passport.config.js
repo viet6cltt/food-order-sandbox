@@ -1,6 +1,6 @@
 const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const UserService = require('../services/user.service');
+const UserService = require('@/services/app/user.service');
 /**
  * done: hàm callback phải gọi khi logic kết thúc, cú pháp thường là done(error, user)
  */

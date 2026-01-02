@@ -2,7 +2,7 @@
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
-const UserService = require('@/services/user.service');
+const UserService = require('@/services/app/user.service');
 
 class UserController {
   /**

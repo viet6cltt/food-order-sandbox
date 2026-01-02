@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const tokenConfig = require('../config/token.config');
+const tokenConfig = require('@/config/token.config');
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {

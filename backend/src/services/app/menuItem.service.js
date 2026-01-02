@@ -1,7 +1,7 @@
-const MenuItemRepository = require('../repositories/menuItem.repository');
+const MenuItemRepository = require('@/repositories/menuItem.repository');
 const RestaurantService = require('./restaurant.service');
-const ERR_RESPONSE = require('../utils/httpErrors.js');
-const ERR = require('../constants/errorCodes');
+const ERR_RESPONSE = require('@/utils/httpErrors.js');
+const ERR = require('@/constants/errorCodes');
 
 class MenuItemService {
   // get menu items by restaurantId

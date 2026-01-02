@@ -1,5 +1,5 @@
-const categoryRepo = require('../../repositories/category.repository');
-const ERR_RESPONSE = require('../../utils/httpErrors');
+const categoryRepo = require('@/repositories/category.repository');
+const ERR_RESPONSE = require('@/utils/httpErrors');
 
 class AdminCategoryService {
 

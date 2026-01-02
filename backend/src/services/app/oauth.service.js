@@ -1,5 +1,5 @@
-const providersConfig = require('../config/providers.config');
-const authHelper = require('../utils/authHelper');
+const providersConfig = require('@/config/providers.config');
+const authHelper = require('@/utils/authHelper');
 const crypto = require('crypto');
 
 function buildQuery(params) {

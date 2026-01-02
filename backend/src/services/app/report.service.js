@@ -1,9 +1,9 @@
 const reviewService = require('./review.service');
-const restaurantService = require('../restaurant.service');
+const restaurantService = require('./restaurant.service');
 const ERR = require("@/utils/httpErrors");
 const reportRepo = require('@/repositories/report.repository');
 const { ReportStatus, TargetType } = require('@/constants/report.constants');
-const userService = require('../user.service');
+const userService = require('./user.service');
 
 class ReportService {
   async createReport({ reportedBy, targetId, targetType, reason, description }) {

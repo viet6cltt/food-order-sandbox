@@ -1,4 +1,4 @@
-const AuthService = require('@/services/auth.service');
+const AuthService = require('@/services/app/auth.service');
 const passport = require('passport');
 const ERR = require('@/constants/errorCodes');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');

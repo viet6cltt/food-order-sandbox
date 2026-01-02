@@ -1,4 +1,4 @@
-const paymentService = require("@/services/payment.service");
+const paymentService = require("@/services/app/payment.service");
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse'); 

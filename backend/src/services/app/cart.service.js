@@ -1,7 +1,7 @@
-const CartRepository = require('../repositories/cart.repository');
-const ERR_RESPONSE = require('../utils/httpErrors.js');
-const ERR = require('../constants/errorCodes');
-const cartRepository = require('../repositories/cart.repository');
+const CartRepository = require('@/repositories/cart.repository');
+const ERR_RESPONSE = require('@/utils/httpErrors.js');
+const ERR = require('@/constants/errorCodes');
+const cartRepository = require('@/repositories/cart.repository');
 
 const orderService = require('./order.service.js');
 const menuItemService = require('./menuItem.service.js');

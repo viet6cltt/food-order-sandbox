@@ -1,4 +1,4 @@
-const restaurantRequestService = require('@/services/restaurantRequest.service');
+const restaurantRequestService = require('@/services/app/restaurantRequest.service');
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');

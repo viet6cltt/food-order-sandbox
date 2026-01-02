@@ -1,10 +1,10 @@
 
 
-const RestaurantRepository = require('../repositories/restaurant.repository');
-const ERR_RESPONSE = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
-const restaurantRepository = require('../repositories/restaurant.repository');
-const cloudinary = require("../config/cloudinary.config");
+const RestaurantRepository = require('@/repositories/restaurant.repository');
+const ERR_RESPONSE = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
+const restaurantRepository = require('@/repositories/restaurant.repository');
+const cloudinary = require("@/config/cloudinary.config");
 const fs = require('fs');
 const { RestaurantStatus } = require('@/constants/restaurant.constants');
 

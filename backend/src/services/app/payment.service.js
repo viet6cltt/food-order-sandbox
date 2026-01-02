@@ -1,10 +1,10 @@
-const paymentRepository = require('../repositories/payment.repository');
-const ERR_RESPONSE = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
+const paymentRepository = require('@/repositories/payment.repository');
+const ERR_RESPONSE = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
 const restaurantService = require('./restaurant.service');
 // Lazy load orderService to break circular dependency
 // const orderService = require('./order.service');
-const { orderStatusObject } = require('../constants/orderStatus');
+const { orderStatusObject } = require('@/constants/orderStatus');
 
 class PaymentService {
 
@@ -32,7 +32,7 @@ class PaymentService {
   async createPaymentBANK({ orderId, userId, status }) {
     // Khi status là BANK_TRANSFER thì tạo payment khi checkout order
     // Lazy load to break circular dependency
-    const orderService = require('./order.service');
+    const orderService = require('./app/order.service');
     const order = await orderService.getOrder(userId, orderId);
 
     if (order.paymentMethod !== "BANK_TRANSFER") {
@@ -75,7 +75,7 @@ class PaymentService {
     }
 
     // Lazy load to break circular dependency
-    const orderService = require('./order.service');
+    const orderService = require('./app/order.service');
     // Note: getOrder requires userId, but we only have orderId here
     // We need to use getOrderById instead or pass userId
     const order = await orderService.getOrderById(payment.orderId);
@@ -113,7 +113,7 @@ class PaymentService {
     }
 
     // Lazy load to break circular dependency
-    const orderService = require('./order.service');
+    const orderService = require('./app/order.service');
     const order = await orderService.getOrderById(payment.orderId);
 
     if (!order) {

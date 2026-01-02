@@ -1,12 +1,12 @@
-const orderRepository = require('../repositories/order.repository');
+const orderRepository = require('@/repositories/order.repository');
 const geolib = require('geolib');
-const ERR_RESPONSE = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
+const ERR_RESPONSE = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
 const menuItemService = require('./menuItem.service');
 const restaurantService = require('./restaurant.service');
 const paymentService = require('./payment.service');
 
-const { orderStatusObject ,allowedTransitions } = require('../constants/orderStatus');
+const { orderStatusObject ,allowedTransitions } = require('@/constants/orderStatus');
 
 
 class OrderService {

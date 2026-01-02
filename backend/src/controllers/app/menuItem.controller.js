@@ -1,7 +1,7 @@
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
-const MenuItemService = require('@/services/menuItem.service');
+const MenuItemService = require('@/services/app/menuItem.service');
 
 class MenuItemController {
   /**

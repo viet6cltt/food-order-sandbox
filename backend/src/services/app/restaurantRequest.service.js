@@ -1,7 +1,6 @@
-const repoRestaurantRequest = require('../repositories/restaurantRequest.repository');
-const serviceRestaurant = require('./restaurant.service');
-const ERR_RESPONSE = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
+const repoRestaurantRequest = require('@/repositories/restaurantRequest.repository');
+const ERR_RESPONSE = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
 
 class RestaurantRequestService {
   

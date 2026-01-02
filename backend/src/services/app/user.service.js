@@ -1,10 +1,10 @@
 
-const TokenRepository = require('../repositories/token.repository');
-const UserRepository = require('../repositories/user.repository');
-const authHelper = require('../utils/authHelper');
+const TokenRepository = require('@/repositories/token.repository');
+const UserRepository = require('@/repositories/user.repository');
+const authHelper = require('@/utils/authHelper');
 
-const HTTP_ERROR = require('../utils/httpErrors');
-const ERR = require('../constants/errorCodes');
+const HTTP_ERROR = require('@/utils/httpErrors');
+const ERR = require('@/constants/errorCodes');
 
 class UserService {
   async createUser(data) {

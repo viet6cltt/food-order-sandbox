@@ -1,4 +1,4 @@
-const revenueService = require('@/services/revenue.service');
+const revenueService = require('@/services/app/revenue.service');
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');

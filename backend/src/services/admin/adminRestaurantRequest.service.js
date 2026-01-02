@@ -1,7 +1,7 @@
-const repoRestaurantRequest = require('../../repositories/restaurantRequest.repository');
-const serviceRestaurant = require('../restaurant.service');
-const ERR_RESPONSE = require('../../utils/httpErrors');
-const userService = require('../user.service');
+const repoRestaurantRequest = require('@/repositories/restaurantRequest.repository');
+const serviceRestaurant = require('../app/restaurant.service');
+const ERR_RESPONSE = require('@/utils/httpErrors');
+const userService = require('../app/user.service');
 const { UserRole } = require('@/constants/user.constants');
 const redisService = require('../redis.service');
 
