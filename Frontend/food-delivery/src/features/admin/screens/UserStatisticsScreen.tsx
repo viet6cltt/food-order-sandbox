@@ -4,7 +4,7 @@ import UserList from '../components/user-statistics/UserList';
 import PenaltyAccountList from '../components/user-statistics/PenaltyAccountList';
 import OwnerRegisterList from '../components/user-statistics/OwnerRegisterList';
 import { adminUserApi } from '../api'; // Giả định file lưu api
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 const UserStatisticsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'users' | 'penalty' | 'requests'>('users');
@@ -13,7 +13,7 @@ const UserStatisticsScreen: React.FC = () => {
     // Data States
     const [users, setUsers] = useState<any[]>([]);
     const [penaltyList, setPenaltyList] = useState<any[]>([]);
-    const [requests] = useState<any[]>([]);
+    const [requests, setRequests] = useState<any[]>([]);
 
     // Hàm lấy dữ liệu dựa trên Tab
     const fetchData = useCallback(async () => {

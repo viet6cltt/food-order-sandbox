@@ -1,4 +1,5 @@
 import React from 'react';
+import { UserIcon } from '@heroicons/react/24/outline';
 
 interface User {
     _id: string;

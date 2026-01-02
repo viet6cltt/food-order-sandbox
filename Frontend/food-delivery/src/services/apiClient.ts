@@ -26,6 +26,14 @@ api.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${token}`;
     }
 
+    // Avoid conditional GET (ETag/If-None-Match) returning 304 with empty body in XHR/Axios.
+    // This has been causing empty lists (e.g. categories) even though the backend logs 304.
+    if (config.method?.toLowerCase() === 'get' && config.headers) {
+      config.headers['Cache-Control'] = 'no-cache';
+      config.headers['Pragma'] = 'no-cache';
+      config.headers['If-None-Match'] = '';
+      config.headers['If-Modified-Since'] = '';
+    }
     return config;
   },
   (error) => Promise.reject(error)

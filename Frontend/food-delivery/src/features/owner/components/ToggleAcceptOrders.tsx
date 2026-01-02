@@ -5,10 +5,10 @@ const ToggleAcceptOrders: React.FC = () => {
     const [isOpen, setIsOpen] = useState(true);
 
     return (
-        <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 h-full flex items-center justify-between">
             <div>
                 <h3 className="text-lg font-bold text-gray-900">Trạng thái Nhà hàng</h3>
-                <p className={`text-sm font-medium ${isOpen ? 'text-green-600' : 'text-red-500'}`}>
+                <p className={`text-sm font-medium ${isOpen ? 'text-emerald-600' : 'text-red-500'}`}>
                     {isOpen ? 'Đang mở cửa - Nhận đơn' : 'Đang đóng cửa - Tạm ngưng'}
                 </p>
             </div>
@@ -16,8 +16,9 @@ const ToggleAcceptOrders: React.FC = () => {
             {/* Toggle Switch Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-colors focus:outline-none ${isOpen ? 'bg-green-500' : 'bg-gray-300'
-                    }`}
+                className={`relative inline-flex ml-4 h-8 w-14 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 ${
+                    isOpen ? 'bg-emerald-500' : 'bg-gray-300'
+                }`}
             >
                 <span className="sr-only">Toggle shop status</span>
                 <span

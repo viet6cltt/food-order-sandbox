@@ -2,11 +2,13 @@ import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '../../../layouts/AdminLayout';
 import PendingRestaurantsList from '../components/restaurant-category/PendingRestaurantsList';
 import { adminRestaurantApi } from '../api';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 
+type PendingRestaurants = React.ComponentProps<typeof PendingRestaurantsList>['restaurants'];
+
 const AdminRestaurantRequestsScreen: React.FC = () => {
-    const [requests, setRequests] = useState<any[]>([]);
+    const [requests, setRequests] = useState<PendingRestaurants>([]);
     const [isLoading, setIsLoading] = useState(false);
 
     // 1. Hàm lấy dữ liệu từ Backend
@@ -36,6 +38,7 @@ const AdminRestaurantRequestsScreen: React.FC = () => {
             toast.success("Đã phê duyệt hồ sơ thành công!");
             fetchRequests(); // Reload lại danh sách sau khi duyệt
         } catch (error) {
+            console.error(error);
             toast.error("Lỗi trong quá trình phê duyệt");
         }
     };
@@ -51,6 +54,7 @@ const AdminRestaurantRequestsScreen: React.FC = () => {
             toast.success("Đã từ chối hồ sơ đăng ký");
             fetchRequests();
         } catch (error) {
+            console.error(error);
             toast.error("Lỗi khi gửi yêu cầu từ chối");
         }
     };

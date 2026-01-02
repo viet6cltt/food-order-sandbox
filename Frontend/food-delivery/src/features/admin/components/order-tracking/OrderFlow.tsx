@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
-type StepStatus = 'pending' | 'confirmed' | 'cooking' | 'delivering' | 'completed';
+type StepStatus = 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'completed';
 
 interface Props {
     currentStatus: StepStatus;
@@ -10,7 +10,7 @@ interface Props {
 const STEPS = [
     { id: 'pending', label: 'Chờ xác nhận', time: '10:00' },
     { id: 'confirmed', label: 'Đã nhận', time: '10:05' },
-    { id: 'cooking', label: 'Đang nấu', time: '10:15' },
+    { id: 'preparing', label: 'Đang chế biến', time: '10:15' },
     { id: 'delivering', label: 'Đang giao', time: '10:30' },
     { id: 'completed', label: 'Hoàn thành', time: '--:--' },
 ];

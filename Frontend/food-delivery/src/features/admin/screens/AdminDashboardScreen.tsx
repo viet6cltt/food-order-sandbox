@@ -10,6 +10,7 @@ import TopFoodsChart from '../components/dashboard/TopFoodsChart';
 import { 
   ChartBarIcon, 
   UsersIcon, 
+  HomeIcon,
   ClipboardDocumentCheckIcon, 
   ExclamationTriangleIcon,
   TagIcon

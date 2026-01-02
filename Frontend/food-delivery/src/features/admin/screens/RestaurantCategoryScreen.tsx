@@ -3,7 +3,7 @@ import AdminLayout from '../../../layouts/AdminLayout';
 import CategoryList from '../components/restaurant-category/CategoryList';
 import CategoryForm from '../components/restaurant-category/CategoryForm';
 import { adminCategoryApi } from '../api';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-toastify';
 
 const RestaurantCategoryScreen: React.FC = () => {
     const [categories, setCategories] = useState<any[]>([]);

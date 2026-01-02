@@ -14,13 +14,12 @@ export default function useRestaurant(restaurantId: string | undefined): UseRest
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    const id = restaurantId;
-    if (!id) {
+    if (!restaurantId) {
       setRestaurant(null);
       return;
     }
 
-    async function load(restaurantId: string) {
+    async function load() {
       setLoading(true);
       setError(null);
       try {
@@ -34,7 +33,7 @@ export default function useRestaurant(restaurantId: string | undefined): UseRest
       }
     }
 
-    load(id);
+    load();
   }, [restaurantId]);
 
   return { restaurant, loading, error };
