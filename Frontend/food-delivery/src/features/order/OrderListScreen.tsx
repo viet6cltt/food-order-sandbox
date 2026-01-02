@@ -63,7 +63,7 @@ const OrderListScreen: React.FC<{ className?: string }> = ({ className = '' }) =
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
         if (axiosError.response?.status === 401) {
-          navigate('/login')
+          navigate('/auth/login')
           return
         } else {
           errorMessage = axiosError.response?.data?.message || 

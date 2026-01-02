@@ -27,7 +27,7 @@ const PasswordResetRequest: React.FC<PasswordResetRequestProps> = () => {
 
       if (res.success) {
         toast.success('Email đã được gửi, vui lòng kiểm tra email')
-        navigate('/login') // quay lại màn login
+        navigate('/auth/login') // quay lại màn login
       } else {
         setError(res.message || 'Có lỗi xảy ra. Vui lòng thử lại')
       }

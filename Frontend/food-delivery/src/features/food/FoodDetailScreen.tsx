@@ -89,7 +89,7 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
     if (!food || !payload.itemId) return
 
     if (!isAuthenticated) {
-      navigate('/login')
+      navigate('/auth/login')
       return
     }
 
@@ -114,7 +114,7 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
         const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
         if (axiosError.response?.status === 401) {
           errorMessage = 'Vui lòng đăng nhập để thêm vào giỏ hàng'
-          navigate('/login')
+          navigate('/auth/login')
         } else if (axiosError.response?.status === 400) {
           errorMessage = axiosError.response?.data?.message || 
                          axiosError.response?.data?.error || 

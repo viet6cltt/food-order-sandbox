@@ -40,7 +40,7 @@ const OAuthSuccessScreen: React.FC = () => {
               <p className="text-gray-600 mb-4">{error}</p>
               <button
                 className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/auth/login')}
               >
                 Về trang đăng nhập
               </button>

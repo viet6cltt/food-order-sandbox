@@ -3,6 +3,7 @@ const passport = require('passport');
 const ERR = require('@/constants/errorCodes');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
 const HTTP_ERROR = require('@/utils/httpErrors');
+const redisService = require('@/services/redis.service');
 
 
 class AuthController {
@@ -251,7 +252,7 @@ class AuthController {
    */
   async logout(req, res, next) {
     try {
-      const  refreshToken = req.cookies.refreshToken;
+      const refreshToken = req.cookies.refreshToken;
       const accessToken = req.token;
       const accessTokenExp = req.tokenExp;
 

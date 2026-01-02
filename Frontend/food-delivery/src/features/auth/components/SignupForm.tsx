@@ -104,7 +104,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
     setError(null);
     try {
       await register(username, password, idToken);
-      navigate('/login');
+      navigate('/auth/login');
     } catch (err: unknown) {
       let errorMessage = 'Đăng ký thất bại. Vui lòng thử lại.';
       if (err && typeof err === 'object' && 'response' in err) {

@@ -12,18 +12,18 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   allowedRoles,
-  redirectTo = '/login'
+  redirectTo = '/auth/login'
 }) => {
   const { isAuthenticated } = useAuth();
-  const { user, loading } = useUser();
+  const { user, isLoading } = useUser();
 
   // Đang load user info
-  if (loading) {
+  if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   // Chưa đăng nhập
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !user) {
     return <Navigate to={redirectTo} replace />;
   }
 

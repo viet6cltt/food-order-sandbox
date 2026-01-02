@@ -33,7 +33,7 @@ const AppRoutes: React.FC = () => {
 		<BrowserRouter>
 			<Routes>
 				<Route
-					path="/login"
+					path="/auth/login"
 					element={
 						<PublicRoute>
 							<LoginScreen />
@@ -41,7 +41,7 @@ const AppRoutes: React.FC = () => {
 					}
 				/>
 				<Route
-					path="/signup"
+					path="/auth/signup"
 					element={
 						<PublicRoute>
 							<SignupScreen />
@@ -50,13 +50,13 @@ const AppRoutes: React.FC = () => {
 				/>
 				<Route path="/auth/complete-profile" element={<CompleteProfileScreen />} />
 				<Route path="/auth/oauth-success" element={<OAuthSuccessScreen />} />
-				<Route path="/reset-password-request" element={<ResetPasswordRequestScreen />} />
-				<Route path="/reset-password" element={<ResetPasswordScreen />} />
+				<Route path="/auth/reset-password-request" element={<ResetPasswordRequestScreen />} />
+				<Route path="/auth/reset-password" element={<ResetPasswordScreen />} />
 
 
-                {/* Customer routes */}
-                <Route path="/search" element={<SearchScreen />} />
-                {/* <Route path="/category/:categoryId" element={<CategoryRestaurantsScreen />} /> */}
+				{/* Customer routes */}
+				<Route path="/search" element={<SearchScreen />} />
+				{/* <Route path="/category/:categoryId" element={<CategoryRestaurantsScreen />} /> */}
     
 				{/* Redirect sau khi đăng nhập */}
 				<Route path="/redirect" element={<RoleBasedRedirect />} />

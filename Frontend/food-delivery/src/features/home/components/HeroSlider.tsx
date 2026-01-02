@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
-import Banner1 from '../../../../public/PromoBanner_1.jpg';
-import Banner2 from '../../../../public/PromoBanner_2.png';
-import Banner3 from '../../../../public/PromoBanner_3.png';
-import Banner4 from '../../../../public/PromoBanner_4.png';
-import Banner5 from '../../../../public/PromoBanner_5.png';
-import Banner6 from '../../../../public/PromoBanner_6.png';
-import Banner7 from '../../../../public/PromoBanner_7.png';
-import Banner8 from '../../../../public/PromoBanner_8.png';
-import Banner9 from '../../../../public/PromoBanner_9.png';
+import Banner1 from '../../../assets/picture/Foodbanner_1.png';
+import Banner2 from '../../../assets/picture/PromoBanner_2.png';
+import Banner3 from '../../../assets/picture/PromoBanner_3.png';
+import Banner4 from '../../../assets/picture/PromoBanner_4.png';
+import Banner5 from '../../../assets/picture/PromoBanner_5.png';
+import Banner6 from '../../../assets/picture/PromoBanner_6.png';
+// import Banner7 from '../../../assets/picture/PromoBanner_7.png';
+// import Banner8 from '../../../assets/picture/PromoBanner_8.png';
+// import Banner9 from '../../../assets/picture/PromoBanner_9.png';
 
 type Slide = {
   id: number;

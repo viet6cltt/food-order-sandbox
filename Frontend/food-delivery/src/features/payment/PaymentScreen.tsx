@@ -86,7 +86,7 @@ const PaymentScreen: React.FC = () => {
                 if (err && typeof err === 'object' && 'response' in err) {
                     const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } };
                     if (axiosError.response?.status === 401) {
-                        navigate('/login');
+                        navigate('/auth/login');
                         return;
                     } else if (axiosError.response?.status === 404) {
                         errorMessage = 'Không tìm thấy đơn hàng';

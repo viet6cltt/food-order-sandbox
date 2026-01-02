@@ -49,7 +49,7 @@ const RestaurantDetailScreen: React.FC = () => {
     if (!restaurantId || !payload.itemId) return
 
     if (!isAuthenticated) {
-      navigate('/login')
+      navigate('/auth/login')
       return
     }
 
@@ -77,7 +77,7 @@ const RestaurantDetailScreen: React.FC = () => {
         const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
         if (axiosError.response?.status === 401) {
           errorMessage = 'Vui lòng đăng nhập để thêm vào giỏ hàng'
-          navigate('/login')
+          navigate('/auth/login')
         } else {
           errorMessage = axiosError.response?.data?.message || axiosError.response?.data?.error || errorMessage
         }

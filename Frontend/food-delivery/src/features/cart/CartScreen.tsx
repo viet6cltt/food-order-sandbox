@@ -26,7 +26,7 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
         if (axiosError.response?.status === 401) {
-          navigate('/login')
+          navigate('/auth/login')
           return
         } else if (axiosError.response?.status === 404) {
           // Cart not found - this is OK, means empty cart
@@ -121,7 +121,7 @@ const CartScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
         if (axiosError.response?.status === 401) {
-          navigate('/login')
+          navigate('/auth/login')
           return
         } else {
           errorMessage = axiosError.response?.data?.message || 

@@ -58,12 +58,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchUser = useCallback(async () => {
+    setIsLoading(true); // đảm bảo luôn bật loading khi bắt đầu check
     try {
       // Endpoint lấy info user hiện tại
       const res = await api.get('/users/me'); 
       setUser(res.data.data.user);
       console.log(res.data.data.user);
     } catch {
+      // nếu cả Interceptor cx không refresh đc (401)
       setUser(null);
     } finally {
       setIsLoading(false);
@@ -71,12 +73,47 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
+    const pathname = window.location.pathname;
+
+    // Kiểm tra xem trang hiện tại có thuộc nhóm /auth hay không
+    const isAuthPage = pathname.startsWith('/auth');
+
+    // Logic: 
+    // - Nếu không phải trang /auth -> BẮT BUỘC fetchUser (để check session/silent refresh).
+    // - Nếu là trang /auth NHƯNG có accessToken -> Vẫn fetch để tự động redirect vào trong nếu token còn sống.
+    const hasToken = !!localStorage.getItem('accessToken');
+    const shouldFetch = !isAuthPage || hasToken;
+
+    if (shouldFetch) {
       fetchUser();
     } else {
+      // Nếu ở trang login (/auth/login) mà không có token, tắt loading ngay để hiện form
       setIsLoading(false);
     }
+
+    // Lắng nghe sự kiện logout được phát từ apiClient khi refresh thất bại
+    const onLogoutEvent = () => {
+      setUser(null);
+      localStorage.removeItem('accessToken');
+      setIsLoading(false);
+    };
+
+    window.addEventListener('auth:logout', onLogoutEvent);
+
+    // Lắng nghe storage change để đồng bộ logout giữa các tab
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'accessToken' && e.newValue === null) {
+        setUser(null);
+        setIsLoading(false);
+      }
+    };
+
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      window.removeEventListener('auth:logout', onLogoutEvent);
+      window.removeEventListener('storage', onStorage);
+    };
   }, [fetchUser]);
 
   const login = async (phone: string, password: string) => {
@@ -90,10 +127,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     await api.post('/auth/register', { username, password, idToken });
   };
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('accessToken');
-    window.location.href = '/login';
+  const logout = async() => {
+    try {
+      // set isLoading = true để không render khi thoát
+      setIsLoading(true);
+      // gửi req logout lên BE
+      await api.post('/auth/logout');
+    } catch (err) {
+      console.error('Logout error', err);
+    }  finally {
+      // clear user and token local
+      setUser(null);
+      localStorage.removeItem('accessToken');
+      window.location.replace('/auth/login');
+    }
   };
 
   return (

@@ -43,7 +43,7 @@ const PasswordResetForm: React.FC = () => {
       if (res.success) {
         setSuccessMessage('Mật khẩu đã được cập nhật thành công!');
         setTimeout(() => {
-          navigate('/login'); // Redirect về login
+          navigate('/auth/login'); // Redirect về login
         }, 1500);
       } else {
         setError(res.message || 'Có lỗi xảy ra. Vui lòng thử lại.');

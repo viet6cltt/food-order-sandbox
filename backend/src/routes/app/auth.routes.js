@@ -7,7 +7,7 @@ router.get('/', AuthController.index);
 router.post('/register', AuthController.register);
 router.post('/login', AuthController.login);
 router.post('/refresh', AuthController.refreshAccessToken);
-router.post('/logout', AuthController.logout);
+router.post('/logout', requireAuth, AuthController.logout);
 
 // gửi email xác minh đến người dùng
 router.post('/verification-email', requireAuth, AuthController.sendEmailVerification);

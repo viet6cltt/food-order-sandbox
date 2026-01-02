@@ -157,7 +157,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
               </div>
             ) : (
               <button 
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/auth/login')}
                 className="px-6 py-2 text-sm font-bold text-white bg-green-600 rounded-full hover:bg-green-700 transition"
               >
                 ĐĂNG NHẬP
