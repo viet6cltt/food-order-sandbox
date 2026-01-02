@@ -46,21 +46,15 @@ const RestaurantCard: React.FC<{ restaurant: Restaurant; className?: string }> =
     const navigate = useNavigate();
 
     const handleClick = () => {
-        const restaurantId =
-            restaurant.id ??
-            (typeof restaurant._id === 'string'
-                ? restaurant._id
-                : restaurant._id && typeof restaurant._id === 'object' && ' $oid' in (restaurant._id as Record<string, unknown>)
-                    ? (restaurant._id as { $oid?: string }).$oid
-                    : (restaurant._id as { $oid?: string } | undefined)?.$oid);
+        const restaurantId = restaurant.id || restaurant._id || (typeof restaurant._id === 'object' ? restaurant._id.$oid : undefined)
         if (restaurantId) {
             navigate(`/restaurant/${restaurantId}`);
         }
     }
 
     return (
-        <button className="w-full h-full hover:shadow-lg transition-shadow rounded-lg" onClick={handleClick}>
-            <article className={`bg-white rounded-lg shadow-sm overflow-hidden h-full flex flex-col ${className}`}>
+        <button className="hover:shadow-lg transition-shadow rounded-lg" onClick={handleClick}>
+            <article className={`bg-white rounded-lg shadow-sm overflow-hidden ${className}`}>
                 <img
                     src={restaurant.bannerUrl}
                     alt={restaurant.name}
@@ -68,11 +62,11 @@ const RestaurantCard: React.FC<{ restaurant: Restaurant; className?: string }> =
                     loading="lazy"
                 />
 
-                <div className="p-3 flex-1 flex flex-col">
-                    <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">{restaurant.name}</h3>
-                    <p className="text-xs text-gray-500 mt-1 line-clamp-2">{renderAddress(restaurant.address)}</p>
+                <div className="p-3">
+                    <h3 className="text-sm font-semibold text-gray-800 truncate">{restaurant.name}</h3>
+                    <p className="text-xs text-gray-500 mt-1 truncate">{renderAddress(restaurant.address)}</p>
 
-                    <div className="mt-auto pt-3 flex items-center justify-between">
+                    <div className="mt-3 flex items-center justify-between">
                         <div className="flex items-center space-x-2">
                             <StarIcon className="h-4 w-4 text-yellow-400" />
                             <span className="text-sm text-gray-700">{restaurant.rating.toFixed(1)}</span>

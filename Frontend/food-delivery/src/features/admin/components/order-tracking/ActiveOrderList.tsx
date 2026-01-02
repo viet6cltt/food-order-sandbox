@@ -4,7 +4,7 @@ interface Order {
     id: string;
     customer: string;
     shipper: string;
-    status: 'pending' | 'confirmed' | 'preparing' | 'delivering' | 'completed';
+    status: 'pending' | 'confirmed' | 'cooking' | 'delivering' | 'completed';
 }
 
 interface Props {

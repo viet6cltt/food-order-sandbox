@@ -152,25 +152,6 @@ const PaymentMethod: React.FC<PaymentMethodProps> = ({ className = '', restauran
                                 </div>
                             </div>
                         )}
-
-                        {listBanks.length > 0 && selectedBank && restaurantPaymentInfo?.qrImageUrl && (
-                            <div className="p-6">
-                                <p className="text-sm text-gray-600 mb-3">Quét mã QR để chuyển khoản</p>
-                                <div className="flex justify-center">
-                                    <img
-                                        src={restaurantPaymentInfo.qrImageUrl}
-                                        alt="QR thanh toán"
-                                        className="w-64 h-64 object-contain border border-gray-200 rounded"
-                                    />
-                                </div>
-                                {restaurantPaymentInfo?.bankAccountNumber && (
-                                    <p className="text-xs text-gray-500 mt-3 text-center">
-                                        STK: {restaurantPaymentInfo.bankAccountNumber}
-                                        {restaurantPaymentInfo?.bankAccountName ? ` - ${restaurantPaymentInfo.bankAccountName}` : ''}
-                                    </p>
-                                )}
-                            </div>
-                        )}
                     </div> 
                 )}
             </div>

@@ -4,7 +4,6 @@ import useAuth from '../../../hooks/useAuth';
 import useUser from '../../../hooks/useUser'; 
 import AppLayout from '../../../layouts/AppLayout';
 import ProfileEditForm from '../components/ProfileEditForm';
-import ChangePasswordForm from '../components/ChangePasswordForm';
 import { type UserProfile } from '../../../types/user';
 
 const ProfileScreen: React.FC = () => {
@@ -12,7 +11,6 @@ const ProfileScreen: React.FC = () => {
     const { logout } = useAuth();
     const { user, isLoading, refetch } = useUser();
     const [isEditing, setIsEditing] = useState(false);
-    const [isChangingPassword, setIsChangingPassword] = useState(false);
 
     // 1. Logic ghép FullName (Ưu tiên First + Last, fallback về Username)
     const fullName = user?.firstname || user?.lastname
@@ -41,16 +39,6 @@ const ProfileScreen: React.FC = () => {
     }
 
     if (!user) return null;
-
-    const roleQuickAction = (() => {
-        if (user.role === 'restaurant_owner') {
-            return { label: 'Menu', to: '/owner/menu-list' };
-        }
-        if (user.role === 'admin') {
-            return { label: 'Users', to: '/admin/users' };
-        }
-        return { label: 'Đơn hàng', to: '/order-list' };
-    })();
 
     return (
         <AppLayout>
@@ -143,34 +131,16 @@ const ProfileScreen: React.FC = () => {
                                 </div>
 
                                 {/* Footer Actions */}
-                                <div className="mt-10 pt-6 border-t border-gray-100 grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="mt-10 pt-6 border-t border-gray-100 grid grid-cols-2 gap-4">
                                     <button 
-                                        onClick={() => navigate(roleQuickAction.to)}
+                                        onClick={() => navigate('/order-history')}
                                         className="flex items-center justify-center gap-2 py-3 bg-green-50 text-green-700 font-bold rounded-xl hover:bg-green-100 transition-all active:scale-95"
                                     >
                                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            {user.role === 'restaurant_owner' ? (
-                                                <path d="M4 6h16M4 12h16M4 18h16" />
-                                            ) : user.role === 'admin' ? (
-                                                <path d="M17 20h5v-2a4 4 0 00-4-4h-1M9 20H4v-2a4 4 0 014-4h1m4-4a4 4 0 110-8 4 4 0 010 8zm8 3a4 4 0 10-8 0" />
-                                            ) : (
-                                                <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                            )}
+                                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                                         </svg>
-                                        {roleQuickAction.label}
+                                        Đơn hàng
                                     </button>
-
-                                    <button 
-                                        onClick={() => setIsChangingPassword((v) => !v)}
-                                        className="flex items-center justify-center gap-2 py-3 bg-gray-50 text-gray-800 font-bold rounded-xl hover:bg-gray-100 transition-all active:scale-95"
-                                    >
-                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path d="M12 11c1.105 0 2 .895 2 2v2a2 2 0 11-4 0v-2c0-1.105.895-2 2-2zm6 2v6a2 2 0 01-2 2H8a2 2 0 01-2-2v-6a2 2 0 012-2h8a2 2 0 012 2z" />
-                                            <path d="M8 11V7a4 4 0 118 0v4" />
-                                        </svg>
-                                        Đổi mật khẩu
-                                    </button>
-
                                     <button 
                                         onClick={logout}
                                         className="flex items-center justify-center gap-2 py-3 bg-red-50 text-red-600 font-bold rounded-xl hover:bg-red-100 transition-all active:scale-95"
@@ -181,13 +151,6 @@ const ProfileScreen: React.FC = () => {
                                         Đăng xuất
                                     </button>
                                 </div>
-
-                                {isChangingPassword && (
-                                    <ChangePasswordForm
-                                        className="mt-6"
-                                        onSuccess={() => setIsChangingPassword(false)}
-                                    />
-                                )}
                             </div>
                         </div>
                     )}

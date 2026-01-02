@@ -9,8 +9,6 @@ const RestaurantRequestSchema = new mongoose.Schema({
 
   restaurantName: { type: String, required: true, trim: true },
   description: { type: String, default: null },
-
-  bannerUrl: { type: String, trim: true, default: null },
   
   address: {
     full: { type: String, required: true }, 
@@ -26,7 +24,6 @@ const RestaurantRequestSchema = new mongoose.Schema({
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        default: [10, 10],
         index: '2dsphere',
       },
     },

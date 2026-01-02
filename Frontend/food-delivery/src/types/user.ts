@@ -1,3 +1,4 @@
+// src/types/user.ts
 export type UserProfile = {
   id: string;
   username: string;

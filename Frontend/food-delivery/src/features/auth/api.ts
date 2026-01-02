@@ -36,12 +36,14 @@ export type RegisterResponse = {
         user: {
             id: string;
             username: string;
+            role: string;
             phone: string;
         };
     };
     user?: {
-        id: string;
+        _id: string;
         username: string;
+        role: string;
         phone: string;
     };
 };
@@ -69,32 +71,6 @@ export async function login(payload: LoginPayload): Promise<LoginResponse> {
 
 export async function register(payload: RegisterPayload): Promise<RegisterResponse> {
     const res = await api.post('/auth/register', payload);
-    return res.data;
-}
-
-// =========== COMPLETE PROFILE (OAuth pending users) =============
-export type CompleteProfilePayload = {
-    userId: string;
-    phone: string;
-    username: string;
-    password: string;
-};
-
-export type CompleteProfileResponse = {
-    success: boolean;
-    message: string;
-    data: {
-        accessToken: string;
-        user: {
-            id: string;
-            username: string;
-            phone: string;
-        };
-    };
-};
-
-export async function completeProfile(payload: CompleteProfilePayload): Promise<CompleteProfileResponse> {
-    const res = await api.post('/auth/complete-profile', payload);
     return res.data;
 }
 

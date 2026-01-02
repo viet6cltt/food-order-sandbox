@@ -20,18 +20,6 @@ class RestaurantRequestRepository {
     });
   }
 
-  async getByUserId(userId) {
-    return await RestaurantRequest.findOne({ userId: userId })
-      .sort({ createdAt: -1 }); // Lấy request mới nhất
-  }
-
-  async getPendingByUserId(userId) {
-    return await RestaurantRequest.findOne({
-      userId: userId,
-      status: "pending"
-    });
-  }
-
   async approve(requestId) {
     return await RestaurantRequest.findByIdAndUpdate(
       requestId, 

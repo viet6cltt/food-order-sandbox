@@ -1,7 +1,6 @@
 // src/features/promotion/components/PromotionForm.tsx
 import React, { useState } from 'react';
 import type { Promotion } from '../../../types/promotion';
-import { toast } from 'react-toastify';
 
 interface Props {
     initialData?: Promotion | null;
@@ -35,7 +34,7 @@ const PromotionForm: React.FC<Props> = ({ initialData, onCancel, onSave }) => {
     const handleSubmit = () => {
         // 1. Validate sơ bộ (bắt buộc phải có mã và tên)
         if (!formData.code || !formData.name) {
-            toast.warning("Vui lòng nhập Mã khuyến mãi và Tên chương trình!");
+            alert("Vui lòng nhập Mã khuyến mãi và Tên chương trình!");
             return;
         }
 

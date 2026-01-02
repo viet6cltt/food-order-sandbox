@@ -111,7 +111,7 @@ const FoodEditForm: React.FC<FoodEditFormProps> = ({ food }) => {
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={() => {
-                    toast.success('Đã xóa món ăn thành công!');
+                    alert('Đã xóa món ăn thành công!');
                     setShowDeleteModal(false);
                 }}
                 foodName={formData.name}

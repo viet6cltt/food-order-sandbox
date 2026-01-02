@@ -34,61 +34,41 @@ const FoodItem: React.FC<FoodItemProps> = ({
 
   // Compact card used inside lists
   if (compact) {
-    const isAvailable = item.isAvailable !== false
     return (
-      <article className={`${className} rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col`}>
+      <article className={`${className} rounded-md overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow flex flex-col`}>
         <button
           type="button"
           onClick={() => onSelect && onSelect(item)}
           className="text-left flex-1 flex flex-col"
           aria-label={`View ${item.name}`}
         >
-          <div className="relative h-36 bg-gray-100 flex items-center justify-center overflow-hidden">
+          <div className="h-36 bg-gray-100 flex items-center justify-center overflow-hidden">
             {item.imageUrl ? (
               <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
             ) : (
-              <div className="text-xs text-gray-400">Không có ảnh</div>
+              <div className="text-xs text-gray-400">No image</div>
             )}
-
-            <div className="absolute top-2 left-2">
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  isAvailable ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
-                }`}
-              >
-                {isAvailable ? 'Có sẵn' : 'Hết hàng'}
-              </span>
-            </div>
           </div>
           <div className="p-3">
-            <h3 className="text-sm font-semibold text-gray-900 line-clamp-1">{item.name}</h3>
+            <h3 className="text-sm font-semibold text-gray-800 truncate">{item.name}</h3>
             {item.description ? <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.description}</p> : null}
           </div>
         </button>
 
         <div className="px-3 py-2 border-t flex items-center justify-between bg-gray-50">
-          <div className="min-w-0">
-            <div className="text-sm font-semibold text-gray-900">{formatPriceVnd(item.price)}</div>
-            {typeof item.rating === 'number' ? (
-              <div className="mt-0.5 text-xs text-yellow-700 flex items-center gap-1">
-                <StarIcon className="w-4 h-4" />
-                <span className="font-medium">{item.rating.toFixed(1)}</span>
-              </div>
-            ) : (
-              <div className="mt-0.5 text-xs text-gray-400">Chưa có đánh giá</div>
-            )}
+          <div>
+            <div className="text-sm font-medium text-gray-900">{formatPrice(item.price)}</div>
+            {typeof item.rating === 'number' && <div className="text-xs text-yellow-600"><StarIcon className="inline w-4 h-4" /> {item.rating.toFixed(1)}</div>}
           </div>
-
-          {onAdd ? (
+          <div>
             <button
               type="button"
-              disabled={!isAvailable}
-              onClick={() => onAdd({ itemId: item._id, qty: 1 })}
-              className="inline-flex items-center px-3 py-1 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-emerald-300"
+              onClick={() => onAdd && onAdd({ itemId: item._id, qty: 1 })}
+              className="inline-flex items-center px-3 py-1 rounded bg-green-600 text-white text-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-300"
             >
-              <PlusIcon className="w-4 h-4 mr-1" /> Thêm
+              <PlusIcon className="w-4 h-4 mr-1" /> Add
             </button>
-          ) : null}
+          </div>
         </div>
       </article>
     )
@@ -111,18 +91,18 @@ const FoodItem: React.FC<FoodItemProps> = ({
             <div className="text-sm text-yellow-600 mt-2"><StarIcon className="inline w-4 h-4" /> {item.rating.toFixed(1)}</div>
           )}
           <p className="text-sm text-gray-600 mt-4">{item.description}</p>
-          <div className="mt-4 text-xl font-semibold">{formatPriceVnd(item.price)}</div>
+          <div className="mt-4 text-xl font-semibold">{formatPrice(item.price)}</div>
         </div>
       </div>
     </div>
   )
 }
 
-function formatPriceVnd(p: number) {
+function formatPrice(p: number) {
   try {
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(p)
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency: 'USD' }).format(p)
   } catch {
-    return `${p.toLocaleString('vi-VN')} đ`
+    return `$${p.toFixed(2)}`
   }
 }
 

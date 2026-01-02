@@ -145,10 +145,7 @@ const SignupForm: React.FC<{ className?: string }> = ({ className = '' }) => {
 
         {/* Form Card */}
         <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
-
-          {/* reCAPTCHA container */}
-          <div id="recaptcha-container"></div>
-
+          <div id="recaptcha-container" className="hidden"></div>
 
           {/* Error Message */}
           {error && (

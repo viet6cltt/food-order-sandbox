@@ -1,5 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
-import React, { createContext, useState, type ReactNode, useEffect, useCallback } from 'react';
+import React, { createContext, useState, ReactNode, useEffect, useCallback } from 'react';
 import api from '../services/apiClient';
 
 export type Provider = {
@@ -63,7 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       const res = await api.get('/users/me'); 
       setUser(res.data.data.user);
       console.log(res.data.data.user);
-    } catch {
+    } catch (err) {
       setUser(null);
     } finally {
       setIsLoading(false);

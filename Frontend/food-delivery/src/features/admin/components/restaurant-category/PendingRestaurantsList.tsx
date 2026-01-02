@@ -32,29 +32,8 @@ interface Props {
 }
 
 const PendingRestaurantsList: React.FC<Props> = ({ restaurants, onApprove, onReject }) => {
-    // Empty state
-    if (!restaurants || restaurants.length === 0) {
-        return (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="bg-amber-50 px-6 py-5 border-b border-amber-100 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                        <div className="p-2 bg-amber-500 rounded-lg">
-                            <BuildingStorefrontIcon className="w-6 h-6 text-white" />
-                        </div>
-                        <div>
-                            <h2 className="text-lg font-black text-amber-900 uppercase">Yêu cầu mở quán</h2>
-                            <p className="text-xs text-amber-700 font-medium">Đang chờ xét duyệt (0)</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="p-10 text-center">
-                    <p className="text-sm font-semibold text-gray-800">Không có nhà hàng nào cần duyệt</p>
-                    <p className="mt-1 text-sm text-gray-500">Khi có yêu cầu mới, chúng sẽ hiển thị tại đây.</p>
-                </div>
-            </div>
-        );
-    }
+    // Nếu không có data thì không hiện component này
+    if (!restaurants || restaurants.length === 0) return null;
 
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-8 overflow-hidden">

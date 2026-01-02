@@ -1,15 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { getCategories } from '../api';
+import { type Category } from '../../../types/category';
 import { useNavigate } from 'react-router-dom';
-
-type HomeCategory = {
-  id: string;
-  name: string;
-  imageUrl?: string;
-};
-
 const CategoryList: React.FC = () => {
-  const [categories, setCategories] = useState<HomeCategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -17,7 +11,7 @@ const CategoryList: React.FC = () => {
     async function fetchCategories() {
       try {
         // Hàm này giờ đây chỉ trả về những cái isActive: true
-        const data = await getCategories(1, 12);
+        const data = await getCategories();
         setCategories(data);
       } catch (err) {
         console.error('Lỗi khi tải danh mục:', err);
@@ -41,8 +35,8 @@ const CategoryList: React.FC = () => {
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 gap-6">
         {categories.map((cat) => (
           <div 
-            key={cat.id} 
-            onClick={() => handleCategoryClick(cat.id)}
+            key={cat._id} 
+            onClick={() => handleCategoryClick(cat._id)}
             className="group cursor-pointer flex flex-col items-start"
           >
             {/* Khung ảnh tỷ lệ 16:9 giống ảnh mẫu */}

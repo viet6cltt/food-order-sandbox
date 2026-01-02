@@ -4,7 +4,6 @@ const ERR_RESPONSE = require('../utils/httpErrors');
 const ERR = require('../constants/errorCodes');
 const menuItemService = require('./menuItem.service');
 const restaurantService = require('./restaurant.service');
-const userService = require('./user.service');
 const paymentService = require('./payment.service');
 
 const { orderStatusObject ,allowedTransitions } = require('../constants/orderStatus');
@@ -77,47 +76,7 @@ class OrderService {
       0
     );
 
-    // Calculate shipping fee based on user's saved address (geo)
-    const user = await userService.findById(userId);
-    if (!user) {
-      throw new ERR_RESPONSE.NotFoundError('User not found', ERR.USER_NOT_FOUND);
-    }
-
-    if (!restaurant.address || !restaurant.address.geo || !Array.isArray(restaurant.address.geo.coordinates)) {
-      throw new ERR_RESPONSE.BadRequestError('Restaurant geo location is invalid', ERR.INVALID_INPUT);
-    }
-
-    const userCoordinates = user.address?.geo?.coordinates;
-    if (!Array.isArray(userCoordinates) || userCoordinates.length !== 2) {
-      throw new ERR_RESPONSE.UnprocessableEntityError(
-        'User address geo location is missing or invalid',
-        ERR.INVALID_INPUT
-      );
-    }
-
-    const [userLng, userLat] = userCoordinates;
-    const [restaurantLng, restaurantLat] = restaurant.address.geo.coordinates;
-
-    if (
-      typeof userLat !== 'number' ||
-      typeof userLng !== 'number' ||
-      typeof restaurantLat !== 'number' ||
-      typeof restaurantLng !== 'number' ||
-      (userLat === 0 && userLng === 0)
-    ) {
-      throw new ERR_RESPONSE.UnprocessableEntityError(
-        'User address geo location is missing or invalid',
-        ERR.INVALID_INPUT
-      );
-    }
-
-    const distanceMeters = geolib.getDistance(
-      { latitude: restaurantLat, longitude: restaurantLng },
-      { latitude: userLat, longitude: userLng }
-    );
-
-    const distanceKm = distanceMeters / 1000;
-    const shippingFee = restaurant.baseShippingFee + distanceKm * restaurant.shippingPerKm;
+    const shippingFee = 0
     // Build order items
     const orderItems = cart.items.map((item)=> ({
       menuItemId: item.menuItemId,
@@ -134,12 +93,6 @@ class OrderService {
       restaurantId,
       items: orderItems,
       totalFoodPrice,
-      shippingFee: Math.round(shippingFee),
-      deliveryAddress: {
-        full: [user.address?.street, user.address?.city].filter(Boolean).join(', ') || null,
-        lat: userLat,
-        lng: userLng,
-      },
       status: "draft",
       note: "",
     });

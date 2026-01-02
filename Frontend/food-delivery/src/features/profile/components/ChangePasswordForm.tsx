@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import apiClient from '../../../services/apiClient'
+import useAuth from '../../../hooks/useAuth'
 
 interface ChangePasswordFormProps {
   className?: string
@@ -7,6 +7,7 @@ interface ChangePasswordFormProps {
 }
 
 const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ className = '', onSuccess }) => {
+  const { user } = useAuth()
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -47,10 +48,14 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ className = '',
     setLoading(true)
 
     try {
-      await apiClient.post('/auth/change-password', {
-        currentPassword,
-        newPassword,
-      })
+      // TODO: Replace with real API call
+      // const response = await apiClient.post('/api/auth/change-password', {
+      //   currentPassword,
+      //   newPassword
+      // })
+      
+      // Mock API call
+      await new Promise((resolve) => setTimeout(resolve, 1000))
       
       // Success
       setSuccess(true)
@@ -65,7 +70,7 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ className = '',
     } catch (err: unknown) {
       let errorMessage = 'Lỗi khi thay đổi mật khẩu. Vui lòng thử lại.'
       if (err && typeof err === 'object' && 'response' in err) {
-        const axiosError = err as { response?: { data?: { error?: string; message?: string; code?: string } } }
+        const axiosError = err as { response?: { data?: { error?: string; message?: string } } }
         errorMessage = axiosError.response?.data?.error || axiosError.response?.data?.message || errorMessage
       } else if (err instanceof Error) {
         errorMessage = err.message

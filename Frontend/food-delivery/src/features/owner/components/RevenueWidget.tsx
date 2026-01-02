@@ -1,5 +1,5 @@
 // src/features/owner/components/RevenueWidget.tsx
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { BanknotesIcon } from '@heroicons/react/24/solid';
 import { getTotalRevenue, getWeekRevenue, type Restaurant } from '../api';
 

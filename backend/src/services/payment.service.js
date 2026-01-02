@@ -29,7 +29,7 @@ class PaymentService {
     return newPayment;
   }
 
-  async createPaymentBANK({ orderId, userId }) {
+  async createPaymentBANK({ orderId, userId, status }) {
     // Khi status là BANK_TRANSFER thì tạo payment khi checkout order
     // Lazy load to break circular dependency
     const orderService = require('./order.service');
@@ -37,23 +37,6 @@ class PaymentService {
 
     if (order.paymentMethod !== "BANK_TRANSFER") {
       throw new ERR_RESPONSE.BadRequestError('Only BANK_TRANSFER orders need payment record');
-    }
-
-    // Idempotency: if a BANK_TRANSFER payment already exists for this order, reuse it
-    const existing = await paymentRepository.findOne({ orderId, method: 'BANK_TRANSFER' });
-    if (existing) {
-      // Ensure order is linked to existing payment
-      if (!order.paymentId) {
-        order.paymentId = existing._id;
-        await order.save();
-      }
-
-      if (existing.status === 'pending') return existing;
-      if (existing.status === 'success') {
-        throw new ERR_RESPONSE.ConflictError('Payment already confirmed', ERR.RESOURCE_CONFLICT);
-      }
-      // failed -> allow creating a new one? simplest: reuse failed and let owner mark again
-      return existing;
     }
 
     const payment = await paymentRepository.create({
@@ -64,10 +47,6 @@ class PaymentService {
       status: "pending",
       amount: order.totalFoodPrice + order.shippingFee - order.discountAmount,
     });
-
-    // Link payment to order so owner dashboard can see it
-    order.paymentId = payment._id;
-    await order.save();
 
     return payment;
 
@@ -80,7 +59,7 @@ class PaymentService {
   }
 
   async getPaymentByOrderId(orderId) {
-    return await paymentRepository.findOne({ orderId });
+    return await paymentRepository.find({ orderId });
   }
 
   async getPaymentByPaymentId(paymentId) {

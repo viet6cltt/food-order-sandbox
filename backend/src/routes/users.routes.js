@@ -2,8 +2,6 @@ const express = require('express');
 const router = express.Router();
 const UserController = require('../controllers/user.controller.js');
 const restaurantRequestController = require("../controllers/restaurantRequest.controller.js");
-const RestaurantController = require('../controllers/restaurant.controller.js');
-const upload = require('../middlewares/upload.middleware.js');
 
 const { requireAuth } = require('../middlewares/auth.middleware.js');
 
@@ -14,12 +12,6 @@ router.put('/me', requireAuth, UserController.updateMe); // dùng khi người d
 
 
 // request restaurant
-router.get("/restaurant-requests/me", requireAuth, restaurantRequestController.getMyRequest);
-router.post("/restaurant-requests", requireAuth, upload.single('file'), restaurantRequestController.submit);
-
-// owner restaurant
-router.get("/owner/restaurant", requireAuth, RestaurantController.getMyRestaurant);
-router.patch("/owner/restaurant", requireAuth, RestaurantController.updateMyRestaurant);
-router.patch('/owner/restaurant/payment-qr', requireAuth, upload.single('file'), RestaurantController.uploadMyPaymentQr);
+router.post("/restaurant-requests",requireAuth, restaurantRequestController.submit);
 
 module.exports = router;

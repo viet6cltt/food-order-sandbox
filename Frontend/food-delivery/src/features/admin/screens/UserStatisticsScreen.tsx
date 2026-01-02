@@ -4,7 +4,7 @@ import UserList from '../components/user-statistics/UserList';
 import PenaltyAccountList from '../components/user-statistics/PenaltyAccountList';
 import OwnerRegisterList from '../components/user-statistics/OwnerRegisterList';
 import { adminUserApi } from '../api'; // Giả định file lưu api
-import { toast } from 'react-toastify';
+import { toast } from 'react-hot-toast';
 
 const UserStatisticsScreen: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'users' | 'penalty' | 'requests'>('users');

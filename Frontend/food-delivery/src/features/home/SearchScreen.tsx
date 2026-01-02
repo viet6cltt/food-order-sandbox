@@ -63,5 +63,4 @@ const SearchScreen: React.FC = () => {
   );
 };
 
-
 export default SearchScreen;

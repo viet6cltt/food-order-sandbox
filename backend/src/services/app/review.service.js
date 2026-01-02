@@ -14,7 +14,7 @@ class ReviewService {
       throw new ERR.ForbiddenError("You have no permission to create review");
     }
 
-    if (order.status !== "completed") {
+    if (order.status !== "COMPLETED") {
       throw new ERR.BadRequestError("Order not completed, cannot review");
     }
 

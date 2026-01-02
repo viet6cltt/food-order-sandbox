@@ -10,7 +10,7 @@ interface FoodListProps {
 
 const FoodList: React.FC<FoodListProps> = ({ items, className = '', onSelect, onAdd }) => {
   if (!items || items.length === 0) {
-    return <div className={`${className} py-6 text-center text-sm text-gray-500`}>Không có món ăn nào.</div>
+    return <div className={`${className} py-6 text-center text-sm text-gray-500`}>No foods found.</div>
   }
 
   return (

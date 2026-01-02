@@ -1,65 +1,16 @@
 import api from "../../services/apiClient"
 import type { Restaurant } from "./components/RestaurantCard"
 
-export interface Category {
-  _id: string;
-  id?: string;
-  name: string;
-  imageUrl?: string;
-  description?: string;
-  isActive?: boolean;
-}
-
-export interface NormalizedCategory {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  description?: string;
-  isActive?: boolean;
-}
-
-// export async function getCategories(page = 1, limit = 100): Promise<NormalizedCategory[]> {
-//   try {
-//     const res = await api.get('/categories', { params: { page, limit } });
-//     let data = res.data?.data;
-//     if (!data && Array.isArray(res.data)) {
-//       data = res.data;
-//     }
-//     if (!Array.isArray(data)) {
-//       data = [];
-//     }
-//     return data.map((category: Category) => ({
-//       ...category,
-//       id: category.id || category._id || '',
-//       name: category.name,
-//       description: category.description,
-//       isActive: category.isActive,
-//     })).filter((cat: NormalizedCategory): cat is NormalizedCategory => !!cat.id && cat.isActive !== false);
-//   } catch (error) {
-//     console.error('Error fetching categories:', error);
-//     throw error;
-//   }
-// }
-
 export async function getRestaurants(page = 1, limit = 16) {
   const res = await api.get('/restaurants', { params: { page, limit } })
-  // backend hiện trả: { success: true, message, data: { items, meta } }
-  // nhưng vẫn support shape cũ: { success: true, data: items, meta }
-  const items = Array.isArray(res.data?.data?.items)
-    ? res.data.data.items
-    : Array.isArray(res.data?.data)
-      ? res.data.data
-      : []
-
-  const meta = res.data?.data?.meta ?? res.data?.meta ?? { page, limit, total: items.length }
+  // backend trả: { success: true, data: items, meta }
+  const items = Array.isArray(res.data?.data) ? res.data.data : []
+  const meta = res.data?.meta ?? { page, limit, total: items.length }
   // Repository đã map _id thành id, nhưng đảm bảo normalize để an toàn
-  const normalizedItems = items.map((item: unknown) => {
-    const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
-    return {
-      ...restaurant,
-      id: restaurant.id || (restaurant._id ? String(restaurant._id) : undefined)
-    }
-  })
+  const normalizedItems = items.map(item => ({
+    ...item,
+    id: item.id || (item._id ? String(item._id) : undefined)
+  }))
   return { items: normalizedItems, meta }
 }
 
@@ -74,16 +25,13 @@ export async function getRestaurantsByCategory(categoryId: string, page = 1, lim
     } 
   });
 
-  const items: unknown[] = Array.isArray(res.data?.data?.items) ? res.data.data.items : [];
+  const items = Array.isArray(res.data?.data?.items) ? res.data.data.items : [];
   const meta = res.data?.data?.meta ?? { page, limit, total: items.length };
   
-  const normalizedItems = items.map((item: unknown) => {
-    const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
-    return {
-      ...restaurant,
-      id: restaurant.id || (restaurant._id ? String(restaurant._id) : undefined),
-    }
-  })
+  const normalizedItems = items.map((item: any) => ({
+    ...item,
+    id: item.id || (item._id ? String(item._id) : undefined)
+  }));
 
   return { items: normalizedItems, meta };
 }
@@ -117,29 +65,19 @@ export async function getRecommendRestaurants() {
   return normalizedItems;
 }
 
-export async function getCategories(page = 1, limit = 12): Promise<NormalizedCategory[]> {
-  const res = await api.get('/categories', { params: { page, limit } });
+export async function getCategories() {
+  const res = await api.get('/categories', {
+    params: {
+      page: 1,
+      limit: 12
+    }
+  });
 
-  // BE trả về: { success, message, data: { categories, pagination } }
-  // Nhưng một số nơi trước đây cũng từng trả mảng trực tiếp.
-  const raw =
-    (Array.isArray(res.data?.data?.categories) && res.data.data.categories) ||
-    (Array.isArray(res.data?.data) && res.data.data) ||
-    (Array.isArray(res.data) && res.data) ||
-    [];
+  const categories = res.data.data.categories || [];
 
-  const normalized = raw
-    .map((category: Category) => ({
-      ...category,
-      id: category.id || category._id || '',
-      name: category.name,
-      imageUrl: category.imageUrl,
-      description: category.description,
-      isActive: category.isActive,
-    }))
-    .filter((cat: NormalizedCategory) => !!cat.id && cat.isActive === true);
-
-  return normalized;
+  console.log(categories);
+  
+  return categories.filter((category: any) => category.isActive === true);
 }
 
 export async function searchRestaurants(keyword: string, options?: { lat?: number; lng?: number; page?: number; limit?: number }): Promise<Restaurant[]> {

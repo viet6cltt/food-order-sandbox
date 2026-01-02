@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ShoppingCartIcon, UserIcon } from '@heroicons/react/24/outline'
 import SearchButton from '../ui/SearchButton'
 import useUser from '../../hooks/useUser'
-import * as cartApi from '../../features/cart/api'
 
 type Props = {
   className?: string
@@ -12,49 +11,10 @@ type Props = {
 const Header: React.FC<Props> = ({ className = '' }) => {
   const navigate = useNavigate();
   const { user, isAuthenticated, isLoading } = useUser();
-  const [cartCount, setCartCount] = useState(0)
-
-  const shouldShowCart = Boolean(isAuthenticated && user?.role !== 'admin' && user?.role !== 'restaurant_owner')
-
-  useEffect(() => {
-    if (!shouldShowCart) {
-      setCartCount(0)
-      return
-    }
-
-    let mounted = true
-
-    async function loadCartCount() {
-      try {
-        const cart = await cartApi.getCart()
-        const next = cart?.totalItems ?? cart?.items?.reduce((sum, it) => sum + (it?.qty ?? 0), 0) ?? 0
-        if (mounted) setCartCount(next)
-      } catch {
-        if (mounted) setCartCount(0)
-      }
-    }
-
-    loadCartCount()
-
-    function onCartUpdated(event: Event) {
-      const custom = event as CustomEvent<{ totalItems?: number }>
-      const next = typeof custom.detail?.totalItems === 'number' ? custom.detail.totalItems : undefined
-      if (typeof next === 'number') setCartCount(next)
-      else loadCartCount()
-    }
-
-    window.addEventListener('cart:updated', onCartUpdated)
-    return () => {
-      mounted = false
-      window.removeEventListener('cart:updated', onCartUpdated)
-    }
-  }, [shouldShowCart])
 
   const handleLogoClick = () => {
     if (isAuthenticated && user?.role === 'admin') {
       navigate('/admin/dashboard');
-    } else if (isAuthenticated && user?.role === 'restaurant_owner') {
-      navigate('/owner/dashboard');
     } else {
       navigate('/');
     }
@@ -109,32 +69,25 @@ const Header: React.FC<Props> = ({ className = '' }) => {
                   Mở quán
                 </button>
               )}
-
-              {isAuthenticated && user?.role === 'restaurant_owner' && (
-                <button
-                  className="text-xs font-bold text-gray-700 hover:text-green-600 transition uppercase"
-                  onClick={() => navigate('/owner/menu-list')}
-                >
-                  Menu
-                </button>
-              )}
             </nav>
 
             {isAuthenticated ? (
               <div className="flex items-center space-x-2">
-                {user?.role !== 'admin' &&  user?.role !== 'restaurant_owner' && (
-                  <button 
-                    onClick={() => navigate('/cart')} 
-                    className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition relative group"
-                  >
-                    <ShoppingCartIcon className="h-6 w-6" />
-                    {cartCount > 0 && (
-                      <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-green-600 text-white text-[10px] font-bold leading-[18px] text-center">
-                        {cartCount > 99 ? '99+' : cartCount}
-                      </span>
-                    )}
-                  </button>
-                )}
+                <button 
+                  onClick={() => navigate('/cart')} 
+                  className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition relative group"
+                >
+                  {user?.role !== 'admin' && (
+                    <button 
+                      onClick={() => navigate('/cart')} 
+                      className="p-2 text-gray-600 hover:bg-gray-100 rounded-full transition relative group"
+                    >
+                      <ShoppingCartIcon className="h-6 w-6" />
+                    </button>
+                  )}
+                  
+                  
+                </button>
                 
                 <button 
                   onClick={() => navigate('/profile')} 

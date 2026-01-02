@@ -6,9 +6,8 @@ import ReviewList from './components/ReviewList'
 import AddToCartBar from './components/AddToCartBar'
 import * as foodApi from './api'
 import * as cartApi from '../cart/api'
-import * as reviewApi from '../review/api'
 import type { MenuItemDto } from '../restaurant/components/FoodItem'
-import type { Review } from '../review/api'
+import type { Review } from './api'
 import useAuth from '../../hooks/useAuth'
 import { toast } from 'react-toastify'
 
@@ -54,11 +53,11 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
   }
 
   async function loadReviews() {
-    if (!food?.restaurantId) return
+    if (!foodId) return
 
     try {
-      const result = await reviewApi.getReviewsByRestaurant(food.restaurantId, 1, 20)
-      setReviews(result.items)
+      const data = await foodApi.getReviews(foodId)
+      setReviews(data)
     } catch (err) {
       console.error('Failed to load reviews:', err)
       setReviews([])
@@ -73,16 +72,9 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
     }
 
     loadFoodDetails()
+    loadReviews()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foodId])
-
-  // Load reviews after food is loaded (to get restaurantId)
-  useEffect(() => {
-    if (food?.restaurantId) {
-      loadReviews()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [food?.restaurantId])
 
   async function handleAddToCart(payload: { itemId?: string; qty: number }) {
     if (!food || !payload.itemId) return
@@ -131,6 +123,18 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
     } finally {
       setCartLoading(false)
     }
+  }
+
+  async function handleReviewSubmit(payload: { rating: number; comment?: string }) {
+    if (!foodId) return
+
+    await foodApi.createReview({
+      menuItemId: foodId,
+      rating: payload.rating,
+      comment: payload.comment,
+    })
+
+    await loadReviews()
   }
 
   if (loading) {
@@ -217,11 +221,10 @@ const FoodDetailScreen: React.FC<{ className?: string }> = ({ className = '' }) 
         )}
 
         <div className="mt-8 space-y-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <p className="text-sm text-blue-800">
-              <strong>Lưu ý:</strong> Để đánh giá nhà hàng, vui lòng vào danh sách đơn hàng và chọn đánh giá cho đơn hàng đã hoàn thành.
-            </p>
-          </div>
+          <ReviewForm
+            onSubmit={handleReviewSubmit}
+            className="mb-6"
+          />
 
           <ReviewList reviews={reviews} />
         </div>
