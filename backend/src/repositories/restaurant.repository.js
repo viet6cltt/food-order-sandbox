@@ -198,5 +198,17 @@ class RestaurantRepository {
 
     return { items, total };
   }
+
+  async findByOwnerId(ownerId) {
+    return await Restaurant.find({ ownerId }).sort({ createdAt: -1 });
+  }
+
+  async update(restaurantId, updateData) {
+    return await Restaurant.findByIdAndUpdate(
+      restaurantId,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+  }
 }
 module.exports = new RestaurantRepository();

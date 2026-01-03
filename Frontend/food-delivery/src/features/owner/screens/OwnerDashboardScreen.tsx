@@ -1,26 +1,66 @@
 import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import OrderList from '../components/OrderList';
 import RevenueWidget from '../components/RevenueWidget';
 import { ChartBarIcon } from '@heroicons/react/24/outline';
 import OwnerLayout from '../../../layouts/OwnerLayout';
 import {Cog6ToothIcon} from '@heroicons/react/24/outline';
-import { useNavigate } from 'react-router-dom';
 import { getMyRestaurant, type Restaurant } from '../api';
 
 const OwnerDashboardScreen: React.FC = () => {
     const navigate = useNavigate();
+    const { restaurantId } = useParams<{ restaurantId: string }>();
+    
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log("Current restaurantId from params:", restaurantId);
         const fetchRestaurant = async () => {
-            const restaurant = await getMyRestaurant();
-            setRestaurant(restaurant);
+            if (!restaurantId) {
+                setLoading(false);
+                return;
+            }
+            try {
+                setLoading(true);
+                console.log("bne trong:", restaurantId);
+                const data = await getMyRestaurant(restaurantId);
+                console.log(data);
+                setRestaurant(data);
+            } catch (error) {
+                console.error('Error fetching restaurant:', error);
+                setRestaurant(null);
+            } finally {
+                setLoading(false);
+            }
         };
         fetchRestaurant();
-    }, []);
+    }, [restaurantId]);
+
+    if (loading) {
+        return (
+            <OwnerLayout>
+                <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex items-center justify-center">
+                    <div className="text-gray-500">Đang tải...</div>
+                </div>
+            </OwnerLayout>
+        );
+    }
 
     if (!restaurant) {
-        return <div>Loading...</div>;
+        return (
+            <OwnerLayout>
+                <div className="min-h-screen bg-gray-50 p-4 md:p-8 flex flex-col items-center justify-center">
+                    <p className="text-gray-500 mb-4">Không tìm thấy thông tin nhà hàng</p>
+                    <button
+                        onClick={() => navigate('/owner/restaurants')}
+                        className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                    >
+                        Quay lại danh sách
+                    </button>
+                </div>
+            </OwnerLayout>
+        );
     }
 
     return (
@@ -40,7 +80,7 @@ const OwnerDashboardScreen: React.FC = () => {
                         <button
                             type="button" 
                             className="flex flex-row items-center gap-2 mt-4 p-4 bg-green-200 rounded-full shadow-sm hover:bg-gray-100 text-gray-600 opacity-75 hover:opacity-100 transition-opacity"
-                            onClick={() => navigate('/owner/restaurant-info')} 
+                            onClick={() => navigate(`/owner/restaurant-info/${restaurantId}`)} 
                         >
                             <p className="text-black text-sm text-center -translate-y-0.5">Thông tin nhà hàng</p>    
                             <Cog6ToothIcon className="w-6 h-6 text-black opacity-75 hover:opacity-100 transition-opacity" />

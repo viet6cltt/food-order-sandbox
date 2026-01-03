@@ -287,6 +287,47 @@ class RestaurantController {
       next(err);
     }
   }
+
+  // [GET] /users/me/restaurants
+  async getMyRestaurants(req, res, next) {
+    try {
+      const userId = req.userId;
+      const restaurants = await RestaurantService.getRestaurantsByOwnerId(userId);
+
+      return SUCCESS_RESPONSE.success(res, 'Fetch My Restaurants Successfully"', restaurants);
+    } catch (err) {
+      next(err);
+    }
+  } 
+
+  // [PATCH] /me/restaurants/:restaurantId
+  async updateMyRestaurant(req, res, next) {
+    try {
+      const { restaurantId } = req.params;
+      const updateData = req.body;
+
+      const result = await RestaurantService.updateMyRestaurant(restaurantId, updateData);
+      return SUCCESS_RESPONSE.success(res, "Update Restaurant Successfully", result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /me/restaurant/:restaurantId/payment-qr
+  async uploadMyPaymentQr(req, res, next) {
+    try {
+      if (!req.file) throw new ERR_RESPONSE.BadRequestError("Please upload a QR image");
+
+      const { restaurantId } = req.params;
+      const filePath = req.file.path;
+
+      const result = await RestaurantService.uploadPaymentQr(restaurantId, filePath);
+      return SUCCESS_RESPONSE.success(res, "Upload Payment QR Successfully", result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
 }
 
 module.exports = new RestaurantController();

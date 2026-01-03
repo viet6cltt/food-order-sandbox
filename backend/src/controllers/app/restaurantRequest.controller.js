@@ -86,14 +86,38 @@ class RestaurantRequestController {
   async submit(req, res, next) {
     try {
       const userId = req.userId;
-      const data = req.body;
+      let rawData = req.body.data;
+      if (typeof rawData === 'string') {
+        try {
+          rawData = JSON.parse(rawData);
+        } catch (e) {
+          throw new ERR_RESPONSE.BadRequestError("Invalid JSON format in data field");
+        }
+      }
 
-      if (!data) {
+      if (!rawData) {
         throw new ERR_RESPONSE.BadRequestError("Missing Required Data");
       }
 
-      const result = await restaurantRequestService.submitRequest(userId, data);
+      // convert geo coordinates to Number
+      if (rawData.address?.geo?.coordinates) {
+        rawData.address.geo.coordinates = rawData.address.geo.coordinates.map(Number);
+      }
+
+      const result = await restaurantRequestService.submitRequest(userId, rawData, req.files);
       return SUCCESS_RESPONSE.success(res, "Send Request Successfully", result); 
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getMyRequest(req, res, next) {
+    try {
+      const userId = req.userId;
+
+      const result = await restaurantRequestService.getMyRequest(userId);
+
+      return SUCCESS_RESPONSE.success(res, "Fetch My Request successfully", result);
     } catch (err) {
       next(err);
     }

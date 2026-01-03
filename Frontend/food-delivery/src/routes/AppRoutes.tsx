@@ -17,6 +17,7 @@ import OwnerDashboardScreen from '../features/owner/screens/OwnerDashboardScreen
 import AddFoodScreen from '../features/owner/screens/AddFoodScreen';
 import OwnerRestaurantInfoScreen from '../features/owner/screens/OwnerRestaurantInfoScreen';
 import OwnerMenuListScreen from '../features/owner/screens/OwnerMenuListScreen.tsx';
+import OwnerRestaurantListScreen from '../features/owner/screens/OwnerRestaurantListScreen.tsx';
 import ProtectedRoute from './ProtectedRoute';
 import PublicRoute from './PublicRoute';
 import ResetPasswordRequestScreen from '../features/auth/screens/ResetPasswordRequestScreen';
@@ -63,9 +64,9 @@ const AppRoutes: React.FC = () => {
 				
 				{/* Customer routes */}
 				<Route path="/" element={
-					<ProtectedRoute allowedRoles={['customer']}>
+					
 						<HomeScreen />
-					</ProtectedRoute>
+
 				} />
 				<Route path="/cart" element={
 					<ProtectedRoute allowedRoles={['customer']}>
@@ -109,9 +110,14 @@ const AppRoutes: React.FC = () => {
 				} />
 
                 {/* Owner routes */}
-                <Route path="/owner/dashboard/*" element={
+                <Route path="/owner/:restaurantId/dashboard/*" element={
                     <ProtectedRoute allowedRoles={['restaurant_owner']}>
                         <OwnerDashboardScreen />
+                    </ProtectedRoute>
+                } />
+                <Route path="/owner/:restaurantId/restaurant-info/*" element={
+                    <ProtectedRoute allowedRoles={['restaurant_owner']}>
+                        <OwnerRestaurantInfoScreen />
                     </ProtectedRoute>
                 } />
                 <Route path="/owner/add-food/*" element={
@@ -119,11 +125,13 @@ const AppRoutes: React.FC = () => {
                         <AddFoodScreen />
                     </ProtectedRoute>
                 } />
-                <Route path="/owner/restaurant-info/*" element={
+
+								<Route path="/owner/restaurant-list/*" element={
                     <ProtectedRoute allowedRoles={['restaurant_owner']}>
-                        <OwnerRestaurantInfoScreen />
+                        <OwnerRestaurantListScreen />
                     </ProtectedRoute>
                 } />
+
 
 				<Route path="/owner/menu-list" element={
 						<ProtectedRoute allowedRoles={['restaurant_owner']}>

@@ -16,7 +16,7 @@ const OrderList: React.FC = () => {
         const fetchRestaurant = async () => {
             try {
                 setLoading(true);
-                const restaurant = await getMyRestaurant();
+                const restaurant = await getMyRestaurant(restaurantId);
                 if (restaurant) {
                     setRestaurantId(restaurant._id || restaurant.id || null);
                 } else {

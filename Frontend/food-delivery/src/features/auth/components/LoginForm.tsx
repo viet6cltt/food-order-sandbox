@@ -94,7 +94,7 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-semibold text-gray-700">Mật khẩu</label>
-              <Link to="/reset-password-request" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              <Link to="/auth/reset-password-request" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                 Quên mật khẩu?
               </Link>
             </div>
@@ -149,7 +149,7 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
         <div className="text-center">
           <p className="text-gray-600">
             Chưa có tài khoản?{' '}
-            <Link to="/signup" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+            <Link to="/auth/signup" className="text-emerald-600 hover:text-emerald-700 font-semibold">
               Đăng ký ngay
             </Link>
           </p>

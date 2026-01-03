@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import OwnerLayout from '../../../layouts/OwnerLayout';
-import { getMyRestaurant, type Restaurant } from '../api';
+import { getMyRestaurants, type Restaurant } from '../api';
 import { getMenuItemsByRestaurant } from '../../restaurant/api';
 import type { MenuItemDto } from '../../restaurant/components/FoodItem';
 import { deleteMenuItem } from '../menuItemApi';
@@ -22,7 +22,7 @@ const OwnerMenuListScreen: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const myRestaurant = await getMyRestaurant();
+        const myRestaurant = await getMyRestaurants();
         setRestaurant(myRestaurant);
 
         const id = myRestaurant?._id || myRestaurant?.id;

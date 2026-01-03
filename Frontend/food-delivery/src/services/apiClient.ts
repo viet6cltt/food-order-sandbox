@@ -76,6 +76,7 @@ api.interceptors.response.use(
       if (originalRequest.url?.includes('/auth/refresh')) {
         // Nếu refresh token cũng fail → logout
         localStorage.removeItem('accessToken');
+        isRefreshing = false;
         window.location.href = '/auth/login';
         return Promise.reject(error);
       }
@@ -116,15 +117,21 @@ api.interceptors.response.use(
         originalRequest.headers['Authorization'] = `Bearer ${newAccessToken}`;
         return api(originalRequest);
       } catch (refreshErr: unknown) {
-        processQueue(refreshErr instanceof Error ? refreshErr : new Error(String(refreshErr)), null);
+        // Refresh thất bại → reject queue requests
+        processQueue(
+          refreshErr instanceof Error ? refreshErr : new Error(String(refreshErr)),
+          null
+        );
 
-        // Refresh thất bại → remove token and emit logout event (don't forcibly navigate here)
+        // Remove token and logout immediately
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('isLoggedIn');
+        isRefreshing = false;
+
         try {
           window.dispatchEvent(new Event('auth:logout'));
-        } catch (e) {
-          // ignore
-        }
+        } catch (e) { /* ignore */ }
+
         return Promise.reject(refreshErr);
       } finally {
         isRefreshing = false;

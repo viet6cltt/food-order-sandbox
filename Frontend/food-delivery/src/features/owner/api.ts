@@ -25,6 +25,8 @@ export interface RestaurantRequestPayload {
   };
   phone: string;
   categoriesId: string[];
+  banner?: File | null;
+  documents?: File[];
 }
 
 export interface RestaurantRequestResponse {
@@ -44,6 +46,8 @@ export interface RestaurantRequestResponse {
     };
   };
   phone: string;
+  bannerUrl: string;
+  documents: string[];
   categoriesId: string[];
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
@@ -82,47 +86,39 @@ export async function getCategories(page = 1, limit = 100): Promise<NormalizedCa
   }
 }
 
-export async function getMyRestaurantRequest(): Promise<RestaurantRequestResponse | null> {
+export async function getMyRestaurantRequest(): Promise<RestaurantRequestResponse[]> {
   try {
     const res = await api.get('/users/restaurant-requests/me');
-    return res.data?.data || null;
+    return Array.isArray(res.data?.data) ? res.data.data : [];
   } catch (error) {
     console.error('Error fetching restaurant request:', error);
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 404) {
-        return null;
-      }
-    }
-    throw error;
+    return [];
   }
 }
 
-export async function submitRestaurantRequest(payload: RestaurantRequestPayload): Promise<RestaurantRequestResponse> {
-  try {
-    const res = await api.post('/users/restaurant-requests', payload);
-    return res.data?.data;
-  } catch (error) {
-    console.error('Error submitting restaurant request:', error);
-    throw error;
-  }
-}
-
-export async function submitRestaurantRequestWithBanner(
+export async function submitRestaurantRequest(
   payload: RestaurantRequestPayload,
-  bannerFile?: File | null
-): Promise<RestaurantRequestResponse> {
-  if (!bannerFile) {
-    return submitRestaurantRequest(payload);
+  banner?: File | null,
+  documents?: File[]
+) : Promise<RestaurantRequestResponse> {
+  const formData = new FormData();
+
+  // 1. Tạo một bản copy của payload nhưng LOẠI BỎ các trường File
+  const { banner: _, documents: __, ...textData } = payload;
+  formData.append('data', JSON.stringify(textData));
+
+  // 2. lấy file từ parameters
+  if (banner) {
+    formData.append('banner', banner);
   }
 
-  const formData = new FormData();
-  formData.append('file', bannerFile);
-  formData.append('data', JSON.stringify(payload));
+  if (documents && documents.length > 0) {
+    documents.forEach((file) => {
+      formData.append('documents', file);
+    });
+  }
 
-  const res = await api.post('/users/restaurant-requests', formData, {
-    headers: { 'Content-Type': 'multipart/form-data' },
-  });
+  const res = await api.post('/users/restaurant-requests', formData);
 
   return res.data?.data;
 }
@@ -133,33 +129,37 @@ export interface Restaurant {
   name: string;
   ownerId: string;
   description?: string;
+  bannerUrl?: string;
   address: {
     full: string;
     street?: string;
     ward?: string;
     district?: string;
     city?: string;
+    geo?: {
+      type: 'Point';
+      coordinates: [number, number]; // [longitude, latitude]
+    };
   };
   phone: string;
-  bannerUrl?: string;
   isAcceptingOrders?: boolean;
   opening_time?: string;
   closing_time?: string;
-  openingHours?: Array<{ day: number; open: string; close: string; isClosed: boolean }>;
+  isActive?: boolean;
+  status?: 'ACTIVE' | 'BLOCKED';
+  rating?: number;
+  reviewCount?: number;
+  categoriesId?: string[];
+  shippingPolicy?: 'SELF_SHIP' | 'PARTNER_SHIP' | 'HYBRID';
+  baseShippingFee?: number;
+  shippingPerKm?: number;
+  estimatedDeliveryTime?: number;
   paymentInfo?: {
     bankName?: string | null;
     bankAccountNumber?: string | null;
     bankAccountName?: string | null;
     qrImageUrl?: string | null;
   };
-  isActive?: boolean;
-  rating?: number;
-  reviewCount?: number;
-  categoriesId?: string[];
-  shippingPolicy?: string;
-  baseShippingFee?: number;
-  shippingPerKm?: number;
-  estimatedDeliveryTime?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -182,27 +182,38 @@ export interface GetRestaurantOrdersOptions {
   to?: string;
 }
 
-export async function getMyRestaurant(): Promise<Restaurant | null> {
+export async function getMyRestaurants(): Promise<Restaurant[] | null> {
   try {
-    const res = await api.get('/users/owner/restaurant');
-    const restaurant = res.data?.data || res.data;
-    if (!restaurant) {
-      return null;
-    }
+    const res = await api.get('/users/me/restaurants');
+    const data = res.data?.data || [];
+    if (!Array.isArray(data)) return [];
+
     // Normalize id field
+    return data.map((item: any) => ({
+      ...item,
+      id: item.id || item._id || '',
+    }));
+  } catch (error: unknown) {
+    console.error('Error fetching my restaurants:', error);
+    return [];
+  }
+}
+
+export async function getMyRestaurant(restaurantId: string | null): Promise<Restaurant | null> {
+  try {
+    console.log("id tu get", restaurantId);
+    const res = await api.get(`/users/me/restaurants/${restaurantId}`);
+    const data = res.data?.data || res.data;
+
+    if (!data) return null;
+
     return {
-      ...restaurant,
-      id: restaurant.id || restaurant._id || '',
+      ...data,
+      id: data.id || data._id || '',
     };
   } catch (error: unknown) {
-    if (error && typeof error === 'object' && 'response' in error) {
-      const axiosError = error as { response?: { status?: number } };
-      if (axiosError.response?.status === 404) {
-        return null;
-      }
-    }
-    console.error('Error fetching my restaurant:', error);
-    throw error;
+    console.error(`Error fetching restaurant with ID ${restaurantId}:`, error);
+    return null;
   }
 }
 
@@ -229,8 +240,8 @@ export type UpdateMyRestaurantPayload = {
   };
 };
 
-export async function updateMyRestaurant(payload: UpdateMyRestaurantPayload): Promise<Restaurant> {
-  const res = await api.patch('/users/owner/restaurant', payload);
+export async function updateMyRestaurant(restaurantId: string, payload: UpdateMyRestaurantPayload): Promise<Restaurant> {
+  const res = await api.patch(`/me/restaurants/${restaurantId}`, payload);
   const restaurant = res.data?.data || res.data;
   return {
     ...restaurant,
@@ -253,11 +264,11 @@ export async function uploadRestaurantBanner(restaurantId: string, file: File): 
   };
 }
 
-export async function uploadMyRestaurantPaymentQr(file: File): Promise<Restaurant> {
+export async function uploadMyRestaurantPaymentQr(restaurantId: string, file: File): Promise<Restaurant> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const res = await api.patch('/users/owner/restaurant/payment-qr', formData, {
+  const res = await api.patch(`/me/restaurant/${restaurantId}/payment-qr`, formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   });
 

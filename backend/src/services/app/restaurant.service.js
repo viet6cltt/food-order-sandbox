@@ -43,6 +43,35 @@ class RestaurantService {
     return restaurant;
   }
 
+  async getRestaurantsByOwnerId(userId) {
+    return await restaurantRepository.findByOwnerId(userId);
+  }
+
+  async updateMyRestaurant(restaurantId, updateData) {
+    return await restaurantRepository.update(restaurantId, updateData);
+  }
+
+  async uploadPaymentQr(restaurantId, ownerId, filePath) {
+    try {
+      // Upload ảnh lên Cloudinary
+      const result = await cloudinary.uploader.upload(filePath, {
+        folder: `food-order/restaurants/${restaurantId}/payments`,
+        public_id: `qr-${Date.now()}`,
+      });
+
+      // Cập nhật URL vào DB
+      const updated = await repoRestaurant.update(restaurantId, { paymentQrUrl: result.secure_url });
+      
+      // Xóa file tạm ở backend
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      
+      return updated;
+    } catch (err) {
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      throw err;
+    }
+  }
+
   // get restaurants by categoryId
   async getRestaurants({ categoryId, pagination, sortBy, lat, lng }) {
     const { skip, limit, page } = pagination;
