@@ -1,13 +1,37 @@
 const categoryRepo = require('@/repositories/category.repository');
 const ERR_RESPONSE = require('@/utils/httpErrors');
+const fs = require('fs');
+const cloudinary = require('@/config/cloudinary.config');
 
 class AdminCategoryService {
 
-  async create(data) {
-    return await categoryRepo.create(data);
+  async create(data, filePath) {
+    let category = null;
+    try {
+      // 1. tạo category
+      category = await categoryRepo.create(data);
+
+      if (filePath) {
+        // 2. Upload ảnh vào folder có tên là _id của tên folder 
+        const result = await cloudinary.uploader.upload(filePath, {
+          folder: `food-order/categories/${category._id}`,
+          public_id: `image`,
+          overwrite: true
+        });
+
+        category = await categoryRepo.updateById(category._id, { imageUrl: result.secure_url });
+
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      }
+
+      return category;
+    } catch (err) {
+      if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      throw err;
+    }
   }
 
-  async update(categoryId, data) {
+  async update(categoryId, data, filePath) {
     const category = await categoryRepo.getById(categoryId);
 
     if (!category) throw new ERR_RESPONSE.NotFoundError("Category not found");
@@ -17,7 +41,27 @@ class AdminCategoryService {
       throw new ERR_RESPONSE.UnprocessableEntityError("Only active category can change info");
     }
 
-    return await categoryRepo.updateById(categoryId, data);
+    try {
+      // nếu có ảnh cũ tồn tại thì xóa ảnh cũ
+      if (filePath) {
+        // 1 upload len cloudinary
+        const result = await cloudinary.uploader.upload(filePath, {
+          folder: `food-order/categories/${categoryId}`,
+          public_id: `image`,
+          overwrite: true,
+        });
+
+        data.imageUrl = result.secure_url;
+
+        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        
+      }
+
+      return await categoryRepo.updateById(categoryId, data);
+    } catch (err) {
+      if (filePath && fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      throw err;
+    }
   }
 
   async deactive(categoryId) {

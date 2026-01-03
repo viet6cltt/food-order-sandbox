@@ -78,7 +78,9 @@ class AdminUserController {
   async listUsers(req, res, next) {
     try {
       const { role, status } = req.query;
-      const users = await adminUserService.listUsers({ role, status });
+
+      const pagination = req.pagination;
+      const users = await adminUserService.listUsers({ role, status }, pagination);
 
       return SUCCESS_RESPONSE.success(res, "Get users successfully", users);
     } catch (err) {

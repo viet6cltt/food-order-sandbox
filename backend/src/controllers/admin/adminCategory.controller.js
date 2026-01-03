@@ -71,11 +71,13 @@ class AdminCategoryController {
     try {
       const data = req.body;
 
+      const filePath = req.file ? req.file.path : null;
+
       if (!data.name) {
         throw new ERR_RESPONSE.BadRequestError("Require name to create category");
       }
 
-      const category = await adminCategoryService.create(data);
+      const category = await adminCategoryService.create(data, filePath);
 
       return SUCCESS_RESPONSE.success(res, "Create new category successfully", category);
     } catch (err) {
@@ -154,7 +156,9 @@ class AdminCategoryController {
         throw new ERR_RESPONSE.BadRequestError("No data provided");
       }
 
-      const updated = await adminCategoryService.update(categoryId, data);
+      const filePath = req.file ? req.file.path : null;
+
+      const updated = await adminCategoryService.update(categoryId, data, filePath);
 
       return SUCCESS_RESPONSE.success(res, "Update category successfully", updated);
     } catch (err) {

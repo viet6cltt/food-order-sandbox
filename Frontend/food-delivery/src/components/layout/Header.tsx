@@ -54,7 +54,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
     if (isAuthenticated && user?.role === 'admin') {
       navigate('/admin/dashboard');
     } else if (isAuthenticated && user?.role === 'restaurant_owner') {
-      navigate('/owner/restaurant-list');
+      navigate('/owner/dashboard');
     } else {
       navigate('/');
     }
@@ -136,7 +136,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
 
                   {user?.role === 'restaurant_owner' && (
                     <button
-                      onClick={() => navigate('/owner/restaurant-list')}
+                      onClick={() => navigate('/owner/dashboard')}
                       className="px-4 py-1.5 text-sm font-semibold rounded-full
                         bg-white border border-gray-300 text-gray-700
                         hover:bg-gray-50 transition"

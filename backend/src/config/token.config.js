@@ -1,6 +1,6 @@
 
 const TOKEN_CONFIG = {
-  ACCESS: { type: 'access', secret: process.env.JWT_ACCESS_SECRET, expiry: '15m' },
+  ACCESS: { type: 'access', secret: process.env.JWT_ACCESS_SECRET, expiry: '1d' },
   REFRESH: { type: 'refresh', secret: process.env.JWT_REFRESH_SECRET, expiry: '7d' },
   EMAIL_VERIFY: { type: 'verify_email', secret: process.env.JWT_EMAIL_VERIFY_SECRET, expiry: '2h' },
   RESET_PASSWORD: { type: 'reset_password', secret: process.env.JWT_RESET_PASSWORD_SECRET, expiry: '1h' },

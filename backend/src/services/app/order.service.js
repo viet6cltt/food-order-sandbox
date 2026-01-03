@@ -33,7 +33,7 @@ class OrderService {
       );
     }
 
-    if (!restaurantService.checkOpenTime(restaurant)) {
+    if (!restaurantService.isOperational(restaurant)) {
       throw new ERR_RESPONSE.UnprocessableEntityError(
         "Restaurant is currently closed (outside business hours)",
         ERR.RESTAURANT_OUTSIDE_BUSINESS_HOURS,
