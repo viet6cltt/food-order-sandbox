@@ -1,14 +1,18 @@
-const { createClient, ReconnectStrategyError } = require('redis');
+const { createClient } = require('redis');
 
-const isRender = process.env.REDIS_URL && process.env.REDIS_URL.includes('red-');
+// Lấy URL từ biến môi trường REDIS_URL trên Render
+const redisUrl = process.env.REDIS_URL;
+
+// Kiểm tra giao thức để quyết định bật TLS
+// Nếu URL bắt đầu bằng rediss:// thì mới bật TLS
+const useTls = redisUrl?.startsWith('rediss://');
 
 const client = createClient({
-  url: process.env.REDIS_URL,
+  url: redisUrl,
   socket: {
-    // Nếu Render thì bật TLS, local thì không
-    tls: isRender ? true : false,
-    rejectUnauthorized: false,
-    reconnectStrategy: retries => Math.min(retries * 100, 3000)
+    // Chỉ thêm thuộc tính tls nếu cần thiết
+    ...(useTls && { tls: true, rejectUnauthorized: false }),
+    reconnectStrategy: (retries) => Math.min(retries * 100, 3000)
   },
 });
 
@@ -17,7 +21,9 @@ client.on('connect', () => console.log('🚀 Redis Connected!'));
 
 (async () => {
   try {
-    await client.connect();
+    if (!client.isOpen) {
+      await client.connect();
+    }
   } catch (err) {
     console.error('❌ Could not connect to Redis:', err);
   }
