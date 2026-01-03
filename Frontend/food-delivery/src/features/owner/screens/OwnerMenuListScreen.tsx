@@ -1,20 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import OwnerLayout from '../../../layouts/OwnerLayout';
-import { getMyRestaurants, type Restaurant } from '../api';
+import { getMyRestaurant, type Restaurant } from '../api';
 import { getMenuItemsByRestaurant } from '../../restaurant/api';
 import type { MenuItemDto } from '../../restaurant/components/FoodItem';
 import { deleteMenuItem } from '../menuItemApi';
 
 const OwnerMenuListScreen: React.FC = () => {
   const navigate = useNavigate();
+  const { restaurantId } = useParams<{ restaurantId: string }>();
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
   const [items, setItems] = useState<MenuItemDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deletingIds, setDeletingIds] = useState<Record<string, boolean>>({});
 
-  const restaurantId = useMemo(() => restaurant?._id || restaurant?.id || '', [restaurant]);
+  console.log("OwnerMenuListScreen restaurantId:", restaurantId);
 
   useEffect(() => {
     const run = async () => {
@@ -22,7 +23,7 @@ const OwnerMenuListScreen: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const myRestaurant = await getMyRestaurants();
+        const myRestaurant = await getMyRestaurant(restaurantId);
         setRestaurant(myRestaurant);
 
         const id = myRestaurant?._id || myRestaurant?.id;

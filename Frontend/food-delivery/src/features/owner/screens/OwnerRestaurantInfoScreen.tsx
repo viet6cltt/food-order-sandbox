@@ -4,7 +4,7 @@ import OpeningHoursEditor from '../components/OpeningHoursEditor';
 import ToggleAcceptOrders from '../components/ToggleAcceptOrders';
 import RestaurantForm from '../components/RestaurantForm';
 import { toast } from 'react-toastify';
-import { getCategories, getMyRestaurants, updateMyRestaurant, type NormalizedCategory } from '../api';
+import { getCategories, getMyRestaurant, updateMyRestaurant, type NormalizedCategory } from '../api';
 
 const OwnerRestaurantInfoScreen: React.FC = () => {
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
@@ -33,13 +33,12 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
         const load = async () => {
             try {
                 setLoading(true);
-                const [cats, restaurants] = await Promise.all([
+                const [cats, restaurant] = await Promise.all([
                     getCategories(1, 200),
-                    getMyRestaurants(),
+                    getMyRestaurant(),
                 ]);
                 setCategories(cats);
 
-                const restaurant = Array.isArray(restaurants) ? restaurants[0] : null;
                 if (restaurant) {
                     setRestaurantId(restaurant._id || restaurant.id || '');
                     setBannerUrl(restaurant.bannerUrl || '');

@@ -17,7 +17,7 @@ const AuthHeader: React.FC<Props> = ({ className = '' }) => {
   const handleLogoClick = () => {
     if (isAuthenticated) {
       if (user?.role === 'admin') navigate('/admin/dashboard');
-      else if (user?.role === 'restaurant_owner') navigate('/owner/dashboard');
+      else if (user?.role === 'restaurant_owner') navigate('/owner/restaurant-list');
       else navigate('/');
     } else {
       navigate('/');

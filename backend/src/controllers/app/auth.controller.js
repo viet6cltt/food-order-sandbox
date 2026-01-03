@@ -77,7 +77,7 @@ class AuthController {
     try {
       const { username, password, role, idToken } = req.body;
 
-      if (!username || !password || !idToken || !role) {
+      if (!username || !password || !idToken) {
         throw new HTTP_ERROR.BadRequestError('Missing username, password, role or idToken', ERR.AUTH_MISSING_FIELDS);
       }
 
@@ -728,7 +728,7 @@ class AuthController {
       const { userId, phone, username, password } = req.body;
 
       if (!userId || !phone || !username || !password) {
-        throw new HTTP_ERROR.BadRequestError('Missing userId, phonem username or password', ERR.AUTH_MISSING_FIELDS);
+        throw new HTTP_ERROR.BadRequestError('Missing userId, phone, username or password', ERR.AUTH_MISSING_FIELDS);
       }
 
       const deviceInfo = {

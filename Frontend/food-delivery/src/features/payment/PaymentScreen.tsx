@@ -8,6 +8,7 @@ import PlaceOrderButton from "./components/PlaceOrderButton";
 import ChangeAddressForm from "./components/ChangeAddressForm";
 import * as profileApi from '../profile/api';
 import * as orderApi from '../order/api';
+import * as geocodeApi from '../../services/geocodeApi';
 import type { Order } from '../../types/order';
 
 const PaymentScreen: React.FC = () => {
@@ -22,9 +23,17 @@ const PaymentScreen: React.FC = () => {
     const [deliveryAddress, setDeliveryAddress] = useState<{ full: string; lat: number; lng: number } | null>(null);
     const [showAddressForm, setShowAddressForm] = useState(false);
     
-    // Default coordinates for Hanoi center
-    const DEFAULT_LAT = 21.0285;
-    const DEFAULT_LNG = 105.8542;
+    const geocodeOrFallback = async (full: string) => {
+        const trimmed = (full || '').trim();
+        if (!trimmed) return null;
+        try {
+            const geo = await geocodeApi.geocodeAddress(trimmed);
+            return { full: geo.formatted || trimmed, lat: geo.lat, lng: geo.lng };
+        } catch (e) {
+            // If geocode fails, still allow user to proceed; backend will attempt again on place order.
+            return { full: trimmed, lat: 0, lng: 0 };
+        }
+    };
 
     useEffect(() => {
         const loadOrder = async () => {
@@ -54,29 +63,20 @@ const PaymentScreen: React.FC = () => {
                         profileAddressText = `${userData.address.street}${userData.address.city ? `, ${userData.address.city}` : ''}`.trim();
                     }
                     
-                    // Use order's delivery address if exists, otherwise use profile address
-                    // Always use default Hanoi center coordinates
-                    const defaultAddress = {
-                        full: orderData.deliveryAddress?.full || profileAddressText || '',
-                        lat: DEFAULT_LAT,
-                        lng: DEFAULT_LNG,
-                    };
-                    
-                    setDeliveryAddress(defaultAddress);
+                    const seedFull = orderData.deliveryAddress?.full || profileAddressText || '';
+                    const geoAddress = await geocodeOrFallback(seedFull);
+                    setDeliveryAddress(geoAddress);
                     
                     // If no address text, show form to enter address
-                    if (!defaultAddress.full) {
+                    if (!seedFull.trim()) {
                         setShowAddressForm(true);
                     }
                 } catch (profileErr) {
                     console.error('Failed to load user profile:', profileErr);
                     // Use order's delivery address if exists
                     if (orderData.deliveryAddress?.full) {
-                        setDeliveryAddress({
-                            full: orderData.deliveryAddress.full,
-                            lat: DEFAULT_LAT,
-                            lng: DEFAULT_LNG,
-                        });
+                        const geoAddress = await geocodeOrFallback(orderData.deliveryAddress.full);
+                        setDeliveryAddress(geoAddress);
                     } else {
                         setShowAddressForm(true);
                     }
@@ -86,7 +86,7 @@ const PaymentScreen: React.FC = () => {
                 if (err && typeof err === 'object' && 'response' in err) {
                     const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } };
                     if (axiosError.response?.status === 401) {
-                        navigate('/auth/login');
+                        navigate('/login');
                         return;
                     } else if (axiosError.response?.status === 404) {
                         errorMessage = 'Không tìm thấy đơn hàng';
@@ -158,13 +158,7 @@ const PaymentScreen: React.FC = () => {
                         <AddressSelector 
                             deliveryAddress={deliveryAddress}
                             onAddressChange={(address) => {
-                                // Always use default coordinates when updating address
-                                const addressWithDefaults = {
-                                    full: address.full,
-                                    lat: DEFAULT_LAT,
-                                    lng: DEFAULT_LNG,
-                                };
-                                setDeliveryAddress(addressWithDefaults);
+                                setDeliveryAddress(address);
                                 setShowAddressForm(false);
                                 // Only update local state, don't call API here
                             }}
@@ -205,13 +199,7 @@ const PaymentScreen: React.FC = () => {
                             }
                         }}
                         onSuccess={(address) => {
-                            // Always use default coordinates when updating address
-                            const addressWithDefaults = {
-                                full: address.full,
-                                lat: DEFAULT_LAT,
-                                lng: DEFAULT_LNG,
-                            };
-                            setDeliveryAddress(addressWithDefaults);
+                            setDeliveryAddress(address);
                             setShowAddressForm(false);
                             // Only update local state, don't call API here
                         }}

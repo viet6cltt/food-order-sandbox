@@ -38,10 +38,11 @@ const RestaurantList: React.FC<RestaurantListProps> = ({ restaurants, isLoading 
         <div
           key={restaurant._id || restaurant.id}
           className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow clickable"
-          onClick={() => navigate(`/owner/${restaurant._id || restaurant.id}/dashboard`)}
         >
           {/* Banner */}
-          <div className="relative h-40 bg-gray-200">
+          <div className="relative h-40 bg-gray-200"
+          onClick={() => navigate(`/owner/${restaurant._id || restaurant.id}/dashboard`)}
+          >
             {restaurant.bannerUrl ? (
               <img
                 src={restaurant.bannerUrl}
@@ -119,13 +120,14 @@ const RestaurantList: React.FC<RestaurantListProps> = ({ restaurants, isLoading 
             {/* Actions */}
             <div className="flex gap-2 pt-4 border-t border-gray-100">
               <button
+                onClick={() => navigate(`/owner/${restaurant._id || restaurant.id}/restaurant-info`)}
                 className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors font-medium text-sm"
               >
                 
                 Thiết lập
               </button>
               <button
-                onClick={() => navigate(`/owner/menu-list?restaurantId=${restaurant._id || restaurant.id}`)}
+                onClick={() => navigate(`/owner/${restaurant._id || restaurant.id}/menu-list`)}
                 className="flex-1 px-3 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors font-medium text-sm"
               >
                 Menu

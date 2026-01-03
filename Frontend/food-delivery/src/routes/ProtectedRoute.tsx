@@ -31,7 +31,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
     // Redirect về trang phù hợp với role
     if (user.role === 'restaurant_owner') {
-      return <Navigate to="/owner/dashboard" replace />;
+      return <Navigate to="/owner/restaurant-list/" replace />;
     }
     return <Navigate to="/" replace />;
   }

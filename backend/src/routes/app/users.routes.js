@@ -2,10 +2,11 @@ const express = require('express');
 const router = express.Router();
 const UserController = require('@/controllers/app/user.controller.js');
 const restaurantRequestController = require("@/controllers/app/restaurantRequest.controller.js");
-const restaurantController = require('@/controllers/app/restaurant.controller');
+const restaurantController = require('@/controllers/app/restaurant.controller.js');
+const upload = require('@/middlewares/upload.middleware.js');
+
 const { requireAuth } = require('@/middlewares/auth.middleware.js');
 const { checkUserStatus } = require('@/middlewares/userStatus.middleware.js');
-const upload = require('@/middlewares/upload.middleware');
 const { requireRestaurantOwnerRole } = require('@/middlewares/role.middleware');
 const { requireRestaurantOwner } = require('@/middlewares/restaurantOwner.middleware');
 
@@ -33,5 +34,11 @@ router.get('/:userId', UserController.getUser); // dùng khi admin lấy thông 
 
 // dùng để report người dùng
 router.post('/:userId', requireAuth, checkUserStatus, reportController.sendReport);
+
+// request restaurant
+router.get("/owner/restaurant", requireAuth, requireRestaurantOwnerRole, restaurantController.getMyRestaurant);
+router.patch("/owner/restaurant", requireAuth, requireRestaurantOwnerRole, restaurantController.updateMyRestaurantByOwner);
+router.patch("/owner/restaurant/payment-qr", requireAuth, requireRestaurantOwnerRole, upload.single('file'), restaurantController.uploadMyPaymentQrByOwner);
+
 
 module.exports = router;

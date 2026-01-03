@@ -1,6 +1,6 @@
 const revenueService = require('@/services/app/revenue.service');
 const ERR = require('@/constants/errorCodes');
-const ERR_RESPONSE = require('@/utils/httpErrors');
+const ERR_RESPONSE = require('@/utils/httpErrors.js');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
 
 class RevenueController {
@@ -42,9 +42,7 @@ class RevenueController {
     try {
       const { restaurantId } = req.params;
       const { date } = req.query;
-      if (!Date) {
-        throw new ERR_RESPONSE.BadRequestError("Missing Date", ERR.INVALID_INPUT);
-      }
+      
       const data = await revenueService.getRevenueByDay(restaurantId, date);
 
       return SUCCESS_RESPONSE.success(res, "Get revenue of this restaurant by day successfully", { data });

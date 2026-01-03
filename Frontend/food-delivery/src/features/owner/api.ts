@@ -201,7 +201,7 @@ export async function getMyRestaurants(): Promise<Restaurant[] | null> {
 
 export async function getMyRestaurant(restaurantId: string | null): Promise<Restaurant | null> {
   try {
-    console.log("id tu get", restaurantId);
+    if (!restaurantId || restaurantId === 'null' || restaurantId === 'undefined') return null;
     const res = await api.get(`/users/me/restaurants/${restaurantId}`);
     const data = res.data?.data || res.data;
 
@@ -299,6 +299,8 @@ export async function getRestaurantOrders(
         ? ordersData 
         : [];
     
+    console.log('Fetched orders:', res);
+
     return {
       orders: ordersArray,
       pagination: ordersData.pagination || data.pagination,

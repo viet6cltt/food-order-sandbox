@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import ImageUploader from './ImageUploader';
 import { toast } from 'react-toastify';
-import { getCategories, getMyRestaurants, type NormalizedCategory } from '../../owner/api';
+import { getCategories, getMyRestaurant, type NormalizedCategory } from '../../owner/api';
 import { createMenuItem } from '../../owner/menuItemApi.ts';
 import { useNavigate } from 'react-router-dom';
 

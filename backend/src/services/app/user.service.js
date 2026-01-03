@@ -3,8 +3,9 @@ const TokenRepository = require('@/repositories/token.repository');
 const UserRepository = require('@/repositories/user.repository');
 const authHelper = require('@/utils/authHelper');
 
-const HTTP_ERROR = require('@/utils/httpErrors');
+const ERR_RESPONSE = require('@/utils/httpErrors.js');
 const ERR = require('@/constants/errorCodes');
+const geocodeService = require('./geocode.service');
 
 class UserService {
   async createUser(data) {
@@ -64,6 +65,37 @@ class UserService {
 
   }
   async updateUser(userId, data) {
+    if (data && typeof data === 'object' && data.address && typeof data.address === 'object') {
+      const coords = data.address?.geo?.coordinates;
+      const hasValidCoords =
+        Array.isArray(coords) &&
+        coords.length === 2 &&
+        typeof coords[0] === 'number' &&
+        typeof coords[1] === 'number' &&
+        Number.isFinite(coords[0]) &&
+        Number.isFinite(coords[1]) &&
+        !(coords[0] === 0 && coords[1] === 0);
+
+      if (!hasValidCoords) {
+        const street = typeof data.address.street === 'string' ? data.address.street.trim() : '';
+        const ward = typeof data.address.ward === 'string' ? data.address.ward.trim() : '';
+        const city = typeof data.address.city === 'string' ? data.address.city.trim() : '';
+        const query = [street, ward, city].filter(Boolean).join(', ');
+        if (query) {
+          const { lat, lng, formatted } = await geocodeService.geocodeAddress(query);
+          data.address.geo = {
+            ...(data.address.geo || {}),
+            type: 'Point',
+            coordinates: [lng, lat],
+          };
+
+          if (!street && formatted) {
+            data.address.street = formatted;
+          }
+        }
+      }
+    }
+
     const updatedUser = await UserRepository.updateUser(userId, data);
     if (!updatedUser)
       throw new HTTP_ERROR.NotFoundError('User not found', ERR.USER_NOT_FOUND);

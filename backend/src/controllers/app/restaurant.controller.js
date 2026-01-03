@@ -2,6 +2,7 @@ const RestaurantService = require('@/services/app/restaurant.service');
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
+const mongoose = require('mongoose');
 
 class RestaurantController {
   /**
@@ -42,6 +43,10 @@ class RestaurantController {
       const { restaurantId } = req.params;
       if (!restaurantId) {
         throw new ERR_RESPONSE.BadRequestError("Missing restaurant ID", ERR.INVALID_INPUT);
+      }
+
+      if (!mongoose.Types.ObjectId.isValid(restaurantId)) {
+        throw new ERR_RESPONSE.BadRequestError("Invalid restaurant ID", ERR.INVALID_INPUT);
       }
 
       const restaurantInfo = await RestaurantService.getRestaurantInfo(restaurantId);
@@ -252,6 +257,128 @@ class RestaurantController {
 
       return SUCCESS_RESPONSE.success(res, `Banner updated successfully`, updated);
     } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * @swagger
+    * /users/owner/restaurant:
+    *   get:
+    *     summary: Get my restaurant (owner)
+    *     description: Retrieve the restaurant associated with the authenticated owner
+    *     tags:
+    *       - Restaurants
+    *     security:
+    *       - bearerAuth: []
+    *     responses:
+    *       200:
+    *         description: Restaurant retrieved successfully
+    *       401:
+    *         description: Unauthorized
+    *       403:
+    *         description: Not restaurant owner
+   */
+  async getMyRestaurant(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const restaurant = await RestaurantService.getRestaurantByOwnerId(userId);
+      
+      if (!restaurant) {
+        throw new ERR_RESPONSE.NotFoundError("Restaurant not found for this owner", ERR.RESTAURANT_NOT_FOUND);
+      }
+
+      return SUCCESS_RESPONSE.success(res, "Get restaurant successfully", restaurant);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * @swagger
+   * /users/owner/restaurant:
+   *   patch:
+   *     summary: Update my restaurant (owner)
+   *     description: Update the restaurant information associated with the authenticated owner
+   *     tags:
+   *       - Restaurants
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
+   *     responses:
+   *       200:
+   *         description: Restaurant updated successfully
+   *       401:
+   *         description: Unauthorized
+   *       403:
+   *         description: Not restaurant owner
+   */
+  async updateMyRestaurantByOwner(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const updated = await RestaurantService.updateRestaurantByOwnerId(userId, req.body || {});
+      return SUCCESS_RESPONSE.success(res, 'Update restaurant successfully', updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * @swagger
+   * /users/owner/restaurant/payment-qr:
+   *   patch:
+   *     summary: Upload or update restaurant payment QR code (owner)
+   *     description: Allows restaurant owners to upload or update their restaurant's payment QR code.
+   *     tags:
+   *       - Restaurants
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - file
+   *             properties:
+   *               file:
+   *                 type: string
+   *                 format: binary
+   *     responses:
+   *       200:
+   *         description: Payment QR updated successfully
+   *       401:
+   *         description: Unauthorized
+   */
+  async uploadMyPaymentQrByOwner(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const file = req.file;
+      if (!file) {
+        throw new ERR_RESPONSE.BadRequestError("File is required", ERR.INVALID_INPUT);
+      }
+
+      const updated = await RestaurantService.uploadPaymentQrByOwnerId(userId, file);
+      return SUCCESS_RESPONSE.success(res, 'Payment QR updated successfully', updated);
+  } catch (err) {
       next(err);
     }
   }

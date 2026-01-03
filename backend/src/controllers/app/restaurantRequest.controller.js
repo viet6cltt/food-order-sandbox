@@ -111,13 +111,44 @@ class RestaurantRequestController {
     }
   }
 
+  /**
+   * @swagger
+   * /users/restaurant-requests/me:
+    *   get:
+    *     summary: Get my restaurant request
+    *     description: Retrieve the restaurant request submitted by the authenticated user
+    *     tags:
+    *       - Restaurant Requests
+    *     security:
+    *       - bearerAuth: []
+    *     responses:
+    *       200:
+    *         description: Restaurant request retrieved successfully
+    *         content:
+    *           application/json:
+    *             schema:
+    *               type: object
+    *               properties:
+    *                 success:
+    *                   type: boolean
+    *                   example: true
+    *                 message:
+    *                   type: string
+    *                   example: Get request successfully
+    *                 data:
+    *                   type: object
+    *                   nullable: true
+    *                   properties:
+    *                     request:
+    *                       type: object
+    *       401:
+    *         description: Unauthorized - Invalid or missing token
+   */
   async getMyRequest(req, res, next) {
     try {
       const userId = req.userId;
-
-      const result = await restaurantRequestService.getMyRequest(userId);
-
-      return SUCCESS_RESPONSE.success(res, "Fetch My Request successfully", result);
+      const requests = await restaurantRequestService.getMyRequest(userId);
+      return SUCCESS_RESPONSE.success(res, "Get request successfully", requests);
     } catch (err) {
       next(err);
     }

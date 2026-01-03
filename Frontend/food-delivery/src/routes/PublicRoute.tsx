@@ -20,7 +20,7 @@ const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
 
   // 2. Nếu đã xác thực (Authenticated) -> Đẩy ra khỏi trang Auth ngay lập tức
   if (isAuthenticated && user) {
-    if (user.role === 'restaurant_owner') return <Navigate to="/owner/dashboard" replace />;
+    if (user.role === 'restaurant_owner') return <Navigate to="/owner/restaurant-list" replace />;
     if (user.role === 'admin') return <Navigate to="/admin/dashboard" replace />;
     
     // Mặc định về trang chủ cho Customer

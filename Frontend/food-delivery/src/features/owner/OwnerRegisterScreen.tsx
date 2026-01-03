@@ -4,6 +4,7 @@ import RestaurantForm from "./components/RestaurantForm";
 import { useNavigate } from "react-router-dom";
 import { getCategories, submitRestaurantRequest, getMyRestaurantRequest, type NormalizedCategory, type RestaurantRequestResponse } from './api';
 import { toast } from 'react-toastify';
+import { geocodeAddress } from '../../services/geocodeApi';
 
 const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
     const navigate = useNavigate();
@@ -20,8 +21,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
     });
     const [restaurantPhone, setRestaurantPhone] = useState('');
     const [categoryId, setCategoryId] = useState('');
-    const [latitude, setLatitude] = useState('');
-    const [longitude, setLongitude] = useState('');
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
@@ -32,8 +31,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         address?: string;
         phone?: string;
         categoryId?: string;
-        latitude?: string;
-        longitude?: string;
     }>({});
 
     const [loading, setLoading] = useState(false);
@@ -83,8 +80,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
             address?: string;
             phone?: string;
             categoryId?: string;
-            latitude?: string;
-            longitude?: string;
         } = {};
         
         if (!name.trim()) {
@@ -116,20 +111,20 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
             return false;
         }
 
-        const lat = Number(latitude);
-        const lng = Number(longitude);
+        // const lat = Number(latitude);
+        // const lng = Number(longitude);
 
-        if (!latitude.trim()) {
-            errors.latitude = 'Vui lòng nhập latitude';
-        } else if (Number.isNaN(lat) || lat < -90 || lat > 90) {
-            errors.latitude = 'Latitude phải nằm trong khoảng [-90, 90]';
-        }
+        // if (!latitude.trim()) {
+        //     errors.latitude = 'Vui lòng nhập latitude';
+        // } else if (Number.isNaN(lat) || lat < -90 || lat > 90) {
+        //     errors.latitude = 'Latitude phải nằm trong khoảng [-90, 90]';
+        // }
 
-        if (!longitude.trim()) {
-            errors.longitude = 'Vui lòng nhập longitude';
-        } else if (Number.isNaN(lng) || lng < -180 || lng > 180) {
-            errors.longitude = 'Longitude phải nằm trong khoảng [-180, 180]';
-        }
+        // if (!longitude.trim()) {
+        //     errors.longitude = 'Vui lòng nhập longitude';
+        // } else if (Number.isNaN(lng) || lng < -180 || lng > 180) {
+        //     errors.longitude = 'Longitude phải nằm trong khoảng [-180, 180]';
+        // }
         
         setRestaurantErrors(errors);
         return Object.keys(errors).length === 0;
@@ -144,8 +139,15 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         setError(null);
 
         try {
-            const lat = Number(latitude);
-            const lng = Number(longitude);
+            // Convert address -> lat/lng on FE, then send to BE as GeoJSON Point
+            const geo = await geocodeAddress(address.full);
+            const lat = Number(geo?.lat);
+            const lng = Number(geo?.lng);
+
+            if (Number.isNaN(lat) || Number.isNaN(lng)) {
+                throw new Error('Không thể xác định tọa độ (lat/lng) từ địa chỉ. Vui lòng nhập địa chỉ chi tiết hơn.');
+            }
+
             const payload = {
                 restaurantName: name,
                 description: description || undefined,
@@ -305,7 +307,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                                 Tạo nhà hàng
                             </h2>
                             <p className="text-center text-sm text-black/70 mt-2">
-                                Nhập thông tin nhà hàng và vị trí (latitude/longitude) để gửi yêu cầu duyệt.
+                                Nhập thông tin nhà hàng và địa chỉ để gửi yêu cầu duyệt.
                             </p>
                         </div>
 
@@ -354,7 +356,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                             </div>
                         </div>
 
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label className="block text-sm font-medium text-black mb-1">Latitude</label>
                                 <input
@@ -389,7 +391,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                                     <p className="mt-1 text-sm text-black/70">{restaurantErrors.longitude}</p>
                                 )}
                             </div>
-                        </div>
+                        </div> */}
 
                         {loadingCategories && (
                             <div className="text-center text-sm text-black/60 mt-3">

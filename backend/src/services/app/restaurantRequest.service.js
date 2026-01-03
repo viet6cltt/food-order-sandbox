@@ -33,8 +33,8 @@ class RestaurantRequestService {
 
   async submitRequest(userId, data, files) {
     // check trùng lặp
-    const exists = await repoRestaurantRequest.getByUserId(userId);
-    if (exists) {
+    const hasPending = await repoRestaurantRequest.getPendingRequestsByUserId(userId);
+    if (hasPending) {
       this._cleanupFiles(files);
       throw new ERR_RESPONSE.UnprocessableEntityError("This user already has a pending request");
     }
@@ -89,6 +89,7 @@ class RestaurantRequestService {
       }
     });
   }
+  
 }
 
 module.exports = new RestaurantRequestService();
