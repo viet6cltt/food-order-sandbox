@@ -8,6 +8,7 @@ const orderRoutes = require('./app/order.routes.js');
 const paymentRoutes = require('./app/payment.routes.js');
 const reviewRoutes = require('./app/reviews.routes.js');
 const categoryRoutes = require('./app/category.routes.js');
+const geocodeRoutes = require('./app/geocode.routes.js');
 
 const adminUserRoutes = require('./admin/adminUser.routes.js');
 const adminCategoryRoutes = require('./admin/adminCategory.routes.js');
@@ -29,6 +30,7 @@ function route(app) {
   apiRouter.use('/payments', paymentRoutes);
   apiRouter.use('/reviews', reviewRoutes);
   apiRouter.use('/categories', categoryRoutes);
+  apiRouter.use('/geocode', geocodeRoutes);
   // admin
   apiRouter.use('/admin/users', adminUserRoutes);
   apiRouter.use('/admin/categories', adminCategoryRoutes);

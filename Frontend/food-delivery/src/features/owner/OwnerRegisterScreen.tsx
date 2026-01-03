@@ -20,8 +20,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
     });
     const [restaurantPhone, setRestaurantPhone] = useState('');
     const [categoryId, setCategoryId] = useState('');
-    const [latitude, setLatitude] = useState('');
-    const [longitude, setLongitude] = useState('');
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
@@ -31,8 +29,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         address?: string;
         phone?: string;
         categoryId?: string;
-        latitude?: string;
-        longitude?: string;
     }>({});
 
     const [loading, setLoading] = useState(false);
@@ -81,8 +77,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
             address?: string;
             phone?: string;
             categoryId?: string;
-            latitude?: string;
-            longitude?: string;
         } = {};
         
         if (!name.trim()) {
@@ -102,21 +96,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         if (!categoryId.trim()) {
             errors.categoryId = 'Vui lòng chọn danh mục';
         }
-
-        const lat = Number(latitude);
-        const lng = Number(longitude);
-
-        if (!latitude.trim()) {
-            errors.latitude = 'Vui lòng nhập latitude';
-        } else if (Number.isNaN(lat) || lat < -90 || lat > 90) {
-            errors.latitude = 'Latitude phải nằm trong khoảng [-90, 90]';
-        }
-
-        if (!longitude.trim()) {
-            errors.longitude = 'Vui lòng nhập longitude';
-        } else if (Number.isNaN(lng) || lng < -180 || lng > 180) {
-            errors.longitude = 'Longitude phải nằm trong khoảng [-180, 180]';
-        }
         
         setRestaurantErrors(errors);
         return Object.keys(errors).length === 0;
@@ -131,8 +110,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         setError(null);
 
         try {
-            const lat = Number(latitude);
-            const lng = Number(longitude);
             const payload = {
                 restaurantName: name,
                 description: description || undefined,
@@ -142,10 +119,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                     ward: address.ward || undefined,
                     district: address.district || undefined,
                     city: address.city || undefined,
-                    geo: {
-                        type: 'Point' as const,
-                        coordinates: [lng, lat] as [number, number],
-                    },
                 },
                 phone: restaurantPhone,
                 categoriesId: [categoryId],
@@ -278,7 +251,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                                 Tạo nhà hàng
                             </h2>
                             <p className="text-center text-sm text-black/70 mt-2">
-                                Nhập thông tin nhà hàng và vị trí (latitude/longitude) để gửi yêu cầu duyệt.
+                                Nhập thông tin nhà hàng và địa chỉ để gửi yêu cầu duyệt.
                             </p>
                         </div>
 
@@ -297,44 +270,6 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                             onBannerFileChange={setBannerFile}
                             errors={restaurantErrors}
                         />
-
-                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-black mb-1">Latitude</label>
-                                <input
-                                    type="number"
-                                    inputMode="decimal"
-                                    step="any"
-                                    value={latitude}
-                                    onChange={(e) => setLatitude(e.target.value)}
-                                    className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                                        restaurantErrors.latitude ? 'border-black' : 'border-black/10'
-                                    }`}
-                                    placeholder="VD: 10.8231"
-                                />
-                                {restaurantErrors.latitude && (
-                                    <p className="mt-1 text-sm text-black/70">{restaurantErrors.latitude}</p>
-                                )}
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-black mb-1">Longitude</label>
-                                <input
-                                    type="number"
-                                    inputMode="decimal"
-                                    step="any"
-                                    value={longitude}
-                                    onChange={(e) => setLongitude(e.target.value)}
-                                    className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
-                                        restaurantErrors.longitude ? 'border-black' : 'border-black/10'
-                                    }`}
-                                    placeholder="VD: 106.6297"
-                                />
-                                {restaurantErrors.longitude && (
-                                    <p className="mt-1 text-sm text-black/70">{restaurantErrors.longitude}</p>
-                                )}
-                            </div>
-                        </div>
-
                         {loadingCategories && (
                             <div className="text-center text-sm text-black/60 mt-3">
                                 Đang tải danh sách danh mục...

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
+import { geocodeAddress } from '../../../services/geocodeApi';
 
 interface ChangeAddressFormProps {
     currentAddress?: { full: string; lat: number; lng: number } | null;
@@ -27,14 +28,12 @@ const ChangeAddressForm: React.FC<ChangeAddressFormProps> = ({
         try {
             setLoading(true);
 
-            // Always use default Hanoi center coordinates
-            const DEFAULT_LAT = 21.0285;
-            const DEFAULT_LNG = 105.8542;
-
+            const q = fullAddress.trim();
+            const geo = await geocodeAddress(q);
             const newAddress = {
-                full: fullAddress.trim(),
-                lat: DEFAULT_LAT,
-                lng: DEFAULT_LNG,
+                full: geo.formatted || q,
+                lat: geo.lat,
+                lng: geo.lng,
             };
 
             // Just update local state, don't call API here

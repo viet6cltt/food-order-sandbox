@@ -7,6 +7,7 @@ import * as orderApi from './api'
 import * as restaurantApi from '../restaurant/api'
 import type { OrderStatus, Order } from '../../types/order'
 import { toast } from 'react-toastify'
+import { ArrowPathIcon } from '@heroicons/react/24/outline'
 
 type Status = 'all' | 'delivering' | 'completed' | 'cancelled' | 'pending' | 'confirmed'
 
@@ -63,7 +64,7 @@ const OrderListScreen: React.FC<{ className?: string }> = ({ className = '' }) =
       if (err && typeof err === 'object' && 'response' in err) {
         const axiosError = err as { response?: { data?: { message?: string; error?: string }; status?: number } }
         if (axiosError.response?.status === 401) {
-          navigate('/auth/login')
+          navigate('/login')
           return
         } else {
           errorMessage = axiosError.response?.data?.message || 
@@ -97,6 +98,12 @@ const OrderListScreen: React.FC<{ className?: string }> = ({ className = '' }) =
   const handleStatusChange = (newStatus: Status) => {
     setStatus(newStatus)
     setPage(1)
+  }
+
+  const handleResetOrders = () => {
+    setStatus('all')
+    setPage(1)
+    loadOrders()
   }
 
   const handleOrderCanceled = useCallback(() => {
@@ -160,6 +167,16 @@ const OrderListScreen: React.FC<{ className?: string }> = ({ className = '' }) =
                 onClick={() => handleStatusChange('cancelled')}
               >
                 Đã hủy
+              </button>
+
+              <button
+                type="button"
+                onClick={handleResetOrders}
+                disabled={loading}
+                className="ml-auto px-4 py-2 rounded-md font-medium transition whitespace-nowrap border border-gray-300 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              >
+                <ArrowPathIcon className="w-5 h-5 inline-block mr-2 -translate-y-0.5" />
+                Tải lại đơn hàng
               </button>
             </div>
 

@@ -258,6 +258,145 @@ class RestaurantController {
 
   /**
    * @swagger
+   * /restaurants/owner/restaurant:
+   *  get:
+   *    summary: Get my restaurant (by owner)
+   *    description: Retrieve the restaurant information associated with the authenticated owner
+   *    tags:
+   *      - Restaurants
+   *    security:
+   *      - bearerAuth: []
+   *    responses:
+   *      200:
+   *        description: Restaurant retrieved successfully
+   *      401:
+   *        description: Unauthorized
+   *      403:
+   *        description: Not restaurant owner
+   */
+  async getMyRestaurant(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const restaurant = await RestaurantService.getRestaurantByOwnerId(userId);
+      
+      if (!restaurant) {
+        throw new ERR_RESPONSE.NotFoundError("Restaurant not found for this owner", ERR.RESTAURANT_NOT_FOUND);
+      }
+
+      return SUCCESS_RESPONSE.success(res, "Get restaurant successfully", restaurant);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * @swagger
+   * /restaurants/owner/restaurant:
+   *  post:
+   *    summary: Update my restaurant (by owner)
+   *    description: Update the restaurant information associated with the authenticated owner
+   *    tags:
+   *      - Restaurants
+   *    security:
+   *      - bearerAuth: []
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        application/json:
+   *          schema:
+   *            type: object
+   *            properties:
+   *              name:
+   *                type: string
+   *                description: Name of the restaurant
+   *                example: "My Restaurant"
+   *              address:
+   *                type: string
+   *                description: Address of the restaurant
+   *                example: "123 Main St, City, Country"
+   *              phone:
+   *                type: string
+   *                description: Contact phone number
+   *                example: "+1234567890"
+   *     responses:
+   *       200:
+   *         description: Restaurant updated successfully
+   *       400:
+   *         description: Invalid input data
+   *       401:
+   *         description: Unauthorized
+   *       403:
+   *         description: Not restaurant owner
+   */
+  async updateMyRestaurant(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const updated = await RestaurantService.updateRestaurantByOwnerId(userId, req.body || {});
+      return SUCCESS_RESPONSE.success(res, 'Update restaurant successfully', updated);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * @swagger
+   * /restaurants/owner/restaurant/payment-qr:
+   *   patch:
+   *    summary: Upload or update restaurant payment QR code (by owner)
+   *    description: Allows restaurant owners to upload or update their restaurant's payment QR code.
+   *    tags:
+   *      - Restaurants
+   *    security:
+   *      - bearerAuth: []
+   *    requestBody:
+   *      required: true
+   *      content:
+   *        multipart/form-data:
+   *          schema:
+   *            type: object
+   *            required:
+   *              - file
+   *            properties:
+   *              file:
+   *                type: string
+   *                format: binary
+   *      responses:
+   *        200:
+   *          description: Payment QR updated successfully
+   *        400:
+   *          description: Missing file
+   *        401:
+   *          description: Unauthorized
+   */
+  async uploadMyPaymentQr(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError("User not authenticated", ERR.UNAUTHORIZED);
+      }
+
+      const file = req.file;
+      if (!file) {
+        throw new ERR_RESPONSE.BadRequestError("File is required", ERR.INVALID_INPUT);
+      }
+
+      const updated = await RestaurantService.uploadPaymentQrByOwnerId(userId, file);
+      return SUCCESS_RESPONSE.success(res, 'Payment QR updated successfully', updated);
+  } catch (err) {
+      next(err);
+    }
+  }
+
+  /**
+   * @swagger
    * /restaurants/recommend:
    *   get:
    *     summary: Get recommended restaurants

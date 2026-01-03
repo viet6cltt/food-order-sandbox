@@ -149,7 +149,7 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
         <div className="text-center">
           <p className="text-gray-600">
             Chưa có tài khoản?{' '}
-            <Link to="/signup" className="text-emerald-600 hover:text-emerald-700 font-semibold">
+            <Link to="/auth/signup" className="text-emerald-600 hover:text-emerald-700 font-semibold">
               Đăng ký ngay
             </Link>
           </p>

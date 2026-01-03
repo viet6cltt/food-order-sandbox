@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import OrderList from '../components/OrderList';
+import React, { useState, useEffect, useRef } from 'react';
+import OrderList, { type OrderListHandle } from '../components/OrderList';
 import RevenueWidget from '../components/RevenueWidget';
-import { ChartBarIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import OwnerLayout from '../../../layouts/OwnerLayout';
 import {Cog6ToothIcon} from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,9 @@ import { getMyRestaurant, type Restaurant } from '../api';
 const OwnerDashboardScreen: React.FC = () => {
     const navigate = useNavigate();
     const [restaurant, setRestaurant] = useState<Restaurant | null>(null);
+    const orderListRef = useRef<OrderListHandle | null>(null);
+    const [reloadingOrders, setReloadingOrders] = useState(false);
+    const [revenueReloadKey, setRevenueReloadKey] = useState(0);
 
     useEffect(() => {
         const fetchRestaurant = async () => {
@@ -49,14 +52,36 @@ const OwnerDashboardScreen: React.FC = () => {
 
                     {/* Revenue Widget */}
                     <div className="mb-6">
-                        <RevenueWidget restaurant={restaurant} />
+                        <RevenueWidget restaurant={restaurant} reloadKey={revenueReloadKey} />
                     </div>
 
                     {/* Order List */}
                     <div className="lg:col-span-2">
                         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                            <h2 className="text-lg font-bold text-gray-900 mb-4">Đơn hàng hôm nay</h2>
-                            <OrderList />
+                            <div className="flex items-center justify-between mb-4">
+                                <h2 className="text-lg font-bold text-gray-900">Đơn hàng hôm nay</h2>
+                                <button
+                                    type="button"
+                                    onClick={async () => {
+                                        if (!orderListRef.current) return;
+                                        setReloadingOrders(true);
+                                        try {
+                                            await orderListRef.current.reload();
+                                        } finally {
+                                            setReloadingOrders(false);
+                                        }
+                                    }}
+                                    disabled={reloadingOrders}
+                                    className="inline-flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    <ArrowPathIcon className={`w-4 h-4 ${reloadingOrders ? 'animate-spin' : ''}`} />
+                                    <span className="text-sm font-medium">Tải lại</span>
+                                </button>
+                            </div>
+                            <OrderList
+                                ref={orderListRef}
+                                onOrderCompleted={() => setRevenueReloadKey((k) => k + 1)}
+                            />
                         </div>
                     </div>
 

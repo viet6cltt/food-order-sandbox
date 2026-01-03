@@ -5,6 +5,10 @@ class RestaurantRepository {
     return await Restaurant.findById(restaurantId);
   }
 
+  async findByOwnerId(ownerId) {
+    return await Restaurant.findOne({ ownerId: ownerId });
+  }
+
   async create(data) {
     return await Restaurant.create(data);
   }

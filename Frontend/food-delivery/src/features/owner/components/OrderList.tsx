@@ -1,11 +1,32 @@
 // src/features/owner/components/OrderList.tsx
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { toast } from 'react-toastify';
 import { getMyRestaurant, getRestaurantOrders, confirmOrder, prepareOrder, deliverOrder, cancelOrderByRestaurant, completeOrder } from '../api';
 import type { Order, OrderStatus } from '../../../types/order';
 import OrderTable from './OrderTable';
 
-const OrderList: React.FC = () => {
+function getErrorMessage(err: unknown, fallback: string) {
+    if (err && typeof err === 'object') {
+        const maybe = err as {
+            message?: unknown;
+            response?: { data?: { message?: unknown } };
+        };
+        const fromResponse = maybe.response?.data?.message;
+        if (typeof fromResponse === 'string' && fromResponse.trim()) return fromResponse;
+        if (typeof maybe.message === 'string' && maybe.message.trim()) return maybe.message;
+    }
+    return fallback;
+}
+
+export type OrderListHandle = {
+    reload: () => Promise<void>;
+};
+
+type OrderListProps = {
+    onOrderCompleted?: () => void;
+};
+
+const OrderList = forwardRef<OrderListHandle, OrderListProps>(({ onOrderCompleted }, ref) => {
     const [restaurantId, setRestaurantId] = useState<string | null>(null);
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -22,9 +43,8 @@ const OrderList: React.FC = () => {
                 } else {
                     setError('Bạn chưa có nhà hàng. Vui lòng đăng ký nhà hàng trước.');
                 }
-            } catch (err: any) {
-                const errorMessage = err.response?.data?.message || err.message || 'Không thể tải thông tin nhà hàng.';
-                setError(errorMessage);
+            } catch (err: unknown) {
+                setError(getErrorMessage(err, 'Không thể tải thông tin nhà hàng.'));
                 console.error('Error fetching restaurant:', err);
             } finally {
                 setLoading(false);
@@ -49,9 +69,8 @@ const OrderList: React.FC = () => {
                 });
                 setOrders(result.orders || []);
                 setError(null);
-            } catch (err: any) {
-                const errorMessage = err.response?.data?.message || err.message || 'Không thể tải danh sách đơn hàng.';
-                setError(errorMessage);
+            } catch (err: unknown) {
+                setError(getErrorMessage(err, 'Không thể tải danh sách đơn hàng.'));
                 console.error('Error fetching orders:', err);
             } finally {
                 setLoading(false);
@@ -61,14 +80,38 @@ const OrderList: React.FC = () => {
         fetchOrders();
     }, [restaurantId]);
 
-    const refreshOrders = async () => {
+    const refreshOrders = useCallback(async () => {
         if (!restaurantId) return;
-        const result = await getRestaurantOrders(restaurantId, {
-            page: 1,
-            limit: 50,
-        });
-        setOrders(result.orders || []);
-    };
+        try {
+            setLoading(true);
+            const result = await getRestaurantOrders(restaurantId, {
+                page: 1,
+                limit: 50,
+            });
+            setOrders(result.orders || []);
+            setError(null);
+        } catch (err: unknown) {
+            setError(getErrorMessage(err, 'Không thể tải danh sách đơn hàng.'));
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }, [restaurantId]);
+
+    useImperativeHandle(ref, () => ({
+        reload: async () => {
+            if (!restaurantId) {
+                toast.error('Không tìm thấy thông tin nhà hàng.');
+                return;
+            }
+            try {
+                await refreshOrders();
+                // toast.success('Đã tải lại đơn hàng hôm nay');
+            } catch (err: unknown) {
+                toast.error(getErrorMessage(err, 'Không thể tải lại danh sách đơn hàng.'));
+            }
+        },
+    }), [restaurantId, refreshOrders]);
 
 
     const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
@@ -104,9 +147,12 @@ const OrderList: React.FC = () => {
             
             // Refresh orders list
             await refreshOrders();
-        } catch (err: any) {
-            const errorMessage = err.response?.data?.message || err.message || 'Không thể cập nhật trạng thái đơn hàng.';
-            toast.error(errorMessage);
+
+            if (newStatus === 'completed') {
+                onOrderCompleted?.();
+            }
+        } catch (err: unknown) {
+            toast.error(getErrorMessage(err, 'Không thể cập nhật trạng thái đơn hàng.'));
             console.error('Error updating order status:', err);
         }
     };
@@ -154,6 +200,6 @@ const OrderList: React.FC = () => {
             onRefresh={refreshOrders}
         />
     );
-};
+});
 
 export default OrderList;

@@ -5,6 +5,7 @@ const ERR = require('@/constants/errorCodes');
 const menuItemService = require('./menuItem.service');
 const restaurantService = require('./restaurant.service');
 const paymentService = require('./payment.service');
+const geocodeService = require('./geocode.service');
 
 const { orderStatusObject ,allowedTransitions } = require('@/constants/orderStatus');
 
@@ -122,6 +123,25 @@ class OrderService {
     const restaurant = await restaurantService.getRestaurantInfo(order.restaurantId);
     if (!restaurant || !restaurant.address || !restaurant.address.geo) {
       throw new ERR_RESPONSE.BadRequestError("Restaurant geo location is invalid");
+    }
+
+    // If client only sends address text, derive coordinates server-side
+    const hasValidLatLng =
+      deliveryAddress &&
+      typeof deliveryAddress.lat === 'number' &&
+      typeof deliveryAddress.lng === 'number' &&
+      Number.isFinite(deliveryAddress.lat) &&
+      Number.isFinite(deliveryAddress.lng);
+
+    if (!hasValidLatLng) {
+      const full = typeof deliveryAddress?.full === 'string' ? deliveryAddress.full.trim() : '';
+      if (!full) {
+        throw new ERR_RESPONSE.BadRequestError('Delivery address is missing', ERR.INVALID_INPUT);
+      }
+      const { lat, lng, formatted } = await geocodeService.geocodeAddress(full);
+      deliveryAddress.lat = lat;
+      deliveryAddress.lng = lng;
+      deliveryAddress.full = formatted || full;
     }
 
     const distanceMeters = geolib.getDistance(

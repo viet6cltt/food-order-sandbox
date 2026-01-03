@@ -1,10 +1,28 @@
 const Order = require('../models/Order');
 const { Types } = require("mongoose");
+const ERR_RESPONSE = require('../utils/httpErrors');
+const ERR = require('../constants/errorCodes');
 
 class RevenueRepository {
   async getRevenueByDay(restaurantId, date) {
-    const start = new Date(date);
-    const end = new Date(date);
+    let start;
+    if (typeof date === 'string' && date.trim()) {
+      // Interpret YYYY-MM-DD as local midnight
+      start = new Date(`${date}T00:00:00`);
+    } else if (date instanceof Date) {
+      start = new Date(date);
+      start.setHours(0, 0, 0, 0);
+    } else {
+      // Default to today (local)
+      start = new Date();
+      start.setHours(0, 0, 0, 0);
+    }
+
+    if (Number.isNaN(start.getTime())) {
+      throw new ERR_RESPONSE.BadRequestError('Invalid date', ERR.INVALID_INPUT);
+    }
+
+    const end = new Date(start);
 
     end.setDate(end.getDate() + 1);
 
