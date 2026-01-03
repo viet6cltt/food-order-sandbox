@@ -29,6 +29,8 @@ import RestaurantCategoryScreen from '../features/admin/screens/RestaurantCatego
 import AdminReportHandlingScreen from '../features/admin/screens/AdminReportHandlingScreen';
 import UserStatisticsScreen from '../features/admin/screens/UserStatisticsScreen';
 import AdminRestaurantRequestsScreen from '../features/admin/screens/AdminRestaurantRequestScreen';
+import OrderStatisticsScreen from '../features/admin/screens/OrderStatisticsScreen.tsx';
+
 const AppRoutes: React.FC = () => {
 	return (
 		<BrowserRouter>
@@ -98,7 +100,7 @@ const AppRoutes: React.FC = () => {
 					</ProtectedRoute>
 				} />
 
-                <Route path="/order-list" element={
+				<Route path="/order-list" element={
 					<ProtectedRoute allowedRoles={['customer']}>
 						<OrderListScreen />
 					</ProtectedRoute>
@@ -169,6 +171,14 @@ const AppRoutes: React.FC = () => {
 								<AdminRestaurantRequestsScreen />
 						</ProtectedRoute>
 				} />
+
+				<Route path="/admin/orders/*" element={
+						<ProtectedRoute allowedRoles={['admin']}>
+								<OrderStatisticsScreen />
+						</ProtectedRoute>
+				} />
+
+
 
 			</Routes>
 		</BrowserRouter>

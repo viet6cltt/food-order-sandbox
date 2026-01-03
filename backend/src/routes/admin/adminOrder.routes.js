@@ -7,9 +7,11 @@ const { requireAdmin } = require('@/middlewares/role.middleware');
 router.use(requireAuth, requireAdmin);
 
 // for dashboard
-router.get('/dashboard-stats', adminOrderController.getDashboardStats);
+router.get('/statistics', adminOrderController.getOrderTrends);
 
 // for statistics
-router.get('/statistics', adminOrderController.getOrderStatistics);
+// router.get('/statistics', adminOrderController.getOrderStatistics);
+
+router.get('/categories/top', adminOrderController.getTopCategoriesStats);
 
 module.exports = router;
