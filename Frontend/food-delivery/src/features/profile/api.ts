@@ -74,6 +74,28 @@ export async function updateMe(payload: UpdateUserPayload): Promise<UserResponse
 }
 
 /**
+ * Upload current user's avatar image
+ * @param file Avatar image file
+ * @returns Updated user data
+ */
+export async function uploadMyAvatar(file: File): Promise<UserResponse> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await apiClient.patch('/users/me/avatar', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+
+  const user = res.data?.data?.updatedUser ?? res.data?.data?.user ?? res.data?.user;
+
+  if (user) {
+    user.id = user.id || (user._id ? String(user._id) : '');
+  }
+
+  return user;
+}
+
+/**
  * Get user information by ID (for admin)
  * @param userId User ID
  * @returns User data

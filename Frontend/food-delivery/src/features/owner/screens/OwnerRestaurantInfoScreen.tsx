@@ -5,8 +5,12 @@ import ToggleAcceptOrders from '../components/ToggleAcceptOrders';
 import RestaurantForm from '../components/RestaurantForm';
 import { toast } from 'react-toastify';
 import { getCategories, getMyRestaurant, updateMyRestaurant, type NormalizedCategory } from '../api';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const OwnerRestaurantInfoScreen: React.FC = () => {
+    const navigate = useNavigate();
+    const params = useParams();
+    const routeRestaurantId = typeof params.restaurantId === 'string' ? params.restaurantId : null;
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -35,7 +39,7 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
                 setLoading(true);
                 const [cats, restaurant] = await Promise.all([
                     getCategories(1, 200),
-                    getMyRestaurant(),
+                    getMyRestaurant(routeRestaurantId),
                 ]);
                 setCategories(cats);
 
@@ -101,6 +105,15 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
         <OwnerLayout>
             <div className="min-h-screen bg-gray-50 p-4 md:p-8">
                 <div className="max-w-6xl mx-auto">
+                    <div className="mb-6">
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="text-emerald-600 hover:text-emerald-700 font-medium mb-4 inline-flex items-center"
+                        >
+                            ← Quay lại
+                        </button>
+                    </div>
 
                     {/* Header của trang */}
                     <div className="mb-8 flex flex-row justify-between items-center">

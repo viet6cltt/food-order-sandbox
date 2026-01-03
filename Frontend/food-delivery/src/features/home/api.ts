@@ -102,10 +102,8 @@ export async function getRecommendRestaurants() {
 }
 
 export async function getCategories(page = 1, limit = 12): Promise<NormalizedCategory[]> {
-  const res = await api.get('/categories', { params: { page, limit } });
+  const res = await api.get('/categories/', { params: { page, limit } });
 
-  // BE trả về: { success, message, data: { categories, pagination } }
-  // Nhưng một số nơi trước đây cũng từng trả mảng trực tiếp.
   const raw =
     (Array.isArray(res.data?.data?.categories) && res.data.data.categories) ||
     (Array.isArray(res.data?.data) && res.data.data) ||
@@ -113,14 +111,26 @@ export async function getCategories(page = 1, limit = 12): Promise<NormalizedCat
     [];
 
   const normalized = raw
-    .map((category: Category) => ({
-      ...category,
-      id: category.id || category._id || '',
-      name: category.name,
-      imageUrl: category.imageUrl,
-      description: category.description,
-      isActive: category.isActive,
-    }))
+    .map((category: Category) => {
+      const c = category as Category & { _id?: unknown; id?: unknown } & { _id?: { $oid?: string } };
+      const normalizedId =
+        typeof c.id === 'string' && c.id
+          ? c.id
+          : typeof c._id === 'string' && c._id
+            ? c._id
+            : typeof (c as { _id?: { $oid?: string } })._id?.$oid === 'string'
+              ? String((c as { _id?: { $oid?: string } })._id?.$oid)
+              : '';
+
+      return {
+        ...category,
+        id: normalizedId,
+        name: category.name,
+        imageUrl: category.imageUrl,
+        description: category.description,
+        isActive: category.isActive,
+      };
+    })
     .filter((cat: NormalizedCategory) => !!cat.id && cat.isActive === true);
 
   return normalized;

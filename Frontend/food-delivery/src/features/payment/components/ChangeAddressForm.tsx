@@ -29,12 +29,20 @@ const ChangeAddressForm: React.FC<ChangeAddressFormProps> = ({
             setLoading(true);
 
             const q = fullAddress.trim();
-            const geo = await geocodeAddress(q);
-            const newAddress = {
-                full: geo.formatted || q,
-                lat: geo.lat,
-                lng: geo.lng,
-            };
+            let newAddress: { full: string; lat: number; lng: number };
+            try {
+                const geo = await geocodeAddress(q);
+                newAddress = {
+                    full: geo.formatted || q,
+                    lat: geo.lat,
+                    lng: geo.lng,
+                };
+            } catch {
+                // Allow user to proceed even if geocoding is temporarily unavailable.
+                // Backend will attempt to geocode again when placing the order.
+                newAddress = { full: q, lat: 0, lng: 0 };
+                toast.warn('Không thể định vị địa chỉ lúc này. Sẽ xử lý khi đặt hàng.');
+            }
 
             // Just update local state, don't call API here
             // API will be called when user clicks "Đặt hàng"

@@ -4,7 +4,7 @@ import AcceptRejectButtons from './AcceptRejectButtons';
 import StatusUpdateControls from './StatusUpdateControls';
 import { getUser, type UserResponse } from '../../../features/profile/api';
 import { toast } from 'react-toastify';
-import { confirmPayment, getPaymentById, type Payment } from '../../payment/api';
+import { confirmPayment, getPaymentById, getPaymentByOrder, type Payment } from '../../payment/api';
 
 interface Props {
     orders: Order[];
@@ -21,6 +21,10 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
     const [loadingPaymentIds, setLoadingPaymentIds] = useState<Set<string>>(new Set());
     const fetchedPaymentIdsRef = useRef<Set<string>>(new Set());
 
+    const [paymentByOrderIdMap, setPaymentByOrderIdMap] = useState<Map<string, Payment>>(new Map());
+    const [loadingPaymentOrderIds, setLoadingPaymentOrderIds] = useState<Set<string>>(new Set());
+    const fetchedPaymentOrderIdsRef = useRef<Set<string>>(new Set());
+
     // Get unique userIds from orders - use useMemo to prevent unnecessary recalculations
     const uniqueUserIds = useMemo(() => {
         const userIds = orders
@@ -34,6 +38,14 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
             .map(order => order.paymentId)
             .filter((id): id is string => typeof id === 'string' && id.trim() !== '');
         return Array.from(new Set(paymentIds));
+    }, [orders]);
+
+    const uniqueBankTransferOrderIds = useMemo(() => {
+        const orderIds = orders
+            .filter(o => o.paymentMethod === 'BANK_TRANSFER')
+            .map(o => o._id)
+            .filter((id): id is string => typeof id === 'string' && id.trim() !== '');
+        return Array.from(new Set(orderIds));
     }, [orders]);
 
     // Fetch user data for all unique userIds - only when new userIds appear
@@ -141,6 +153,54 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [uniquePaymentIds.join(',')]);
 
+    // Fetch payment by orderId for BANK_TRANSFER orders (covers cases where order.paymentId is not set yet)
+    useEffect(() => {
+        if (uniqueBankTransferOrderIds.length === 0) return;
+
+        const fetchPaymentsByOrder = async () => {
+            const orderIdsToFetch = uniqueBankTransferOrderIds.filter(
+                id => !fetchedPaymentOrderIdsRef.current.has(id) && !loadingPaymentOrderIds.has(id)
+            );
+            if (orderIdsToFetch.length === 0) return;
+
+            setLoadingPaymentOrderIds(prev => new Set([...prev, ...orderIdsToFetch]));
+
+            try {
+                const paymentPromises = orderIdsToFetch.map(async (orderId) => {
+                    try {
+                        const payment = await getPaymentByOrder(orderId);
+                        return { orderId, payment };
+                    } catch (error) {
+                        console.error(`Error fetching payment by order ${orderId}:`, error);
+                        return { orderId, payment: null };
+                    }
+                });
+
+                const results = await Promise.all(paymentPromises);
+
+                setPaymentByOrderIdMap(prev => {
+                    const next = new Map(prev);
+                    results.forEach(({ orderId, payment }) => {
+                        if (payment) {
+                            next.set(orderId, payment);
+                            fetchedPaymentOrderIdsRef.current.add(orderId);
+                        }
+                    });
+                    return next;
+                });
+            } finally {
+                setLoadingPaymentOrderIds(prev => {
+                    const next = new Set(prev);
+                    orderIdsToFetch.forEach(id => next.delete(id));
+                    return next;
+                });
+            }
+        };
+
+        fetchPaymentsByOrder();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [uniqueBankTransferOrderIds.join(',')]);
+
     const getCustomerName = (userId: string): string => {
         if (!userId || typeof userId !== 'string') {
             return 'Khách vãng lai';
@@ -158,11 +218,14 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
         if (method !== 'BANK_TRANSFER') return 'COD';
 
         const paymentId = order.paymentId;
-        if (!paymentId) return 'BANK_TRANSFER (chưa gửi xác nhận)';
+        const payment =
+            (typeof paymentId === 'string' && paymentId ? paymentMap.get(paymentId) : undefined) ||
+            paymentByOrderIdMap.get(order._id);
 
-        const payment = paymentMap.get(paymentId);
         if (!payment) {
-            return loadingPaymentIds.has(paymentId) ? 'BANK_TRANSFER (đang tải...)' : 'BANK_TRANSFER (pending)';
+            const isLoading = (typeof paymentId === 'string' && paymentId && loadingPaymentIds.has(paymentId)) ||
+                loadingPaymentOrderIds.has(order._id);
+            return isLoading ? 'BANK_TRANSFER (đang tải...)' : 'BANK_TRANSFER (chờ xác nhận)';
         }
 
         const statusText = payment.status === 'success'
@@ -190,6 +253,17 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
                 return next;
             });
 
+            // Also update by-order map (if present)
+            setPaymentByOrderIdMap(prev => {
+                const next = new Map(prev);
+                for (const [orderId, payment] of next.entries()) {
+                    if (payment?._id === paymentId) {
+                        next.set(orderId, { ...payment, status: 'success' });
+                    }
+                }
+                return next;
+            });
+
             await onRefresh?.();
         } catch (err: any) {
             const errorMessage = err?.response?.data?.message || err?.message || 'Không thể xác nhận thanh toán';
@@ -202,10 +276,15 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
         if (order.isPaid) return true;
 
         const paymentId = typeof order.paymentId === 'string' ? order.paymentId : '';
-        if (!paymentId) return false;
-
-        const payment = paymentMap.get(paymentId);
+        const payment = (paymentId ? paymentMap.get(paymentId) : undefined) || paymentByOrderIdMap.get(order._id);
         return payment?.status === 'success';
+    };
+
+    const getConfirmablePayment = (order: Order): Payment | null => {
+        if (order.paymentMethod !== 'BANK_TRANSFER') return null;
+        const paymentId = typeof order.paymentId === 'string' ? order.paymentId : '';
+        const payment = (paymentId ? paymentMap.get(paymentId) : undefined) || paymentByOrderIdMap.get(order._id);
+        return payment || null;
     };
 
     return (
@@ -244,19 +323,28 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
                                 {getPaymentLabel(order)}
                             </td>
                             <td className="px-4 py-3">
-                                {order.paymentMethod === 'BANK_TRANSFER' && typeof order.paymentId === 'string' && order.paymentId && (
+                                {order.paymentMethod === 'BANK_TRANSFER' && (
                                     (() => {
-                                        const payment = paymentMap.get(order.paymentId);
-                                        const canConfirm = !order.isPaid && payment?.status === 'pending';
+                                        const payment = getConfirmablePayment(order);
+                                        const canConfirm = Boolean(payment && !order.isPaid && payment.status === 'pending');
+                                        const isLoading = loadingPaymentOrderIds.has(order._id) ||
+                                            (typeof order.paymentId === 'string' && order.paymentId && loadingPaymentIds.has(order.paymentId));
+
                                         return (
                                             <div className="mb-2">
                                                 <button
                                                     type="button"
-                                                    disabled={!canConfirm}
-                                                    onClick={() => handleConfirmPayment(order.paymentId as string)}
+                                                    disabled={!canConfirm || isLoading}
+                                                    onClick={() => {
+                                                        if (!payment?._id) {
+                                                            toast.error('Không tìm thấy thông tin thanh toán của đơn này');
+                                                            return;
+                                                        }
+                                                        handleConfirmPayment(payment._id);
+                                                    }}
                                                     className="px-3 py-2 text-xs rounded-md border border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                                 >
-                                                    Xác nhận thanh toán
+                                                    {isLoading ? 'Đang tải...' : 'Xác nhận thanh toán'}
                                                 </button>
                                             </div>
                                         );

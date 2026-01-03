@@ -56,8 +56,8 @@ const Header: React.FC<Props> = ({ className = '' }) => {
     } else if (isAuthenticated && user?.role === 'restaurant_owner') {
       navigate('/owner/restaurant-list');
     } else {
-      navigate('/');
-    }
+      navigate('/');  
+    } 
   };
 
   if (isLoading) {
@@ -99,7 +99,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
         {/* ACTIONS */}
         <div className="flex items-center justify-end gap-2 sm:gap-3">
 
-          {/* NAV LINKS (XL) */}
+          {/* NAV LINKS (XL)
           <nav className="hidden xl:flex items-center gap-4 pr-4 mr-2 border-r border-gray-200">
             {isAuthenticated && user?.role === 'customer' && (
               <button
@@ -108,22 +108,24 @@ const Header: React.FC<Props> = ({ className = '' }) => {
               >
                 Mở quán
               </button>
-            )}
+            )} */}
 
-            {isAuthenticated && user?.role === 'restaurant_owner' && (
+            {/* {isAuthenticated && user?.role === 'restaurant_owner' && (
               <button
-                onClick={() => navigate('/owner/menu-list')}
-                className="text-xs font-semibold uppercase tracking-wide text-gray-700 hover:text-emerald-600 transition"
+                onClick={() => navigate(`/owner/${restaurant._id || restaurant.id}/menu-list`)}
+                className="px-4 py-1.5 text-sm font-semibold rounded-full
+                      bg-emerald-50 text-emerald-700 border border-emerald-200
+                      hover:bg-emerald-100 hover:border-emerald-300 transition"
               >
                 Menu
               </button>
             )}
-          </nav>
+          </nav> */}
 
           {isAuthenticated ? (
             <>
               {/* CTA OWNER */}
-              {(user?.role === 'customer' || user?.role === 'restaurant_owner') && (
+              {(user?.role === 'customer') && (
                 <div className="hidden sm:flex items-center gap-2">
                   <button
                     onClick={() => navigate('/owner/register')}
@@ -133,10 +135,12 @@ const Header: React.FC<Props> = ({ className = '' }) => {
                   >
                     Mở quán
                   </button>
-
-                  {user?.role === 'restaurant_owner' && (
+                </div>
+              )}
+                <div>
+                {user?.role === 'restaurant_owner' && (
                     <button
-                      onClick={() => navigate('/owner/dashboard')}
+                      onClick={() => navigate('/owner/restaurant-list')}
                       className="px-4 py-1.5 text-sm font-semibold rounded-full
                         bg-white border border-gray-300 text-gray-700
                         hover:bg-gray-50 transition"
@@ -145,7 +149,6 @@ const Header: React.FC<Props> = ({ className = '' }) => {
                     </button>
                   )}
                 </div>
-              )}
 
               {/* CART */}
               {user?.role !== 'admin' && user?.role !== 'restaurant_owner' && (

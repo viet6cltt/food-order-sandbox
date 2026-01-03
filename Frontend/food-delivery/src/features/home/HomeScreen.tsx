@@ -18,7 +18,6 @@ const HomeScreen: React.FC = () => {
               <h2 className="text-2xl font-extrabold text-gray-900 tracking-tight">Dành riêng cho bạn</h2>
               <p className="text-gray-500 text-sm">Những quán ăn ngon nhất dựa trên sở thích của bạn</p>
             </div>
-            <button className="text-green-600 font-bold text-sm hover:underline">Xem tất cả</button>
           </div>
           <RecommendList />
         </section>

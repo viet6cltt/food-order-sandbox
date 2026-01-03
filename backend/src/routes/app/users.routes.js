@@ -15,6 +15,7 @@ const reportController = require('@/controllers/app/report.controller.js');
 router.get('/', UserController.index);
 router.get('/me', requireAuth, UserController.getMe); // dùng khi người dùng lấy thông tin của chính bản thân
 router.put('/me', requireAuth, UserController.updateMe); // dùng khi người dùng muốn thay đổi thông tin bản thân
+router.patch('/me/avatar', requireAuth, upload.single('file'), UserController.uploadMyAvatar);
 
 // request restaurant - định nghĩa trước route /:userId để tránh bị match sai
 router.post("/restaurant-requests",requireAuth, upload.fields([

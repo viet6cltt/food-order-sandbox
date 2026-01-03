@@ -7,6 +7,7 @@ const restaurantRepository = require('@/repositories/restaurant.repository');
 const cloudinary = require("@/config/cloudinary.config");
 const fs = require('fs');
 const { RestaurantStatus } = require('@/constants/restaurant.constants');
+const mongoose = require('mongoose');
 
 function isWithinBusinessHours(current, open, close) {
   // current, open, close đều dạng "HH:MM"
@@ -122,7 +123,16 @@ class RestaurantService {
       status: RestaurantStatus.ACTIVE
     };
 
-    if (categoryId) filter.categoriesId = categoryId;
+    // IMPORTANT: this endpoint uses aggregation ($match / $geoNear).
+    // Aggregation does NOT apply Mongoose's type casting, so we must cast manually
+    // to match against categoriesId: [ObjectId].
+    if (categoryId) {
+      if (mongoose.Types.ObjectId.isValid(categoryId)) {
+        filter.categoriesId = new mongoose.Types.ObjectId(String(categoryId));
+      } else {
+        throw new ERR_RESPONSE.BadRequestError('Invalid categoryId', ERR.INVALID_INPUT);
+      }
+    }
 
     // sort khi không có tọa độ
     // nếu sortBy là newest thì k quan tâm đến rating

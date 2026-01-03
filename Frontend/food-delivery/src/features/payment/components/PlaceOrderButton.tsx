@@ -10,6 +10,7 @@ interface PlaceOrderButtonProps {
     order: Order;
     paymentMethod: 'COD' | 'BANK_TRANSFER';
     deliveryAddress: { full: string; lat: number; lng: number } | null;
+    shippingFee?: number;
 }
 
 const PlaceOrderButton: React.FC<PlaceOrderButtonProps> = ({ 
@@ -17,12 +18,13 @@ const PlaceOrderButton: React.FC<PlaceOrderButtonProps> = ({
     order,
     paymentMethod,
     deliveryAddress,
+    shippingFee: shippingFeeProp,
 }) => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
 
     const basePrice = order.totalFoodPrice || 0;
-    const shippingFee = order.shippingFee || 0; // Will be calculated by backend when updating order
+    const shippingFee = typeof shippingFeeProp === 'number' ? shippingFeeProp : (order.shippingFee || 0);
     const totalPrice = basePrice + shippingFee;
 
     const fmt = (v: number) => v.toLocaleString('vi-VN') + '₫';
@@ -36,16 +38,34 @@ const PlaceOrderButton: React.FC<PlaceOrderButtonProps> = ({
         try {
             setLoading(true);
 
-            const updatedOrder = await orderApi.updateOrderInfo(order._id, {
-                deliveryAddress: deliveryAddress,
-                paymentMethod,
-            });
-
-            // Step 2: If payment method is BANK_TRANSFER, create payment
-            if (paymentMethod === 'BANK_TRANSFER') {
-                await paymentApi.createPayment({
-                    orderId: updatedOrder._id,
+            let updatedOrder: Order;
+            try {
+                updatedOrder = await orderApi.updateOrderInfo(order._id, {
+                    deliveryAddress: deliveryAddress,
+                    paymentMethod,
                 });
+            } catch (err: unknown) {
+                // If order is already pending/draft updated (e.g., user retries), fall back to fetching
+                const maybeAxios = err && typeof err === 'object' && 'response' in err;
+                const message = maybeAxios
+                    ? (err as any).response?.data?.message || (err as any).response?.data?.error
+                    : (err instanceof Error ? err.message : '');
+
+                if (String(message || '').includes('update order info')) {
+                    updatedOrder = await orderApi.getOrder(order._id);
+                } else {
+                    throw err;
+                }
+            }
+
+            // Step 2: If payment method is BANK_TRANSFER, ensure payment record exists
+            if (paymentMethod === 'BANK_TRANSFER') {
+                const existing = await paymentApi.getPaymentByOrder(updatedOrder._id);
+                if (!existing) {
+                    await paymentApi.createPayment({
+                        orderId: updatedOrder._id,
+                    });
+                }
             }
 
             toast.success('Đặt hàng thành công!');

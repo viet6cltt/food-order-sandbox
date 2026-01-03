@@ -32,7 +32,7 @@ class PaymentService {
   async createPaymentBANK({ orderId, userId, status }) {
     // Khi status là BANK_TRANSFER thì tạo payment khi checkout order
     // Lazy load to break circular dependency
-    const orderService = require('./app/order.service');
+    const orderService = require('./order.service');
     const order = await orderService.getOrder(userId, orderId);
 
     if (order.paymentMethod !== "BANK_TRANSFER") {
@@ -75,7 +75,7 @@ class PaymentService {
     }
 
     // Lazy load to break circular dependency
-    const orderService = require('./app/order.service');
+    const orderService = require('./order.service');
     // Note: getOrder requires userId, but we only have orderId here
     // We need to use getOrderById instead or pass userId
     const order = await orderService.getOrderById(payment.orderId);
@@ -113,7 +113,7 @@ class PaymentService {
     }
 
     // Lazy load to break circular dependency
-    const orderService = require('./app/order.service');
+    const orderService = require('./order.service');
     const order = await orderService.getOrderById(payment.orderId);
 
     if (!order) {

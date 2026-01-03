@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { updateMe, type UpdateUserPayload } from '../api';
+import { updateMe, uploadMyAvatar, type UpdateUserPayload } from '../api';
 import { type UserProfile } from '../../../types/user';
 import { toast } from 'react-toastify';
+import AvatarUploader from './AvatarUploader';
 
 interface ProfileEditFormProps {
   user: UserProfile;
@@ -22,6 +23,8 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
   const [dateOfBirth, setDateOfBirth] = useState(user.dateOfBirth || '');
   const [street, setStreet] = useState(user.address?.street || '');
   const [city, setCity] = useState(user.address?.city || '')
+  const [avatarUrl, setAvatarUrl] = useState(user.avatarUrl || '');
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
@@ -33,12 +36,33 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
     setDateOfBirth(user.dateOfBirth || '');
     setStreet(user.address?.street || '');
     setCity(user.address?.city || '');
+    setAvatarUrl(user.avatarUrl || '');
   }, [user]);
+
+  const handleAvatarSelected = async (file: File) => {
+    try {
+      setAvatarUploading(true);
+      const updated = await uploadMyAvatar(file);
+      setAvatarUrl(updated?.avatarUrl || '');
+      toast.success('Đã cập nhật ảnh đại diện');
+    } catch (err: unknown) {
+      console.error(err);
+      toast.error('Upload ảnh đại diện thất bại');
+      throw err;
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
+
+    if (avatarUploading) {
+      toast.info('Đang upload ảnh đại diện, vui lòng đợi...');
+      return;
+    }
 
     // Validation cơ bản
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -55,6 +79,7 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
         lastname: lastname.trim() || undefined,
         email: email.trim() || undefined,
         dateOfBirth: dateOfBirth || undefined,
+        avatarUrl: avatarUrl.trim() || undefined,
         address: {
           street: street.trim() || undefined,
           city: city.trim() || undefined,
@@ -136,6 +161,16 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
           <InputGroup label="Thành phố / Tỉnh" value={city} onChange={setCity} placeholder="Vd: Hà Nội" />
         </div>
 
+        <div className="space-y-4 pt-4 border-t border-gray-50">
+          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Ảnh đại diện</h3>
+          <AvatarUploader
+            avatarUrl={avatarUrl}
+            uploading={avatarUploading}
+            disabled={loading}
+            onFileSelected={handleAvatarSelected}
+          />
+        </div>
+
         <div className="flex gap-4 pt-6">
           <button
             type="button"
@@ -147,10 +182,10 @@ const ProfileEditForm: React.FC<ProfileEditFormProps> = ({
           </button>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || avatarUploading}
             className="flex-3 bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-8 rounded-xl transition-all shadow-lg shadow-green-200 disabled:opacity-50 flex items-center justify-center gap-2"
           >
-            {loading ? (
+            {loading || avatarUploading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : 'Lưu thay đổi'}
           </button>

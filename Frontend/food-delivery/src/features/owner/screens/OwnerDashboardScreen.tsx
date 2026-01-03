@@ -82,14 +82,35 @@ const OwnerDashboardScreen: React.FC = () => {
                             </h1>
                             <p className="text-gray-500 mt-1 ml-11">Chào mừng trở lại! Đây là tình hình kinh doanh hôm nay.</p>
                         </div>
-                        <button
-                            type="button" 
-                            className="flex flex-row items-center gap-2 mt-4 p-4 bg-green-200 rounded-full shadow-sm hover:bg-gray-100 text-gray-600 opacity-75 hover:opacity-100 transition-opacity"
-                            onClick={() => navigate(`/owner/${restaurantId}/restaurant-info`)} 
-                        >
-                            <p className="text-black text-sm text-center -translate-y-0.5">Thông tin nhà hàng</p>    
-                            <Cog6ToothIcon className="w-6 h-6 text-black opacity-75 hover:opacity-100 transition-opacity" />
-                        </button>
+
+                        <div className='flex flex-row gap-4'>
+                            <button
+                            onClick={() => navigate(`/owner/${restaurant._id || restaurant.id}/menu-list`)}
+                            className="mt-4 p-4 text-sm font-semibold rounded-full
+                                    bg-emerald-50 text-emerald-700 border border-emerald-200
+                                    hover:bg-emerald-100 hover:border-emerald-300 transition"
+                            >
+                                Menu
+                            </button>
+
+                            <button
+                                type="button" 
+                                    className="flex flex-row items-center gap-2 mt-4 p-4 text-sm font-semibold rounded-full
+                                            bg-emerald-50 text-emerald-700 border border-emerald-200
+                                            hover:bg-emerald-100 hover:border-emerald-300 transition"
+                                    onClick={() => navigate(`/owner/${restaurantId}/restaurant-info`)} 
+                            >
+                                <p className="text-sm font-semibold
+                                            bg-emerald-50 text-emerald-700
+                                            hover:bg-emerald-100 transition text-center -translate-y-0.5"
+                                >
+                                    Thông tin nhà hàng
+                                </p>    
+                                <Cog6ToothIcon className="w-6 h-6 text-sm font-semibold
+                                            bg-emerald-50 text-emerald-700
+                                            hover:bg-emerald-100 transition" />
+                            </button>
+                        </div>
                     </div>
 
                     {/* Revenue Widget */}
