@@ -196,13 +196,16 @@ class RestaurantService {
   }
 
   async searchRestaurants({ keyword, lat, lng, limit, skip }) {
-    return restaurantRepository.search({
+    const result = await restaurantRepository.search({
       keyword,
       lat: Number(lat),
       lng: Number(lng),
       skip: Number(skip),
       limit: Number(limit)
     });
+
+    console.log(result)
+    return result;
   }
 
   async uploadBanner(id, file) {

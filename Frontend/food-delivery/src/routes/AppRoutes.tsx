@@ -30,11 +30,13 @@ import AdminReportHandlingScreen from '../features/admin/screens/AdminReportHand
 import UserStatisticsScreen from '../features/admin/screens/UserStatisticsScreen';
 import AdminRestaurantRequestsScreen from '../features/admin/screens/AdminRestaurantRequestScreen';
 import OrderStatisticsScreen from '../features/admin/screens/OrderStatisticsScreen.tsx';
+import BannedScreen from '../features/common/BannedScreen.tsx';
 
 const AppRoutes: React.FC = () => {
 	return (
 		<BrowserRouter>
 			<Routes>
+				<Route path="/banned" element={<BannedScreen />} />
 				<Route
 					path="/auth/login"
 					element={
