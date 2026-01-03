@@ -52,10 +52,14 @@ const AppRoutes: React.FC = () => {
 						</PublicRoute>
 					}
 				/>
-				<Route path="/auth/complete-profile" element={<CompleteProfileScreen />} />
-				<Route path="/auth/oauth-success" element={<OAuthSuccessScreen />} />
-				<Route path="/auth/reset-password-request" element={<ResetPasswordRequestScreen />} />
-				<Route path="/auth/reset-password" element={<ResetPasswordScreen />} />
+				<Route path="/auth/complete-profile" element={
+					<PublicRoute>
+						<CompleteProfileScreen />
+					</PublicRoute>
+					} />
+				<Route path="/auth/oauth-success" element={<PublicRoute><OAuthSuccessScreen /></PublicRoute>} />
+				<Route path="/auth/reset-password-request" element={<PublicRoute><ResetPasswordRequestScreen /></PublicRoute>} />
+				<Route path="/auth/reset-password" element={<PublicRoute><ResetPasswordScreen /></PublicRoute>} />
 
 
 				{/* Customer routes */}
