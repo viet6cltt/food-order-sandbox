@@ -3,14 +3,25 @@ const ERR_RESPONSE = require('@/utils/httpErrors.js');
 const ERR = require('@/constants/errorCodes');
 
 class AdminUserService {
-  async listUsers({ role, status }) {
+  async listUsers({ role, status }, pagination) {
     const filter = {};
+    const { page, limit, skip } = pagination;
 
     if (role) filter.role = role;
     if (status) filter.status = status;
 
-    return await UserRepo.findAll(filter);
-  }
+    const { users, total } = await UserRepo.findAll(filter, { limit, skip});
+    
+    return {
+      items: users,
+      metadata: {
+        total,
+        page,
+        limit,
+        totalPage: Math.ceil(total / limit)
+      }
+    }
+  } 
 
   async getUserDetail(userId) {
     const user = await UserRepo.findById(userId);

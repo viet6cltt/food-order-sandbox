@@ -290,6 +290,8 @@ export async function getRestaurantOrders(
     });
     const data = res.data?.data || {};
     const ordersData = data.orders || {};
+
+    console.log(data);
     
     const ordersArray = Array.isArray(ordersData.orders) 
       ? ordersData.orders 

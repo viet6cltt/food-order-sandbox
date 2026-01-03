@@ -22,14 +22,35 @@ export const adminCategoryApi = {
     },
 
     // router.post("/") - Tạo mới
-    create: async (name: string, description?: string) => {
-        const response = await api.post('/admin/categories', { name, description });
+    create: async (name: string, description?: string, imageFile?: File | null) => {
+        const formData = new FormData();
+        formData.append('name', name);
+        if (description !== undefined) {
+            formData.append('description', description);
+        }
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
+        const response = await api.post('/admin/categories', formData);
+
         return response.data;
     },
 
     // router.put("/:categoryId") - Cập nhật thông tin
-    update: async (id: string, name: string, description?: string) => {
-        const response = await api.put(`/admin/categories/${id}`, { name, description });
+    update: async (id: string, name: string, description?: string, imageFile?: File | null) => {
+        const formData = new FormData();
+        formData.append('name', name);
+        if (description !== undefined) {
+            formData.append('description', description);
+        }
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
+        const response = await api.put(`/admin/categories/${id}`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+        });
         return response.data;
     },
 
@@ -57,7 +78,7 @@ export const adminUserApi = {
     getUsers: async (params: { role?: string; status?: string; page?: number; limit?: number }) => {
         const response = await api.get('/admin/users', { params });
         console.log(response.data);
-        return response.data.data; // BE trả về { categories, pagination } hoặc tương tự
+        return response.data.data;
     },
 
     // Khóa tài khoản

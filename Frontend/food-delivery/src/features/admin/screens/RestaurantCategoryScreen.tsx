@@ -36,19 +36,22 @@ const RestaurantCategoryScreen: React.FC = () => {
     };
 
     // --- XỬ LÝ LƯU (CREATE / UPDATE) ---
-    const handleSubmitCategory = async (name: string, description: string) => {
+    const handleSubmitCategory = async (name: string, description: string, imageFile: File | null) => {
+        setIsLoading(true); // Bật loading vì upload ảnh có thể lâu
         try {
             if (editingCategory) {
-                await adminCategoryApi.update(editingCategory._id, name, description);
+                await adminCategoryApi.update(editingCategory._id, name, description, imageFile);
                 toast.success("Cập nhật danh mục thành công");
             } else {
-                await adminCategoryApi.create(name, description);
+                await adminCategoryApi.create(name, description, imageFile);
                 toast.success("Thêm danh mục mới thành công");
             }
             setEditingCategory(null);
-            fetchCategories();
+            fetchCategories(pagination.page); // Reload lại trang hiện tại
         } catch (error) {
-            toast.error("Thao tác thất bại");
+            toast.error("Thao tác thất bại. Vui lòng kiểm tra lại file ảnh.");
+        } finally {
+            setIsLoading(false);
         }
     };
 

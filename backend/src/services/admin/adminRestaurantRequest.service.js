@@ -42,6 +42,7 @@ class AdminRestaurantRequestService {
       address: request.address,
       phone: request.phone,
       categoriesId: request.categoriesId,
+      bannerUrl: request.bannerUrl,
     });
 
     return { approveReq, restaurant };
