@@ -15,7 +15,7 @@ router.post('/verification-email', requireAuth, AuthController.sendEmailVerifica
 router.get('/verify-email', AuthController.verifyEmailToken);
 
 // gửi token đến email đã verify
-router.post('/password-reset-request', requireAuth, AuthController.sendPasswordResetRequest);
+router.post('/password-reset-request', AuthController.sendPasswordResetRequest);
 // cập nhật mật khẩu mới 
 router.post('/password-reset', AuthController.resetPassword);
 
