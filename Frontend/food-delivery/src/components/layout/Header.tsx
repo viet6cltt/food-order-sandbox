@@ -54,7 +54,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
     if (isAuthenticated && user?.role === 'admin') {
       navigate('/admin/dashboard');
     } else if (isAuthenticated && user?.role === 'restaurant_owner') {
-      navigate('/owner/dashboard');
+      navigate('/owner/restaurant-list');
     } else {
       navigate('/');
     }
