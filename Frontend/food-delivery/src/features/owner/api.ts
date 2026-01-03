@@ -246,6 +246,10 @@ export type UpdateMyRestaurantPayload = {
     ward?: string;
     district?: string;
     city?: string;
+    geo?: {
+      type: 'Point';
+      coordinates: [number, number];
+    };
   };
   categoriesId?: string[];
   opening_time?: string;

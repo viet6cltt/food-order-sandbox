@@ -10,17 +10,19 @@ interface RestaurantListProps {
 const RestaurantList: React.FC<RestaurantListProps> = ({ restaurants, isLoading = false }) => {
   const navigate = useNavigate();
 
+  const isFalseLike = (v: unknown) => v === false || v === 0 || v === '0';
+
   const getOperationalBadge = (restaurant: Restaurant): { label: string; className: string } | null => {
     if (restaurant.status === 'BLOCKED') {
       return { label: 'Bị khóa', className: 'bg-red-500' };
     }
 
-    const isActive = restaurant.isActive !== false;
-    const isAccepting = restaurant.isAcceptingOrders !== false;
+    const isActive = !isFalseLike(restaurant.isActive);
+    const isAccepting = !isFalseLike(restaurant.isAcceptingOrders);
     const isOperational = isActive && isAccepting;
 
     if (isOperational) return { label: 'Đang hoạt động', className: 'bg-green-500' };
-    return { label: 'Tạm ngưng', className: 'bg-red-500' };
+    return { label: 'Tạm đóng cửa', className: 'bg-gray-500' };
   };
 
   if (isLoading) {

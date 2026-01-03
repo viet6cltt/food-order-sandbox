@@ -87,14 +87,14 @@ class RestaurantService {
   }
 
   async getRestaurantsByOwnerId(userId) {
-    return await restaurantRepository.findByOwnerId(userId);
+    return await restaurantRepository.findAllByOwnerId(userId);
   }
 
   async updateMyRestaurant(restaurantId, updateData) {
     return await restaurantRepository.update(restaurantId, updateData);
   }
 
-  async uploadPaymentQr(restaurantId, ownerId, filePath) {
+  async uploadPaymentQr(restaurantId, filePath) {
     try {
       // Upload ảnh lên Cloudinary
       const result = await cloudinary.uploader.upload(filePath, {
@@ -103,7 +103,7 @@ class RestaurantService {
       });
 
       // Cập nhật URL vào DB
-      const updated = await repoRestaurant.update(restaurantId, { paymentQrUrl: result.secure_url });
+      const updated = await restaurantRepository.update(restaurantId, { 'paymentInfo.qrImageUrl': result.secure_url });
       
       // Xóa file tạm ở backend
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -123,7 +123,13 @@ class RestaurantService {
       status: RestaurantStatus.ACTIVE
     };
 
-    if (categoryId) filter.categoriesId = new mongoose.Types.ObjectId(categoryId);
+    if (categoryId) {
+      if (!mongoose.Types.ObjectId.isValid(String(categoryId))) {
+        throw new ERR_RESPONSE.BadRequestError('Invalid categoryId', ERR.INVALID_INPUT);
+      }
+      // Aggregation ($match / $geoNear) does not apply Mongoose casting, so cast explicitly.
+      filter.categoriesId = new mongoose.Types.ObjectId(String(categoryId));
+    }
 
     // sort khi không có tọa độ
     // nếu sortBy là newest thì k quan tâm đến rating
@@ -136,18 +142,13 @@ class RestaurantService {
       !isNaN(lat) &&
       !isNaN(lng);
 
-    console.log(filter, sortOptions, lat, lng)
-
     const { items, total } = await restaurantRepository.findAllWithScore({
       filter,
       sort: sortOptions,
       skip, limit,
       lat: hasLocation ? lat : null,
-      lng: hasLocation ? lat : null,
+      lng: hasLocation ? lng : null,
     });
-
-
-    console.log(items);
 
     // Xử lí giờ đóng cửa 
     const currentTime = new Date().toTimeString().slice(0, 5);
@@ -225,7 +226,8 @@ class RestaurantService {
   }
 
   async getRestaurantByOwnerId(userId) {
-    return await RestaurantRepository.findByOwnerId(userId);
+    const found = await restaurantRepository.findByOwnerId(userId);
+    return Array.isArray(found) ? found[0] : found;
   }
 
   async updateRestaurantByOwnerId(userId, updates = {}) {
@@ -323,7 +325,7 @@ class RestaurantService {
       }
     }
 
-    return await RestaurantRepository.updateById(restaurant._id, safeUpdate);
+    return await restaurantRepository.update(restaurant._id, safeUpdate);
   }
 
   async uploadPaymentQrByOwnerId(ownerId, file) {
@@ -342,7 +344,7 @@ class RestaurantService {
     // delete temp file
     fs.unlinkSync(file.path);
 
-    return await RestaurantRepository.updateById(restaurant._id, {
+    return await restaurantRepository.update(restaurant._id, {
       'paymentInfo.qrImageUrl': result.secure_url,
     });
   }
@@ -354,7 +356,7 @@ class RestaurantService {
   }
 
   async updateRatingAndCount(id, { newRating, newCount }) {
-    return restaurantRepository.updateRatingAndCount(id, { newRating, newCount });
+    return await restaurantRepository.updateRatingAndCount(id, { newRating, newCount });
   }
 }
 

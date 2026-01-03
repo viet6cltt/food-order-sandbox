@@ -14,6 +14,7 @@ import {
   ArrowTrendingUpIcon,
   StopIcon
 } from '@heroicons/react/24/outline';
+import { formatLocalDateYYYYMMDD } from '../utils/date';
 
 // --- Types ---
 interface StatusBreakdown {
@@ -21,10 +22,16 @@ interface StatusBreakdown {
   count: number;
 }
 
+type TrendPoint = {
+  date: string;
+  completed?: number;
+  cancelled?: number;
+} & Record<string, unknown>;
+
 interface StatsState {
   statusBreakdown: StatusBreakdown[];
   totalRevenue: number;
-  trend: any[];
+  trend: TrendPoint[];
 }
 
 const OrderStatisticsScreen: React.FC = () => {
@@ -39,7 +46,7 @@ const OrderStatisticsScreen: React.FC = () => {
 
   // --- Helpers ---
   const getStatusConfig = (id: string) => {
-    const map: Record<string, { label: string; color: string; bgColor: string; icon: any }> = {
+    const map: Record<string, { label: string; color: string; bgColor: string; icon: React.ReactNode }> = {
       pending: { 
         label: 'Chờ xác nhận', 
         color: 'text-amber-600', 
@@ -99,8 +106,8 @@ const OrderStatisticsScreen: React.FC = () => {
       else if (timeRange === '30days') start.setDate(end.getDate() - 30);
       else if (timeRange === 'this_month') start.setDate(1);
 
-      const startDateStr = start.toISOString().split('T')[0];
-      const endDateStr = end.toISOString().split('T')[0];
+      const startDateStr = formatLocalDateYYYYMMDD(start);
+      const endDateStr = formatLocalDateYYYYMMDD(end);
 
       // Gọi duy nhất API chứa cả trend và statistics
       const data = await adminOrderApi.getReport(startDateStr, endDateStr);
@@ -110,7 +117,7 @@ const OrderStatisticsScreen: React.FC = () => {
         totalRevenue: data.totalRevenue || 0,
         trend: data.trend || [],
       });
-    } catch (error) {
+    } catch {
       toast.error("Không thể tải thống kê");
     } finally {
       setIsLoading(false);

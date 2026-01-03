@@ -2,6 +2,8 @@ const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
 const MenuItemService = require('@/services/app/menuItem.service');
+const cloudinary = require('@/config/cloudinary.config');
+const fs = require('fs');
 
 class MenuItemController {
   /**
@@ -154,9 +156,26 @@ class MenuItemController {
       const { restaurantId } = req.params;
       const userId = req.userId;
 
-      const data = req.body;
+      const data = { ...(req.body || {}) };
       if (!restaurantId) {
         throw new ERR_RESPONSE.BadRequestError('Missing restaurantId', ERR.INVALID_INPUT);
+      }
+
+      if (req.file?.path) {
+        try {
+          const result = await cloudinary.uploader.upload(req.file.path, {
+            folder: `food-order/restaurants/${restaurantId}/menu-items`,
+            public_id: `menu-item-${Date.now()}`,
+            overwrite: true,
+          });
+          data.imageUrl = result.secure_url;
+        } finally {
+          try {
+            fs.unlinkSync(req.file.path);
+          } catch {
+            // ignore
+          }
+        }
       }
 
       const menuItem = await MenuItemService.createMenuItem(restaurantId, userId, data);

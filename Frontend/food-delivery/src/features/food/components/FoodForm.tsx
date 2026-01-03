@@ -2,11 +2,13 @@
 import React, { useEffect, useState } from 'react';
 import ImageUploader from './ImageUploader';
 import { toast } from 'react-toastify';
-import { getCategories, getMyRestaurant, type NormalizedCategory } from '../../owner/api';
+import { getCategories, type NormalizedCategory } from '../../owner/api';
 import { createMenuItem } from '../../owner/menuItemApi.ts';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 const FoodForm: React.FC = () => {
+    const params = useParams<{ restaurantId?: string }>();
+    const restaurantId = params.restaurantId;
     const navigate = useNavigate();
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
@@ -34,6 +36,10 @@ const FoodForm: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        if (!restaurantId) {
+            toast.error('Thiếu restaurantId. Vui lòng tải lại trang.');
+            return;
+        }
         if (!categoryId) {
             toast.error('Vui lòng chọn danh mục');
             return;
@@ -41,18 +47,12 @@ const FoodForm: React.FC = () => {
 
         try {
             setSubmitting(true);
-            const restaurant = await getMyRestaurant();
-            const restaurantId = restaurant?._id || restaurant?.id;
-            if (!restaurantId) {
-                toast.error('Không tìm thấy nhà hàng của bạn');
-                return;
-            }
 
             await createMenuItem(
                 restaurantId,
                 {
                     categoryId,
-                    name,
+                    name: name.trim(),
                     price: Number(price),
                     description: description || undefined,
                     isAvailable: true,
@@ -61,7 +61,7 @@ const FoodForm: React.FC = () => {
             );
 
             toast.success(`Đã tạo món: ${name}`);
-            navigate('/owner/menu-list');
+            navigate(`/owner/${restaurantId}/menu-list`);
             setName('');
             setPrice('');
             setDescription('');
@@ -139,7 +139,14 @@ const FoodForm: React.FC = () => {
 
                 {/* Nút Submit */}
                 <div className="flex justify-end pt-4 border-t mt-4">
-                    <button type="button" className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 mr-3">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (restaurantId) navigate(`/owner/${restaurantId}/menu-list`);
+                            else window.history.back();
+                        }}
+                        className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 mr-3"
+                    >
                         Hủy
                     </button>
                     <button

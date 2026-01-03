@@ -118,7 +118,7 @@ const AppRoutes: React.FC = () => {
 								<OwnerRestaurantInfoScreen />
 						</ProtectedRoute>
 				} />
-				<Route path="/owner/add-food/*" element={
+				<Route path="/owner/:restaurantId/add-food/*" element={
 						<ProtectedRoute allowedRoles={['restaurant_owner']}>
 								<AddFoodScreen />
 						</ProtectedRoute>

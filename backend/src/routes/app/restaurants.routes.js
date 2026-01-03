@@ -45,7 +45,7 @@ router.post('/:restaurantId/report', reportController.sendReport);
 router.patch("/:restaurantId/banner", requireRestaurantOwner, upload.single("file"), RestaurantsController.uploadBanner);
 
 // menu
-router.post('/:restaurantId/menu-item', requireRestaurantOwner, MenuItemController.createMenuItem);
+router.post('/:restaurantId/menu-item', requireRestaurantOwner, upload.single('file'), MenuItemController.createMenuItem);
 
 // order
 router.get('/:restaurantId/orders', requireRestaurantOwnerOrAdmin, OrderController.getOrdersOfRestaurant);

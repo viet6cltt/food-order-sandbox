@@ -69,14 +69,14 @@ const FoodItem: React.FC<FoodItemProps> = ({
         <div className="px-3 py-2 border-t flex items-center justify-between bg-gray-50">
           <div className="min-w-0">
             <div className="text-sm font-semibold text-gray-900">{formatPriceVnd(item.price)}</div>
-            {typeof item.rating === 'number' ? (
+            {/* {typeof item.rating === 'number' ? (
               <div className="mt-0.5 text-xs text-yellow-700 flex items-center gap-1">
                 <StarIcon className="w-4 h-4" />
                 <span className="font-medium">{item.rating.toFixed(1)}</span>
               </div>
             ) : (
               <div className="mt-0.5 text-xs text-gray-400">Chưa có đánh giá</div>
-            )}
+            )} */}
           </div>
 
           {onAdd ? (

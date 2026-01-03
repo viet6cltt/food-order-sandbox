@@ -99,7 +99,7 @@ const OwnerMenuListScreen: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/owner/add-food')}
+              onClick={() => navigate(`/owner/${restaurantId}/add-food`)}
               className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               Thêm món ăn mới

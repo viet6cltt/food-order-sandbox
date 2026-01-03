@@ -118,6 +118,10 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
     };
 
     const handleUploadQr = async () => {
+        if (!restaurantId) {
+            setUploadQrError('Thiếu restaurantId. Vui lòng tải lại trang.');
+            return;
+        }
         if (!selectedQrFile) {
             setUploadQrError('Vui lòng chọn ảnh QR.');
             return;
@@ -126,7 +130,7 @@ const RestaurantForm: React.FC<RestaurantFormProps> = ({
         try {
             setUploadQrError(null);
             setUploadingQr(true);
-            const updated = await uploadMyRestaurantPaymentQr(selectedQrFile);
+            const updated = await uploadMyRestaurantPaymentQr(restaurantId, selectedQrFile);
             const url = updated.paymentInfo?.qrImageUrl || '';
             if (url && onQrUploaded) onQrUploaded(url);
             setSelectedQrFile(null);

@@ -10,12 +10,7 @@ const OwnerRestaurantListScreen: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const isPriorityActive = (restaurant: Restaurant): boolean => {
-    const isNotBlocked = restaurant.status ? restaurant.status === 'ACTIVE' : true;
-    const isActiveFlag = restaurant.isActive !== false;
-    const isAccepting = restaurant.isAcceptingOrders !== false;
-    return isNotBlocked && isActiveFlag && isAccepting;
-  };
+  const isFalseLike = (v: unknown) => v === false || v === 0 || v === '0';
 
   useEffect(() => {
     const loadRestaurants = async () => {
@@ -24,6 +19,13 @@ const OwnerRestaurantListScreen: React.FC = () => {
         const data = await getMyRestaurants();
         const items = (data || []).map((r, idx) => ({ r, idx }));
         items.sort((a, b) => {
+          const isPriorityActive = (restaurant: Restaurant): boolean => {
+            const isNotBlocked = restaurant.status ? restaurant.status === 'ACTIVE' : true;
+            const isActiveFlag = !isFalseLike(restaurant.isActive);
+            const isAccepting = !isFalseLike(restaurant.isAcceptingOrders);
+            return isNotBlocked && isActiveFlag && isAccepting;
+          };
+
           const ap = isPriorityActive(a.r);
           const bp = isPriorityActive(b.r);
           if (ap !== bp) return ap ? -1 : 1;

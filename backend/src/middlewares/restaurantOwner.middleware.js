@@ -2,6 +2,7 @@ const RestaurantRepository = require('@/repositories/restaurant.repository');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const ERR = require('@/constants/errorCodes');
 const { UserRole } = require('@/constants/user.constants');
+const mongoose = require('mongoose');
 
 const loadRestaurantAndCheckAuth = async(req) => {
   if (!req.userId) {
@@ -12,6 +13,12 @@ const loadRestaurantAndCheckAuth = async(req) => {
   }
 
   const { restaurantId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(String(restaurantId))) {
+    throw new ERR_RESPONSE.BadRequestError(
+      'Invalid restaurantId',
+      ERR.INVALID_INPUT
+    );
+  }
   const restaurant = await RestaurantRepository.getById(restaurantId);
 
   if (!restaurant) {
