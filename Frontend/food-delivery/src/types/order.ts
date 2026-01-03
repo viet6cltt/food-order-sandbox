@@ -34,6 +34,7 @@ export interface Order {
   isPaid?: boolean
   paidAt?: string
   note?: string
+  isReviewed?: boolean | false
 }
 
 export interface OrdersResponse {

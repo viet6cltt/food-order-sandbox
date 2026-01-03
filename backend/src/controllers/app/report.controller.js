@@ -62,7 +62,7 @@ class ReportController {
    */
   async sendReport(req, res, next) {
     try {
-      const { targetId } = req.params;
+      const targetId = req.params.restaurantId || req.params.reviewId || req.params.targetId;
       const { targetType, reason, description } = req.body;
 
       const report = await reportService.createReport({

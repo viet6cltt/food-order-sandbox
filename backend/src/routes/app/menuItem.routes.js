@@ -5,12 +5,13 @@ const MenuItemController = require('@/controllers/app/menuItem.controller');
 const { optionalAuth, requireAuth } = require('@/middlewares/auth.middleware');
 const reviewController = require('@/controllers/app/review.controller');
 const { checkUserStatus } = require('@/middlewares/userStatus.middleware');
+const pagination = require('@/middlewares/pagination.middleware');
 
 // [GET] /api/menu-items/:menuItemId - Get menu item by ID (public, optional auth)
 router.get('/:menuItemId', optionalAuth, MenuItemController.getMenuItemInfo);
 
 // [GET] /api/menu-items/:menuItemId/reviews
-router.get("/:menuItemId/reviews", optionalAuth, reviewController.getByMenuItem);
+router.get("/:menuItemId/reviews", optionalAuth, pagination(10, 50), reviewController.getByMenuItem);
 
 // --- THAO TÁC THAY ĐỔI DỮ LIỆU
 router.use(requireAuth);

@@ -10,10 +10,15 @@ class AdminReportService {
 
   async getAllReports(pagination, { targetType, status }) {
     const { skip, limit, page } = pagination;
+
+    // Ép kiểu sang chữ HOA trước khi gửi xuống Repo
+    const filter = {
+      status: status ? status.toUpperCase() : undefined,
+      targetType: targetType ? targetType.toUpperCase() : undefined
+    };
     
     const { reports, total } = await reportRepo.findAll({
-      status,
-      targetType,
+      ...filter,
       limit,
       skip
     });

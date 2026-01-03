@@ -100,6 +100,8 @@ class AdminReportController {
       const { targetType, status } = req.query; 
       const result = await adminReportService.getAllReports(pagination, { targetType, status });
 
+      console.log(result);
+
       return SUCCESS.success(res, 'Get all reports successfully', result);
     } catch (err) { next(err); }
   }

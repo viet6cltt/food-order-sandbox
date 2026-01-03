@@ -7,6 +7,7 @@ const restaurantRepository = require('@/repositories/restaurant.repository');
 const cloudinary = require("@/config/cloudinary.config");
 const fs = require('fs');
 const { RestaurantStatus } = require('@/constants/restaurant.constants');
+const mongoose = require('mongoose');
 
 function isWithinBusinessHours(current, open, close) {
   // current, open, close đều dạng "HH:MM"
@@ -122,20 +123,31 @@ class RestaurantService {
       status: RestaurantStatus.ACTIVE
     };
 
-    if (categoryId) filter.categoriesId = categoryId;
+    if (categoryId) filter.categoriesId = new mongoose.Types.ObjectId(categoryId);
 
     // sort khi không có tọa độ
     // nếu sortBy là newest thì k quan tâm đến rating
     let sortOptions = { rating: -1, createdAt: -1 };
     if (sortBy === 'newest') sortOptions = { createdAt: -1 };
 
+    const hasLocation =
+      lat !== null &&
+      lng !== null &&
+      !isNaN(lat) &&
+      !isNaN(lng);
+
+    console.log(filter, sortOptions, lat, lng)
+
     const { items, total } = await restaurantRepository.findAllWithScore({
       filter,
       sort: sortOptions,
       skip, limit,
-      lat: lat ? Number(lat) : null,
-      lng: lng ? Number(lng) : null,
+      lat: hasLocation ? lat : null,
+      lng: hasLocation ? lat : null,
     });
+
+
+    console.log(items);
 
     // Xử lí giờ đóng cửa 
     const currentTime = new Date().toTimeString().slice(0, 5);

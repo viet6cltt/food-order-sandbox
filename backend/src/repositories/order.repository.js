@@ -4,19 +4,23 @@ const Order = require('../models/Order');
 class OrderRepository {
 
   async create(payload) {
-    return Order.create(payload);
+    return await Order.create(payload);
   }
 
   async findByUserId(userId) {
-    return Order.find({ userId: userId }).sort({ updatedAt: -1 });
+    return await Order.find({ userId: userId }).sort({ updatedAt: -1 });
   }
 
   async findById(orderId) {
-    return Order.findById(orderId);
+    return await Order.findById(orderId);
   }
 
   async cancelOrder(orderId) {
-    return Order.findByIdAndUpdate(orderId, { status: "cancelled" }, { new: true });
+    return await Order.findByIdAndUpdate(orderId, { status: "cancelled" }, { new: true });
+  }
+
+  async update(orderId, updatedFields) {
+    return await Order.findByIdAndUpdate(orderId, updatedFields, { new: true });
   }
 
   async getOrdersOfRestaurant(filter, { page = 1, limit = 10 }) {

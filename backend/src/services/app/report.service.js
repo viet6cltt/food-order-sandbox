@@ -28,13 +28,9 @@ class ReportService {
   async _validateTarget(userId, targetId, targetType) {
     switch (targetType) {
       case TargetType.REVIEW:
+        console.log(targetId);
         const review = await reviewService.getDetail(targetId);
         if (!review) throw new ERR.NotFoundError("Review not found");
-
-        // Check owner: only owner can report the review of restaurant
-        const checkOwner = restaurantService.checkOwner(review.restaurantId, userId);
-        if (!checkOwner) throw new ERR.ForbiddenError("Only restaurant owner has permission to report this review");
-
         break;
 
       case TargetType.RESTAURANT:

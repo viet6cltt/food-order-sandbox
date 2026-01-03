@@ -47,8 +47,8 @@ const ChangePasswordForm: React.FC<ChangePasswordFormProps> = ({ className = '',
     setLoading(true)
 
     try {
-      await apiClient.post('/auth/change-password', {
-        currentPassword,
+      await apiClient.patch('/users/me/change-password', {
+        oldPassword: currentPassword,
         newPassword,
       })
       

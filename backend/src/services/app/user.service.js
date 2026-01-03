@@ -6,6 +6,7 @@ const authHelper = require('@/utils/authHelper');
 const ERR_RESPONSE = require('@/utils/httpErrors.js');
 const ERR = require('@/constants/errorCodes');
 const geocodeService = require('./geocode.service');
+const userRepository = require('@/repositories/user.repository');
 
 class UserService {
   async createUser(data) {
@@ -159,6 +160,17 @@ class UserService {
     if (!updatedUser)
       throw new HTTP_ERROR.NotFoundError('User not found', ERR.USER_NOT_FOUND);
     return updatedUser;
+  }
+
+  async changePassword(userId, oldPassword, newPassword) {
+    const user = await userRepository.findByIdWithPassword(userId);
+    
+    const isMatch = await authHelper.comparePassword(oldPassword, user.passwordHash);
+
+    if (!isMatch) {
+      throw new HTTP_ERROR.ConflictError('Your password is wrong');
+    }
+    return await this.resetPassword(userId, newPassword);
   }
 }
 

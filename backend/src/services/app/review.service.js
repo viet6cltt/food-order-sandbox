@@ -85,6 +85,8 @@ class ReviewService {
         items: order.items.map(item => item.menuItemId)
       };
 
+      await orderRepo.update(order._id, { isReviewed: true });
+
       const newReview = await reviewRepo.create(reviewData);
 
       // 4. update Rating for restaurant
@@ -116,13 +118,13 @@ class ReviewService {
 
   async findByMenuItem(menuItemId, pagination) {
 
-    const { items, total } =  reviewRepo.findPublishedByMenuItem(menuItemId, pagination);
+    const { items, total } =  await reviewRepo.findPublishedByMenuItem(menuItemId, pagination);
 
     return {
       items,
       meta: {
         total, page: pagination.page, limit: pagination.limit,
-        totalPages: Math.ceil(total / limit)
+        totalPages: Math.ceil(total / pagination.limit)
       }
     }
   }
