@@ -66,18 +66,29 @@ export async function createPayment(payload: CreatePaymentPayload): Promise<Paym
  * Get payment by order ID
  */
 export async function getPaymentByOrder(orderId: string): Promise<Payment | null> {
-  const res = await apiClient.get(`/payments/order/${orderId}`);
-  const payment = res.data?.data?.payment ?? res.data?.payment;
-  
-  if (!payment) {
-    return null;
-  }
-  
-  if (payment) {
-    payment._id = payment._id || payment.id;
-  }
-  
-  return payment as Payment;
+  const res = await apiClient.get(`/payments/orders/${orderId}`);
+  const raw = res.data?.data?.payment ?? res.data?.payment;
+
+  // Backend currently returns an array for payment-by-order
+  const candidate: any = Array.isArray(raw)
+    ? (raw.length > 0
+        ? raw
+            .slice()
+            .sort((a, b) => {
+              const at = a?.createdAt ? Date.parse(a.createdAt) : 0;
+              const bt = b?.createdAt ? Date.parse(b.createdAt) : 0;
+              return at - bt;
+            })
+            .at(-1)
+        : null)
+    : raw;
+
+  if (!candidate) return null;
+
+  const payment = candidate as Payment & { id?: string };
+  payment._id = payment._id || payment.id || '';
+
+  return payment._id ? (payment as Payment) : null;
 }
 
 /**

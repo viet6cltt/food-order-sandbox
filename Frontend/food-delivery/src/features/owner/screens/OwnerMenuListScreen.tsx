@@ -80,6 +80,15 @@ const OwnerMenuListScreen: React.FC = () => {
     <OwnerLayout>
       <div className="min-h-screen bg-gray-50 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
+          <div className="mb-6">
+              <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  className="text-emerald-600 hover:text-emerald-700 font-medium mb-4 inline-flex items-center"
+              >
+                  ← Quay lại
+              </button>
+          </div>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-6">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Danh sách món ăn</h1>
@@ -90,7 +99,7 @@ const OwnerMenuListScreen: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => navigate('/owner/add-food')}
+              onClick={() => navigate(`/owner/${restaurantId}/add-food`)}
               className="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-emerald-600 text-white font-semibold hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               Thêm món ăn mới

@@ -4,6 +4,7 @@ import { adminOrderApi } from '../../api';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { formatLocalDateYYYYMMDD } from '../../utils/date';
 
 // Interface cho dữ liệu biểu đồ
 interface ChartData {
@@ -27,8 +28,8 @@ const OrderChart: React.FC = () => {
         const start = new Date();
         start.setDate(end.getDate() - 7);
 
-        const startDateStr = start.toISOString().split('T')[0];
-        const endDateStr = end.toISOString().split('T')[0];
+        const startDateStr = formatLocalDateYYYYMMDD(start);
+        const endDateStr = formatLocalDateYYYYMMDD(end);
 
         // Sử dụng chung API getReport để đảm bảo tính nhất quán dữ liệu
         const response = await adminOrderApi.getReport(startDateStr, endDateStr);

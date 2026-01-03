@@ -10,12 +10,28 @@ const OwnerRestaurantListScreen: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const isFalseLike = (v: unknown) => v === false || v === 0 || v === '0';
+
   useEffect(() => {
     const loadRestaurants = async () => {
       try {
         setLoading(true);
         const data = await getMyRestaurants();
-        setRestaurants(data || []);
+        const items = (data || []).map((r, idx) => ({ r, idx }));
+        items.sort((a, b) => {
+          const isPriorityActive = (restaurant: Restaurant): boolean => {
+            const isNotBlocked = restaurant.status ? restaurant.status === 'ACTIVE' : true;
+            const isActiveFlag = !isFalseLike(restaurant.isActive);
+            const isAccepting = !isFalseLike(restaurant.isAcceptingOrders);
+            return isNotBlocked && isActiveFlag && isAccepting;
+          };
+
+          const ap = isPriorityActive(a.r);
+          const bp = isPriorityActive(b.r);
+          if (ap !== bp) return ap ? -1 : 1;
+          return a.idx - b.idx;
+        });
+        setRestaurants(items.map((x) => x.r));
       } catch (error) {
         console.error('Error loading restaurants:', error);
         toast.error('Lỗi khi tải danh sách nhà hàng');

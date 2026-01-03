@@ -14,6 +14,7 @@ const reportController = require('@/controllers/app/report.controller.js');
 
 router.get('/', UserController.index);
 router.get('/me', requireAuth, UserController.getMe); // dùng khi người dùng lấy thông tin của chính bản thân
+router.patch('/me/avatar', requireAuth, upload.single('file'), UserController.uploadMyAvatar);
 router.put('/me', requireAuth, UserController.updateMe);
 router.patch('/me/change-password', requireAuth, UserController.changePassword);
 

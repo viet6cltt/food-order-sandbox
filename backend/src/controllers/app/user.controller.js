@@ -3,6 +3,8 @@ const SUCCESS_RESPONSE = require('@/utils/successResponse');
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const UserService = require('@/services/app/user.service');
+const cloudinary = require('@/config/cloudinary.config');
+const fs = require('fs');
 
 class UserController {
   /**
@@ -258,6 +260,41 @@ class UserController {
 
       return SUCCESS_RESPONSE.success(res, 'Update your Info successfully', { updatedUser });
     } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /users/me/avatar
+  async uploadMyAvatar(req, res, next) {
+    try {
+      const userId = req.userId;
+      if (!userId) {
+        throw new ERR_RESPONSE.UnauthorizedError('Access Token are missing or invalid', ERR.AUTH_INVALID_TOKEN);
+      }
+
+      if (!req.file || !req.file.path) {
+        throw new ERR_RESPONSE.BadRequestError('Please upload an avatar image');
+      }
+
+      const filePath = req.file.path;
+
+      const result = await cloudinary.uploader.upload(filePath, {
+        folder: `food-order/users/${userId}`,
+        public_id: `avatar-${Date.now()}`,
+        overwrite: true,
+      });
+
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+
+      const updatedUser = await UserService.updateUser(userId, { avatarUrl: result.secure_url });
+
+      return SUCCESS_RESPONSE.success(res, 'Upload avatar successfully', { updatedUser });
+    } catch (err) {
+      try {
+        if (req.file?.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      } catch (e) {
+        // ignore cleanup errors
+      }
       next(err);
     }
   }

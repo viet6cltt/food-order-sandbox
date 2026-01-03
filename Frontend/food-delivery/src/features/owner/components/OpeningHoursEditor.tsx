@@ -1,5 +1,6 @@
 // src/features/owner/components/OpeningHoursEditor.tsx
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { ClockIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-toastify';
 import { getMyRestaurant, updateMyRestaurant } from '../api';
@@ -47,6 +48,8 @@ function normalizeSchedule(input: unknown, fallbackOpen: string, fallbackClose: 
 }
 
 const OpeningHoursEditor: React.FC = () => {
+    const params = useParams();
+    const restaurantId = typeof params.restaurantId === 'string' ? params.restaurantId : null;
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [openTime, setOpenTime] = useState('08:00');
@@ -57,8 +60,13 @@ const OpeningHoursEditor: React.FC = () => {
         (async () => {
             try {
                 setLoading(true);
-                const restaurant = await getMyRestaurant();
+                const restaurant = await getMyRestaurant(restaurantId);
                 if (!alive) return;
+
+                if (!restaurantId) {
+                    toast.error('Thiếu mã nhà hàng');
+                    return;
+                }
 
                 const fallbackOpen = restaurant?.opening_time || '08:00';
                 const fallbackClose = restaurant?.closing_time || '22:00';
@@ -79,17 +87,21 @@ const OpeningHoursEditor: React.FC = () => {
         return () => {
             alive = false;
         };
-    }, []);
+    }, [restaurantId]);
 
     const onSave = async () => {
         try {
+            if (!restaurantId) {
+                toast.error('Thiếu mã nhà hàng');
+                return;
+            }
             setSaving(true);
 
             const opening_time = openTime || '08:00';
             const closing_time = closeTime || '22:00';
             const openingHours = buildDefaultSchedule(opening_time, closing_time);
 
-            await updateMyRestaurant({
+            await updateMyRestaurant(restaurantId, {
                 opening_time,
                 closing_time,
                 openingHours,

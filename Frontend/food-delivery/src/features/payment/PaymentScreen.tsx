@@ -9,6 +9,7 @@ import ChangeAddressForm from "./components/ChangeAddressForm";
 import * as profileApi from '../profile/api';
 import * as orderApi from '../order/api';
 import * as geocodeApi from '../../services/geocodeApi';
+import { getRestaurantById } from '../restaurant/api';
 import type { Order } from '../../types/order';
 
 const PaymentScreen: React.FC = () => {
@@ -22,6 +23,8 @@ const PaymentScreen: React.FC = () => {
     const [paymentMethod, setPaymentMethod] = useState<'COD' | 'BANK_TRANSFER'>('COD');
     const [deliveryAddress, setDeliveryAddress] = useState<{ full: string; lat: number; lng: number } | null>(null);
     const [showAddressForm, setShowAddressForm] = useState(false);
+
+    const [shippingFee, setShippingFee] = useState<number>(0);
     
     const geocodeOrFallback = async (full: string) => {
         const trimmed = (full || '').trim();
@@ -29,7 +32,7 @@ const PaymentScreen: React.FC = () => {
         try {
             const geo = await geocodeApi.geocodeAddress(trimmed);
             return { full: geo.formatted || trimmed, lat: geo.lat, lng: geo.lng };
-        } catch (e) {
+        } catch {
             // If geocode fails, still allow user to proceed; backend will attempt again on place order.
             return { full: trimmed, lat: 0, lng: 0 };
         }
@@ -58,18 +61,30 @@ const PaymentScreen: React.FC = () => {
                 try {
                     const userData = await profileApi.getMe();
                     let profileAddressText = '';
-                    
                     if (userData.address?.street) {
                         profileAddressText = `${userData.address.street}${userData.address.city ? `, ${userData.address.city}` : ''}`.trim();
                     }
-                    
-                    const seedFull = orderData.deliveryAddress?.full || profileAddressText || '';
-                    const geoAddress = await geocodeOrFallback(seedFull);
-                    setDeliveryAddress(geoAddress);
-                    
-                    // If no address text, show form to enter address
-                    if (!seedFull.trim()) {
-                        setShowAddressForm(true);
+
+                    // Prefer address already on order (if any), else default to profile address
+                    const seedFull = (orderData.deliveryAddress?.full || profileAddressText || '').trim();
+
+                    // If profile has geo coords, use them directly (avoids forcing user to re-enter address)
+                    const coords = userData.address?.geo?.coordinates;
+                    const hasProfileCoords = Array.isArray(coords) && coords.length === 2 &&
+                        Number.isFinite(Number(coords[0])) && Number.isFinite(Number(coords[1]));
+
+                    if (!orderData.deliveryAddress?.full && seedFull && hasProfileCoords) {
+                        setDeliveryAddress({
+                            full: seedFull,
+                            lat: Number(coords[1]),
+                            lng: Number(coords[0]),
+                        });
+                        setShowAddressForm(false);
+                    } else {
+                        const geoAddress = seedFull ? await geocodeOrFallback(seedFull) : null;
+                        setDeliveryAddress(geoAddress);
+                        // Only show form if there is truly no address available
+                        setShowAddressForm(!seedFull);
                     }
                 } catch (profileErr) {
                     console.error('Failed to load user profile:', profileErr);
@@ -106,6 +121,68 @@ const PaymentScreen: React.FC = () => {
 
         loadOrder();
     }, [orderId, navigate]);
+
+    // Compute shipping fee preview (client-side) once we have restaurant info + delivery coordinates
+    useEffect(() => {
+        const computeShipping = async () => {
+            if (!order?.restaurantId || !deliveryAddress) {
+                setShippingFee(0);
+                return;
+            }
+
+            const hasValidLatLng =
+                Number.isFinite(deliveryAddress.lat) &&
+                Number.isFinite(deliveryAddress.lng) &&
+                deliveryAddress.lat !== 0 &&
+                deliveryAddress.lng !== 0;
+
+            if (!hasValidLatLng) {
+                setShippingFee(0);
+                return;
+            }
+
+            try {
+                const restaurant = await getRestaurantById(order.restaurantId) as unknown as {
+                    baseShippingFee?: number;
+                    shippingPerKm?: number;
+                    address?: { geo?: { coordinates?: [number, number] } };
+                };
+                const baseShippingFee = Number(restaurant?.baseShippingFee ?? 0);
+                const shippingPerKm = Number(restaurant?.shippingPerKm ?? 0);
+
+                const coords = restaurant?.address?.geo?.coordinates;
+                const restaurantLng = Array.isArray(coords) ? Number(coords[0]) : NaN;
+                const restaurantLat = Array.isArray(coords) ? Number(coords[1]) : NaN;
+
+                if (!Number.isFinite(restaurantLat) || !Number.isFinite(restaurantLng)) {
+                    setShippingFee(0);
+                    return;
+                }
+
+                // Haversine distance (km)
+                const toRad = (deg: number) => (deg * Math.PI) / 180;
+                const R = 6371;
+                const dLat = toRad(deliveryAddress.lat - restaurantLat);
+                const dLng = toRad(deliveryAddress.lng - restaurantLng);
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(toRad(restaurantLat)) *
+                        Math.cos(toRad(deliveryAddress.lat)) *
+                        Math.sin(dLng / 2) *
+                        Math.sin(dLng / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const distanceKm = R * c;
+
+                const fee = baseShippingFee + distanceKm * shippingPerKm;
+                setShippingFee(Number.isFinite(fee) ? Math.round(fee) : 0);
+            } catch (e) {
+                console.error('Failed to compute shipping fee:', e);
+                setShippingFee(0);
+            }
+        };
+
+        computeShipping();
+    }, [order?.restaurantId, deliveryAddress]);
 
     // Auto-open address form if no address is set after loading completes
     useEffect(() => {
@@ -182,6 +259,7 @@ const PaymentScreen: React.FC = () => {
                             order={order}
                             paymentMethod={paymentMethod}
                             deliveryAddress={deliveryAddress}
+                            shippingFee={shippingFee}
                         />
                     </section>
                 </main>

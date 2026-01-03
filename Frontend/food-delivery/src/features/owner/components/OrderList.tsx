@@ -122,11 +122,15 @@ const OrderList = forwardRef<OrderListHandle, OrderListProps>(({ onOrderComplete
 
             toast.success('Cập nhật trạng thái đơn hàng thành công!');
             
-            // Refresh orders list
-            await refreshOrders();
-
+            // Only refetch from backend when the order is completed (affects revenue widgets).
+            // For other transitions, update local state to avoid unnecessary reloads.
             if (newStatus === 'completed') {
+                await refreshOrders();
                 onOrderCompleted?.();
+            } else {
+                setOrders((prev) =>
+                    prev.map((o) => (o._id === orderId ? ({ ...o, status: newStatus } as Order) : o))
+                );
             }
         } catch (err: unknown) {
             toast.error(getErrorMessage(err, 'Không thể cập nhật trạng thái đơn hàng.'));

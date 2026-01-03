@@ -10,6 +10,16 @@ import RestaurantHeader from './components/RestaurantHeader'
 import RestaurantInfo from './components/RestaurantInfo'
 import useAuth from '../../hooks/useAuth'
 import { toast } from 'react-toastify'
+import { FlagIcon } from '@heroicons/react/24/outline'
+import { reportRestaurant } from '../report/api'
+
+function isTrueLike(v: unknown) {
+  return v === true || v === 1 || v === '1'
+}
+
+function isFalseLike(v: unknown) {
+  return v === false || v === 0 || v === '0'
+}
 
 const RestaurantDetailScreen: React.FC = () => {
     const params = useParams<{ restaurantId?: string}>()
@@ -21,12 +31,31 @@ const RestaurantDetailScreen: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [menuError, setMenuError] = useState<Error | null>(null);
 
+  const isBlocked =
+    restaurant?.status?.toString().toUpperCase() === 'BLOCKED' || isTrueLike((restaurant as any)?.isBlock)
+
+  const isOperational =
+    !isBlocked && !isFalseLike((restaurant as any)?.isActive) && !isFalseLike((restaurant as any)?.isAcceptingOrders)
+
+  const [isReportOpen, setIsReportOpen] = useState(false)
+  const [reportReason, setReportReason] = useState('')
+  const [isReporting, setIsReporting] = useState(false)
+
   function handleFoodSelect(item: MenuItemDto) {
     navigate(`/food/${item._id}`)
   }
 
   useEffect(() => {
     if (!restaurantId) return;
+    if (restaurantLoading) return;
+    if (!restaurant) return;
+
+    if (!isOperational) {
+      setLoading(false)
+      setMenuError(null)
+      setFoods([])
+      return
+    }
 
     async function load() {
       setLoading(true);
@@ -43,7 +72,7 @@ const RestaurantDetailScreen: React.FC = () => {
     }
 
     load();
-  }, [restaurantId]);
+  }, [restaurantId, restaurantLoading, restaurant, isOperational]);
 
   async function handleAddToCart(payload: { itemId?: string; qty: number }) {
     if (!restaurantId || !payload.itemId) return
@@ -88,6 +117,40 @@ const RestaurantDetailScreen: React.FC = () => {
     }
   }
 
+  async function handleSubmitReport() {
+    if (!restaurantId) return
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để báo cáo nhà hàng')
+      navigate('/auth/login')
+      return
+    }
+
+    const reason = reportReason.trim()
+    if (!reason) {
+      toast.error('Vui lòng nhập lý do báo cáo')
+      return
+    }
+
+    setIsReporting(true)
+    try {
+      await reportRestaurant(restaurantId, {
+        reason,
+        description: `Báo cáo nhà hàng từ trang chi tiết: ${restaurantId}`,
+      })
+      toast.success('Đã gửi báo cáo. Admin sẽ sớm xử lý!')
+      setIsReportOpen(false)
+      setReportReason('')
+    } catch (err: any) {
+      if (err?.response?.status === 409 || err?.response?.data?.message?.includes('duplicate')) {
+        toast.warning('Bạn đã báo cáo nhà hàng này trước đó rồi.')
+      } else {
+        toast.error(err?.response?.data?.message || 'Không thể gửi báo cáo')
+      }
+    } finally {
+      setIsReporting(false)
+    }
+  }
+
   if (restaurantLoading) {
     return (
       <AppLayout>
@@ -117,6 +180,25 @@ const RestaurantDetailScreen: React.FC = () => {
   return (
     <AppLayout>
       <div className="max-w-7xl mx-auto px-4 py-6 pb-24 md:pb-6">
+        <div className="flex items-center justify-end mb-3">
+          <button
+            type="button"
+            onClick={() => {
+              if (!restaurantId) return
+              if (!isAuthenticated) {
+                toast.error('Vui lòng đăng nhập để báo cáo nhà hàng')
+                navigate('/auth/login')
+                return
+              }
+              setIsReportOpen(true)
+            }}
+            className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+          >
+            <FlagIcon className="w-5 h-5" />
+            Báo cáo nhà hàng
+          </button>
+        </div>
+
         <div className="flex flex-col gap-6 md:flex-row md:gap-4">
           <RestaurantHeader data={restaurant} />
           <RestaurantInfo data={restaurant} />
@@ -124,7 +206,9 @@ const RestaurantDetailScreen: React.FC = () => {
 
         <section className="mt-6">
           <h3 className="text-xl font-semibold mb-4">Menu</h3>
-          {loading ? (
+          {!isOperational ? (
+            <p className="text-gray-600">Nhà hàng này đang không hoạt động</p>
+          ) : loading ? (
             <p className="text-gray-500">Đang tải menu...</p>
           ) : menuError ? (
             <div className="py-6 text-center">
@@ -142,6 +226,40 @@ const RestaurantDetailScreen: React.FC = () => {
           )}
         </section>
       </div>
+
+      {isReportOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[60]">
+          <div className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl animate-in zoom-in duration-200">
+            <h2 className="text-2xl font-black text-gray-900 mb-2">Báo cáo nhà hàng</h2>
+            <p className="text-sm text-gray-500 mb-6 font-medium">Nhà hàng này vi phạm chính sách của chúng tôi?</p>
+            <textarea
+              value={reportReason}
+              onChange={(e) => setReportReason(e.target.value)}
+              placeholder="Nhập lý do..."
+              className="w-full px-4 py-4 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 outline-none h-32 transition-all bg-gray-50"
+            />
+            <div className="flex gap-3 mt-8">
+              <button
+                disabled={isReporting}
+                onClick={() => {
+                  setIsReportOpen(false)
+                  setReportReason('')
+                }}
+                className="flex-1 py-4 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-all"
+              >
+                Đóng
+              </button>
+              <button
+                onClick={handleSubmitReport}
+                disabled={isReporting || !reportReason.trim()}
+                className="flex-1 py-4 bg-red-600 text-white font-bold rounded-2xl hover:bg-red-700 disabled:opacity-50 transition-all shadow-lg shadow-red-200"
+              >
+                {isReporting ? 'Đang gửi...' : 'Gửi báo cáo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 };

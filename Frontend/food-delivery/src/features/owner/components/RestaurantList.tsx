@@ -10,6 +10,21 @@ interface RestaurantListProps {
 const RestaurantList: React.FC<RestaurantListProps> = ({ restaurants, isLoading = false }) => {
   const navigate = useNavigate();
 
+  const isFalseLike = (v: unknown) => v === false || v === 0 || v === '0';
+
+  const getOperationalBadge = (restaurant: Restaurant): { label: string; className: string } | null => {
+    if (restaurant.status === 'BLOCKED') {
+      return { label: 'Bị khóa', className: 'bg-red-500' };
+    }
+
+    const isActive = !isFalseLike(restaurant.isActive);
+    const isAccepting = !isFalseLike(restaurant.isAcceptingOrders);
+    const isOperational = isActive && isAccepting;
+
+    if (isOperational) return { label: 'Đang hoạt động', className: 'bg-green-500' };
+    return { label: 'Tạm đóng cửa', className: 'bg-gray-500' };
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -56,19 +71,17 @@ const RestaurantList: React.FC<RestaurantListProps> = ({ restaurants, isLoading 
                 </span>
               </div>
             )}
-            {restaurant.status && (
-              <div className="absolute top-2 right-2">
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${
-                    restaurant.status === 'ACTIVE'
-                      ? 'bg-green-500'
-                      : 'bg-red-500'
-                  }`}
-                >
-                  {restaurant.status === 'ACTIVE' ? 'Hoạt động' : 'Bị khóa'}
-                </span>
-              </div>
-            )}
+            {(() => {
+              const badge = getOperationalBadge(restaurant);
+              if (!badge) return null;
+              return (
+                <div className="absolute top-2 right-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${badge.className}`}>
+                    {badge.label}
+                  </span>
+                </div>
+              );
+            })()}
           </div>
 
           {/* Content */}

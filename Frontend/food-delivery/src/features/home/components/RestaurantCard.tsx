@@ -24,9 +24,6 @@ export type Restaurant = {
     closing_time?: string
     reviewCount?: number
     estimatedDeliveryTime?: number
-    // Các field khác từ backend
-    isAcceptingOrders?: boolean
-    isActive?: boolean
     ownerId?: string
     categoriesId?: string[]
     shippingPolicy?: string
@@ -40,10 +37,30 @@ export type Restaurant = {
     }
     createdAt?: string
     updatedAt?: string
+    // Các field khác từ backend
+    isAcceptingOrders?: boolean | number
+    isActive?: boolean | number
+    isBlock?: boolean | number
+    status?: 'ACTIVE' | 'BLOCKED' | string
 }
+    function isFalseLike(v: unknown) {
+        return v === false || v === 0 || v === '0'
+    }
+
+    function isTrueLike(v: unknown) {
+        return v === true || v === 1 || v === '1'
+    }
 
 const RestaurantCard: React.FC<{ restaurant: Restaurant; className?: string }> = ({ restaurant, className = '' }) => {
     const navigate = useNavigate();
+
+    const isBlocked =
+        restaurant.status === 'BLOCKED' ||
+        isTrueLike(restaurant.isBlock);
+
+    const isTemporarilyClosed =
+        !isBlocked &&
+        (isFalseLike(restaurant.isActive) || isFalseLike(restaurant.isAcceptingOrders));
 
     const handleClick = () => {
         const restaurantId =
@@ -61,12 +78,21 @@ const RestaurantCard: React.FC<{ restaurant: Restaurant; className?: string }> =
     return (
         <button className="w-full h-full hover:shadow-lg transition-shadow rounded-lg" onClick={handleClick}>
             <article className={`bg-white rounded-lg shadow-sm overflow-hidden h-full flex flex-col ${className}`}>
-                <img
-                    src={restaurant.bannerUrl}
-                    alt={restaurant.name}
-                    className="w-full h-40 object-cover"
-                    loading="lazy"
-                />
+                <div className="relative">
+                    <img
+                        src={restaurant.bannerUrl}
+                        alt={restaurant.name}
+                        className="w-full h-40 object-cover"
+                        loading="lazy"
+                    />
+                    {(isBlocked || isTemporarilyClosed) && (
+                        <div className="absolute top-2 right-2">
+                            <span className={`px-3 py-1 rounded-full text-xs font-semibold text-white ${isBlocked ? 'bg-red-500' : 'bg-gray-500'}`}>
+                                {isBlocked ? 'Bị khóa' : 'Tạm đóng cửa'}
+                            </span>
+                        </div>
+                    )}
+                </div>
 
                 <div className="p-3 flex-1 flex flex-col">
                     <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">{restaurant.name}</h3>

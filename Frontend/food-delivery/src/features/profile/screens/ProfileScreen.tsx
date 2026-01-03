@@ -45,7 +45,7 @@ const ProfileScreen: React.FC = () => {
 
     const roleQuickAction = (() => {
         if (user.role === 'restaurant_owner') {
-            return { label: 'Menu', to: '/owner/menu-list' };
+            return { label: 'Danh sách quán', to: '/owner/restaurant-list' };
         }
         if (user.role === 'admin') {
             return { label: 'Users', to: '/admin/users' };

@@ -545,8 +545,22 @@ class OrderController {
       const { orderId } = req.params;
       const { deliveryAddress, paymentMethod } = req.body;
 
-      if (!deliveryAddress || !deliveryAddress.full || !deliveryAddress.lat || !deliveryAddress.lng) {
+      if (!deliveryAddress || typeof deliveryAddress.full !== 'string' || !deliveryAddress.full.trim()) {
         throw new ERR_RESPONSE.BadRequestError("Delivery address is missing", ERR.INVALID_INPUT);
+      }
+
+      // Allow lat/lng to be missing or 0. The service will geocode if coordinates are invalid.
+      if (deliveryAddress.lat !== undefined && deliveryAddress.lat !== null) {
+        const latNum = Number(deliveryAddress.lat);
+        if (!Number.isFinite(latNum)) {
+          throw new ERR_RESPONSE.BadRequestError("Invalid delivery address latitude", ERR.INVALID_INPUT);
+        }
+      }
+      if (deliveryAddress.lng !== undefined && deliveryAddress.lng !== null) {
+        const lngNum = Number(deliveryAddress.lng);
+        if (!Number.isFinite(lngNum)) {
+          throw new ERR_RESPONSE.BadRequestError("Invalid delivery address longitude", ERR.INVALID_INPUT);
+        }
       }
 
       if (!paymentMethod || !["COD", "BANK_TRANSFER"].includes(paymentMethod)) {

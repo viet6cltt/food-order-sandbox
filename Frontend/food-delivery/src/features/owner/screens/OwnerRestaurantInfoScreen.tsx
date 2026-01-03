@@ -5,11 +5,22 @@ import ToggleAcceptOrders from '../components/ToggleAcceptOrders';
 import RestaurantForm from '../components/RestaurantForm';
 import { toast } from 'react-toastify';
 import { getCategories, getMyRestaurant, updateMyRestaurant, type NormalizedCategory } from '../api';
+import { useNavigate, useParams } from 'react-router-dom';
+import { geocodeAddress } from '../../../services/geocodeApi';
+
+type GeoPoint = {
+    type: 'Point';
+    coordinates: [number, number]; // [lng, lat]
+};
 
 const OwnerRestaurantInfoScreen: React.FC = () => {
+    const navigate = useNavigate();
+    const params = useParams();
+    const routeRestaurantId = typeof params.restaurantId === 'string' ? params.restaurantId : null;
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [geocoding, setGeocoding] = useState(false);
 
     const [restaurantId, setRestaurantId] = useState<string>('');
     const [bannerUrl, setBannerUrl] = useState<string>('');
@@ -17,8 +28,16 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [restaurantPhone, setRestaurantPhone] = useState('');
-    const [address, setAddress] = useState({ full: '', street: '', ward: '', district: '', city: '' });
+    const [address, setAddress] = useState<{ full: string; street: string; ward: string; district: string; city: string; geo?: GeoPoint }>({
+        full: '',
+        street: '',
+        ward: '',
+        district: '',
+        city: '',
+    });
     const [categoryId, setCategoryId] = useState('');
+
+    const [lastGeocodedFullAddress, setLastGeocodedFullAddress] = useState<string>('');
 
     const [bankName, setBankName] = useState('');
     const [bankAccountNumber, setBankAccountNumber] = useState('');
@@ -29,13 +48,29 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
         return Boolean(name.trim() && restaurantPhone.trim() && address.full.trim() && categoryId);
     }, [name, restaurantPhone, address.full, categoryId]);
 
+    const getGeoFromFullAddress = async (full: string): Promise<GeoPoint | null> => {
+        const trimmed = full.trim();
+        if (!trimmed) return null;
+
+        const result = await geocodeAddress(trimmed);
+        const lat = Number(result?.lat);
+        const lng = Number(result?.lng);
+
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+
+        return {
+            type: 'Point',
+            coordinates: [lng, lat],
+        };
+    };
+
     useEffect(() => {
         const load = async () => {
             try {
                 setLoading(true);
                 const [cats, restaurant] = await Promise.all([
                     getCategories(1, 200),
-                    getMyRestaurant(),
+                    getMyRestaurant(routeRestaurantId),
                 ]);
                 setCategories(cats);
 
@@ -51,7 +86,10 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
                         ward: restaurant.address?.ward || '',
                         district: restaurant.address?.district || '',
                         city: restaurant.address?.city || '',
+                        geo: restaurant.address?.geo,
                     });
+
+                    setLastGeocodedFullAddress((restaurant.address?.full || '').trim());
 
                     const firstCategory = Array.isArray(restaurant.categoriesId) ? restaurant.categoriesId[0] : '';
                     setCategoryId(typeof firstCategory === 'string' ? firstCategory : '');
@@ -69,17 +107,43 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
         };
 
         load();
-    }, []);
+    }, [routeRestaurantId]);
 
     const handleSaveRestaurantInfo = async () => {
         if (!canSave || !restaurantId) return;
         try {
             setSaving(true);
+
+            const full = address.full.trim();
+            let nextAddress = { ...address };
+
+            const coords = nextAddress.geo?.coordinates;
+            const hasValidCoords =
+                Array.isArray(coords) &&
+                coords.length === 2 &&
+                typeof coords[0] === 'number' &&
+                typeof coords[1] === 'number' &&
+                Number.isFinite(coords[0]) &&
+                Number.isFinite(coords[1]);
+
+            const shouldGeocode = !hasValidCoords || lastGeocodedFullAddress !== full;
+            if (shouldGeocode) {
+                setGeocoding(true);
+                const geo = await getGeoFromFullAddress(full);
+                if (!geo) {
+                    toast.error('Không thể xác định tọa độ (lat/lng) từ địa chỉ. Vui lòng nhập địa chỉ chi tiết hơn.');
+                    return;
+                }
+                nextAddress = { ...nextAddress, geo };
+                setAddress(nextAddress);
+                setLastGeocodedFullAddress(full);
+            }
+
             await updateMyRestaurant(restaurantId, {
                 name,
                 description,
                 phone: restaurantPhone,
-                address,
+                address: nextAddress,
                 categoriesId: [categoryId],
                 paymentInfo: {
                     bankName: bankName || null,
@@ -93,6 +157,7 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
             console.error(e);
             toast.error('Lưu thất bại. Vui lòng thử lại.');
         } finally {
+            setGeocoding(false);
             setSaving(false);
         }
     };
@@ -101,6 +166,15 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
         <OwnerLayout>
             <div className="min-h-screen bg-gray-50 p-4 md:p-8">
                 <div className="max-w-6xl mx-auto">
+                    <div className="mb-6">
+                        <button
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="text-emerald-600 hover:text-emerald-700 font-medium mb-4 inline-flex items-center"
+                        >
+                            ← Quay lại
+                        </button>
+                    </div>
 
                     {/* Header của trang */}
                     <div className="mb-8 flex flex-row justify-between items-center">
@@ -163,11 +237,11 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
                                 <div className="mt-6 flex justify-end">
                                     <button
                                         type="button"
-                                        disabled={!canSave || saving}
+                                        disabled={!canSave || saving || geocoding}
                                         onClick={handleSaveRestaurantInfo}
                                         className="px-5 py-2.5 rounded-lg font-semibold text-white bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors"
                                     >
-                                        {saving ? 'Đang lưu...' : 'Lưu thông tin'}
+                                        {geocoding ? 'Đang lấy tọa độ...' : saving ? 'Đang lưu...' : 'Lưu thông tin'}
                                     </button>
                                 </div>
                             </>

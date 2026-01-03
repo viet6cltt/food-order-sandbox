@@ -112,10 +112,11 @@ class OrderService {
       throw new ERR_RESPONSE.ForbiddenError("You do not have permission to access this order", ERR.ORDER_NOT_OWNER);
     }
 
-    // dont allow if confirmed
-    if (order.status !== "draft") {
+    // Only allow editing while order is not yet in restaurant-handling flow
+    // (draft: before user places; pending: user placed but restaurant not confirmed yet)
+    if (!['draft', 'pending'].includes(order.status)) {
       throw new ERR_RESPONSE.BadRequestError(
-        "You can only update order info while the order is pending"
+        'You can only update order info while the order is draft or pending'
       );
     }
 

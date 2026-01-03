@@ -13,6 +13,11 @@ class ReviewService {
     const restaurant = await restaurantService.getRestaurantInfo(restaurantId);
     if (!restaurant) return;
 
+    const numericRating = Number(reviewRating);
+    if (!Number.isFinite(numericRating) || numericRating < 1 || numericRating > 5) {
+      return;
+    }
+
     // 2. Get current values
     const oldCount = restaurant.reviewCount || 0;
     const oldRating = restaurant.rating || 0;
@@ -20,7 +25,7 @@ class ReviewService {
     // 3. Cal new values
     const newCount = oldCount + 1;
 
-    const calculatedRating = ((oldRating * oldCount) + reviewRating) / newCount;
+    const calculatedRating = ((oldRating * oldCount) + numericRating) / newCount;
 
     const newRating = Math.round(calculatedRating * 10) / 10;
 
