@@ -1,6 +1,4 @@
 import React from 'react'
-import { StarIcon } from '@heroicons/react/24/solid'
-import { StarIcon as StarOutlineIcon } from '@heroicons/react/24/outline'
 import type { MenuItemDto } from '../../restaurant/components/FoodItem'
 
 interface FoodInfoProps {

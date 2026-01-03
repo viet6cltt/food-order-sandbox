@@ -40,7 +40,7 @@ const FoodChartDetail: React.FC<Props> = ({ data }) => {
                             formatter={(value) => [`${value} phần`, 'Đã bán']}
                         />
                         <Bar dataKey="sold" name="Đã bán" radius={[0, 4, 4, 0]} barSize={40}>
-                            {data.map((entry, index) => (
+                            {data.map((_entry, index) => (
                                 <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                             ))}
                         </Bar>

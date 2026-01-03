@@ -23,7 +23,14 @@ const OwnerMenuListScreen: React.FC = () => {
         setLoading(true);
         setError(null);
 
-        const myRestaurant = await getMyRestaurant(restaurantId);
+        const rid = typeof restaurantId === 'string' ? restaurantId : null;
+        if (!rid) {
+          setRestaurant(null);
+          setItems([]);
+          return;
+        }
+
+        const myRestaurant = await getMyRestaurant(rid);
         setRestaurant(myRestaurant);
 
         const id = myRestaurant?._id || myRestaurant?.id;
@@ -47,7 +54,7 @@ const OwnerMenuListScreen: React.FC = () => {
     };
 
     run();
-  }, []);
+  }, [restaurantId]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);

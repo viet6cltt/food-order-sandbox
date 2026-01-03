@@ -6,18 +6,19 @@ interface Props {
     onChangeStatus: (newStatus: OrderStatus) => void;
 }
 
-const STATUS_CONFIG: Record<OrderStatus, { label: string; color: string }> = {
+const STATUS_CONFIG: Partial<Record<OrderStatus, { label: string; color: string }>> = {
+    draft: { label: 'Nháp', color: 'bg-gray-100 text-gray-800' },
+    pending: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-800' },
     confirmed: { label: 'Đã nhận đơn', color: 'bg-blue-100 text-blue-800' },
     preparing: { label: 'Đang chế biến', color: 'bg-orange-100 text-orange-800' },
     delivering: { label: 'Đang giao', color: 'bg-purple-100 text-purple-800' },
     completed: { label: 'Hoàn thành', color: 'bg-green-100 text-green-800' },
     cancelled: { label: 'Đã hủy', color: 'bg-red-100 text-red-800' },
-    refunded: { label: 'Đã hoàn tiền', color: 'bg-gray-100 text-gray-800' },
 };
 
 const StatusUpdateControls: React.FC<Props> = ({ currentStatus, onChangeStatus }) => {
         if ( currentStatus === 'completed' || currentStatus === 'cancelled') {
-        const config = STATUS_CONFIG[currentStatus] || { label: currentStatus, color: 'bg-gray-100' };
+        const config = STATUS_CONFIG[currentStatus] || { label: currentStatus, color: 'bg-gray-100 text-gray-800' };
         return (
             <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${config.color}`}>
                 {config.label}

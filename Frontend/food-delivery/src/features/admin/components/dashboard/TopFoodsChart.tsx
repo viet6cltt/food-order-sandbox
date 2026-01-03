@@ -3,10 +3,10 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import { adminOrderApi } from '../../api';
 import { toast } from 'react-toastify';
 
-interface CategoryData {
+type CategoryData = Record<string, string | number> & {
     name: string;
     value: number;
-}
+};
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
@@ -50,9 +50,9 @@ const TopFoodsChart: React.FC = () => {
     return (
         <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col items-center">
             <div className="w-full flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-800">Top Thể Loại Bán Chạy</h3>
+                <h3 className="text-lg font-bold text-gray-800">Top Thể Loại (SL món - đơn hoàn thành)</h3>
                 <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded-full uppercase font-bold">
-                    Tổng cộng
+                    Số lượng
                 </span>
             </div>
 
@@ -67,7 +67,7 @@ const TopFoodsChart: React.FC = () => {
                             outerRadius={100}
                             paddingAngle={5}
                             dataKey="value"
-                            label={({ name, value }) => `${value}`} // Hiện số lượng trực tiếp
+                            label={({ value }) => `${value}`} // Hiện số lượng trực tiếp
                         >
                             {data.map((_, index) => (
                                 <Cell 

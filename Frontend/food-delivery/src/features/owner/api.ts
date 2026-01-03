@@ -147,6 +147,7 @@ export interface Restaurant {
   isAcceptingOrders?: boolean;
   opening_time?: string;
   closing_time?: string;
+  openingHours?: Array<{ day: number; open: string; close: string; isClosed: boolean }>;
   isActive?: boolean;
   status?: 'ACTIVE' | 'BLOCKED';
   rating?: number;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { CalendarDaysIcon, FunnelIcon } from '@heroicons/react/24/outline';
+import { CalendarDaysIcon } from '@heroicons/react/24/outline';
 
 export type TimeRange = '7days' | '30days' | 'this_month';
 

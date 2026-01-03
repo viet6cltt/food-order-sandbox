@@ -88,16 +88,27 @@ export async function getRestaurantsByCategory(categoryId: string, page = 1, lim
   return { items: normalizedItems, meta };
 }
 
-export async function getRecommendRestaurants() {
+export async function getRecommendRestaurants(): Promise<Restaurant[]> {
   const res = await api.get('/restaurants/recommend'); // BE trả về 5 item
   const items: unknown[] = Array.isArray(res.data?.data) ? res.data.data : [];
-  const normalizedItems = items.map((item: unknown) => {
-    const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
-    return {
-      ...restaurant,
-      id: restaurant.id || (restaurant._id ? String(restaurant._id) : undefined),
-    }
-  })
+  const normalizedItems: Restaurant[] = items
+    .map((item: unknown) => {
+      const restaurant = item as Partial<Restaurant> & { _id?: string | { $oid?: string } }
+      const id = restaurant.id || (restaurant._id ? String(restaurant._id) : undefined)
+      const name = typeof restaurant.name === 'string' ? restaurant.name : ''
+      const address = restaurant.address ?? ''
+      const rating = typeof restaurant.rating === 'number' ? restaurant.rating : 0
+
+      return {
+        ...restaurant,
+        id,
+        name,
+        address,
+        rating,
+      } as Restaurant
+    })
+    .filter((r) => Boolean(r.id) && Boolean(r.name))
+
   return normalizedItems;
 }
 

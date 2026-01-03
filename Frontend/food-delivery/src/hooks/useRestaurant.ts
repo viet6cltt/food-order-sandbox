@@ -19,11 +19,13 @@ export default function useRestaurant(restaurantId: string | undefined): UseRest
       return;
     }
 
+    const id = restaurantId;
+
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const data = await getRestaurantById(restaurantId);
+        const data = await getRestaurantById(id);
         setRestaurant(data);
       } catch (err) {
         setError(err instanceof Error ? err : new Error('Failed to load restaurant'));

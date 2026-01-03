@@ -43,7 +43,7 @@ const AuthHeader: React.FC<Props> = ({ className = '' }) => {
           {/* LEFT: Logo & Breadcrumb-like feel */}
           <div className="flex items-center gap-4">
             <button 
-              onClick={() => navigate('/')}
+              onClick={handleLogoClick}
               className="flex items-center group"
             >
               <span className="text-2xl font-black bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent tracking-tight">

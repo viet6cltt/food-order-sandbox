@@ -67,7 +67,7 @@ const OrderChartDetail: React.FC<Props> = ({ data, timeRange }) => {
                             tickFormatter={formatDate}
                             tick={{ fontSize: 12, fill: '#94a3b8' }}
                             axisLine={false}
-                            interval="auto" // 3. Tự động tính khoảng cách để không bị đè chữ khi data nhiều (30 days)
+                            interval="preserveStartEnd" // Tự cân đối tick cho nhiều điểm dữ liệu
                         />
                         
                         <YAxis 

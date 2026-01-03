@@ -8,11 +8,11 @@ import { ClipboardDocumentListIcon } from '@heroicons/react/24/outline';
 const MOCK_ORDERS: Order[] = [
     {
         _id: '65f1a2b3c4d5e6f7a8b9c001',
+        userId: 'user1',
         restaurantId: 'res1',
-        restaurantName: 'Quán Ngon',
-        customerName: 'Nguyễn Văn A',
-        items: [{ menuItemId: 'm1', name: 'Phở Bò', price: 50000, quantity: 1 }],
-        totalPrice: 50000,
+        items: [{ menuItemId: 'm1', name: 'Phở Bò', finalPrice: 50000, quantity: 1 }],
+        totalFoodPrice: 50000,
+        shippingFee: 0,
         status: 'pending',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -20,23 +20,23 @@ const MOCK_ORDERS: Order[] = [
     },
     {
         _id: '65f1a2b3c4d5e6f7a8b9c002',
+        userId: 'user2',
         restaurantId: 'res1',
-        restaurantName: 'Quán Ngon',
-        customerName: 'Trần Thị B',
-        items: [{ menuItemId: 'm3', name: 'Cơm Rang', price: 60000, quantity: 2 }],
-        totalPrice: 120000,
-        status: 'cooking',
+        items: [{ menuItemId: 'm3', name: 'Cơm Rang', finalPrice: 60000, quantity: 2 }],
+        totalFoodPrice: 120000,
+        shippingFee: 0,
+        status: 'preparing',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        paymentMethod: 'Banking'
+        paymentMethod: 'BANK_TRANSFER'
     },
     {
         _id: '65f1a2b3c4d5e6f7a8b9c003',
+        userId: 'user3',
         restaurantId: 'res1',
-        restaurantName: 'Quán Ngon',
-        customerName: 'Lê Văn C',
-        items: [{ menuItemId: 'm4', name: 'Bún Chả', price: 45000, quantity: 1 }],
-        totalPrice: 45000,
+        items: [{ menuItemId: 'm4', name: 'Bún Chả', finalPrice: 45000, quantity: 1 }],
+        totalFoodPrice: 45000,
+        shippingFee: 0,
         status: 'completed',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -44,15 +44,15 @@ const MOCK_ORDERS: Order[] = [
     },
     {
         _id: '65f1a2b3c4d5e6f7a8b9c004',
+        userId: 'user4',
         restaurantId: 'res1',
-        restaurantName: 'Quán Ngon',
-        customerName: 'Phạm Văn D',
-        items: [{ menuItemId: 'm5', name: 'Trà Sữa', price: 25000, quantity: 4 }],
-        totalPrice: 100000,
-        status: 'canceled',
+        items: [{ menuItemId: 'm5', name: 'Trà Sữa', finalPrice: 25000, quantity: 4 }],
+        totalFoodPrice: 100000,
+        shippingFee: 0,
+        status: 'cancelled',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        paymentMethod: 'Banking'
+        paymentMethod: 'BANK_TRANSFER'
     },
 ];
 
@@ -61,10 +61,10 @@ type TabType = 'all' | OrderStatus;
 const TABS: { id: TabType; label: string }[] = [
     { id: 'all', label: 'Tất cả' },
     { id: 'pending', label: 'Chờ xác nhận' },
-    { id: 'cooking', label: 'Đang nấu' },
+    { id: 'preparing', label: 'Đang chuẩn bị' },
     { id: 'delivering', label: 'Đang giao' },
     { id: 'completed', label: 'Hoàn thành' },
-    { id: 'canceled', label: 'Đã hủy' },
+    { id: 'cancelled', label: 'Đã hủy' },
 ];
 
 const OwnerOrderListScreen: React.FC = () => {

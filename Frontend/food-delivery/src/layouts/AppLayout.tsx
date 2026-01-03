@@ -39,13 +39,13 @@ const AppLayout: React.FC<Props> = ({ children, className = '' }) => {
       {/* Nếu bị khóa, thường chúng ta sẽ ẩn luôn Header/Footer 
           để user không tương tác được gì khác.
       */}
-      {user?.status !== 'BANNED' && <Header />}
+        {user?.status !== 'banned' && <Header />}
 
       <div className="flex-1 w-full flex flex-col">
         {children}
       </div>
 
-      {user?.status !== 'BANNED' && <Footer />}
+      {user?.status !== 'banned' && <Footer />}
     </div>
   )
 }

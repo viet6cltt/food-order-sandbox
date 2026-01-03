@@ -327,8 +327,8 @@ const OrderTable: React.FC<Props> = ({ orders, onUpdateStatus, onRefresh }) => {
                                     (() => {
                                         const payment = getConfirmablePayment(order);
                                         const canConfirm = Boolean(payment && !order.isPaid && payment.status === 'pending');
-                                        const isLoading = loadingPaymentOrderIds.has(order._id) ||
-                                            (typeof order.paymentId === 'string' && order.paymentId && loadingPaymentIds.has(order.paymentId));
+                                        const paymentId = typeof order.paymentId === 'string' ? order.paymentId : undefined;
+                                        const isLoading = loadingPaymentOrderIds.has(order._id) || (paymentId ? loadingPaymentIds.has(paymentId) : false);
 
                                         return (
                                             <div className="mb-2">
