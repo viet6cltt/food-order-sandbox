@@ -596,76 +596,65 @@ class AuthController {
    */
   async oauthCallback(req, res, next) {
     try {
-      const { provider } = req.params;
+        const { provider } = req.params;
 
-      return passport.authenticate(provider, { session: false }, async (err, userData, info) => {
-        console.log('authenticating...');
-        try {
-          // lỗi từ strategy
-          if (err) {
-            throw new HTTP_ERROR.UnauthorizedError(
-              err.message || 'OAuth authentication failed',
-              ERR.AUTH_INVALID_CREDENTIALS
-            );
-          }
+        return passport.authenticate(provider, { session: false }, async (err, userData, info) => {
+            try {
+                const { state } = req.query;
+                const st = AuthService.parseAndVerifyState(state);
+                
+                // Chuẩn hóa frontendUrl: bỏ dấu gạch chéo ở cuối nếu có để tránh lỗi //
+                const rawFrontendUrl = st?.returnUrl || 'http://localhost:5173';
+                const frontendUrl = rawFrontendUrl.replace(/\/$/, "");
 
-          // người dùng hủy hoặc provider trả lỗi
-          if (!userData) {
-            const { error, error_description } = req.query;
-            throw new HTTP_ERROR.UnauthorizedError(
-              error_description || error || info?.message || 'OAuth login failed',
-              ERR.AUTH_INVALID_CREDENTIALS
-            );
-          }
+                // 1. Xử lý lỗi
+                if (err || !userData) {
+                    const errorMsg = encodeURIComponent(err?.message || info?.message || 'OAuth failed');
+                    return res.redirect(`${frontendUrl}/login?error=${errorMsg}`);
+                }
 
-          // Verify state
-          const { state } = req.query;
-          const st = AuthService.parseAndVerifyState(state);
+                if (st.provider !== provider) {
+                    return res.redirect(`${frontendUrl}/login?error=provider_mismatch`);
+                }
 
-          if (!st) throw new HTTP_ERROR.BadRequestError('Invalid OAuth state', ERR.BAD_OAUTH_STATE);
+                const { status, userId } = userData;
 
-          if (st.provider !== provider) throw new HTTP_ERROR.BadRequestError('Provider mismatch', ERR.PROVIDER_MISMATCH);
+                // 2. Nếu User cần bổ sung thông tin
+                if (status === ERR.REQUIRE_PHONE_USERNAME_PASSWORD) {
+                    return res.redirect(`${frontendUrl}/auth/complete-profile?userId=${userId}`);
+                }
 
-          const { status, userId } = userData;
+                // 3. Đăng nhập thành công -> Cấp token
+                const deviceInfo = {
+                    userAgent: req.headers['user-agent'] || 'unknown',
+                    ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+                };
 
-          // Nếu user cần bổ sung thông tin
-          if (status === ERR.REQUIRE_PHONE_USERNAME_PASSWORD) {
-            return SUCCESS_RESPONSE.accepted(
-              res, 
-              ERR.REQUIRE_PHONE_USERNAME_PASSWORD,
-              'Please complete your profile to continue'
-            );
-          }
+                const { accessToken, refreshToken } = await AuthService.generateTokensForUser(userId, deviceInfo);
 
-          // nếu đầy đủ -> cấp token
-          const deviceInfo = {
-            userAgent: req.headers['user-agent'] || 'unknown',
-            ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
-          };
+                // Gửi Refresh Token qua Cookie
+                res.cookie('refreshToken', refreshToken, {
+                    httpOnly: true,
+                    secure: true,
+                    sameSite: 'none',
+                    maxAge: 7 * 24 * 60 * 60 * 1000,
+                });
 
-          const { user, accessToken, refreshToken } = await AuthService.generateTokensForUser(userId, deviceInfo);
+                // 4. CHUYỂN HƯỚNG VỀ FE (SỬ DỤNG ĐỐI TƯỢNG URL ĐỂ CHUẨN HÓA)
+                // Cách này tự động xử lý dấu gạch chéo và query string an toàn
+                const redirectTarget = new URL('/auth/oauth-success', frontendUrl);
+                redirectTarget.searchParams.append('accessToken', accessToken);
 
-          res.cookie('refreshToken', refreshToken, {
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-          })
-            
-          return SUCCESS_RESPONSE.success(res, 'Login successfully via OAuth', {
-            accessToken,
-            user: {
-              id: user._id,
-              username: user.username,
-              phone: user.phone,
+                return res.redirect(redirectTarget.toString());
+
+            } catch (innerErr) {
+                const rawFrontendUrl = 'http://localhost:5173';
+                const frontendUrl = rawFrontendUrl.replace(/\/$/, "");
+                res.redirect(`${frontendUrl}/login?error=server_error`);
             }
-          });
-        } catch (innerErr) {
-          next(innerErr);
-        }
-      })(req, res, next);
+        })(req, res, next);
     } catch (err) {
-      next(err);
+        next(err);
     }
   }
 
