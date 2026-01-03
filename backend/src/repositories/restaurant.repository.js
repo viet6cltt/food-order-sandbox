@@ -200,8 +200,6 @@ class RestaurantRepository {
       Restaurant.countDocuments(filter)
     ]);
 
-    console.log(items, total);
-
     return { items, total };
   }
 

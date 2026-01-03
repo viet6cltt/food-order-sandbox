@@ -41,7 +41,7 @@ const FoodForm: React.FC = () => {
 
         try {
             setSubmitting(true);
-            const restaurant = await getMyRestaurant();
+            const restaurant = await getMyRestaurant(restaurantId);
             const restaurantId = restaurant?._id || restaurant?.id;
             if (!restaurantId) {
                 toast.error('Không tìm thấy nhà hàng của bạn');

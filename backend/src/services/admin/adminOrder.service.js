@@ -5,10 +5,10 @@ class AdminOrderService {
   async getOrderAnalysisReport({ startDate, endDate }) {
     // Chuẩn hóa ngày (đầu ngày và cuối ngày)
     const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
+    start.setUTCHours(0, 0, 0, 0);
 
     const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
+    end.setUTCHours(23, 59, 59, 999);
 
     const [distributionData, trendData] = await Promise.all([
         orderRepository.getStatusDistributionSummary({ startDate: start, endDate: end }),
@@ -26,6 +26,8 @@ class AdminOrderService {
 
   async getTopCategoriesReport() {
     const data = await orderRepository.getTopCategoriesTotalSales();
+
+    console.log(data);
 
     return data.map(item => ({
       name: item.categoryName,

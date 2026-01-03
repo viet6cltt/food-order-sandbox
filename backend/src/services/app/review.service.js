@@ -10,7 +10,7 @@ class ReviewService {
 
   async updateRestaurantRating(restaurantId, reviewRating) {
     //1 . Get data
-    const restaurant = restaurantService.getRestaurantInfo(restaurantId);
+    const restaurant = await restaurantService.getRestaurantInfo(restaurantId);
     if (!restaurant) return;
 
     // 2. Get current values

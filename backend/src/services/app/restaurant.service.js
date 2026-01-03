@@ -94,7 +94,7 @@ class RestaurantService {
     return await restaurantRepository.update(restaurantId, updateData);
   }
 
-  async uploadPaymentQr(restaurantId, ownerId, filePath) {
+  async uploadPaymentQr(restaurantId, filePath) {
     try {
       // Upload ảnh lên Cloudinary
       const result = await cloudinary.uploader.upload(filePath, {
@@ -103,7 +103,7 @@ class RestaurantService {
       });
 
       // Cập nhật URL vào DB
-      const updated = await repoRestaurant.update(restaurantId, { paymentQrUrl: result.secure_url });
+      const updated = await restaurantRepository.update(restaurantId, { qrImageUrl: result.secure_url });
       
       // Xóa file tạm ở backend
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
@@ -143,7 +143,7 @@ class RestaurantService {
       sort: sortOptions,
       skip, limit,
       lat: hasLocation ? lat : null,
-      lng: hasLocation ? lat : null,
+      lng: hasLocation ? lng : null,
     });
 
 
@@ -195,13 +195,16 @@ class RestaurantService {
   }
 
   async searchRestaurants({ keyword, lat, lng, limit, skip }) {
-    return restaurantRepository.search({
+    const result = await restaurantRepository.search({
       keyword,
       lat: Number(lat),
       lng: Number(lng),
       skip: Number(skip),
       limit: Number(limit)
     });
+
+    console.log(result)
+    return result;
   }
 
   async uploadBanner(id, file) {
@@ -354,7 +357,7 @@ class RestaurantService {
   }
 
   async updateRatingAndCount(id, { newRating, newCount }) {
-    return restaurantRepository.updateRatingAndCount(id, { newRating, newCount });
+    return await restaurantRepository.updateRatingAndCount(id, { newRating, newCount });
   }
 }
 
