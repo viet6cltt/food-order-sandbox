@@ -6,7 +6,16 @@ class RestaurantRequestRepository {
   }
 
   async getPendingRequests() {
-    return await RestaurantRequest.find({ status: "pending" });
+    return await RestaurantRequest.find({ status: "pending" })
+      .populate('userId', 'username email')
+      .sort({ createdAt: -1 });
+  }
+
+  async getByUserId(userId) {
+    return await RestaurantRequest.find({ userId })
+    .populate('categoriesId', 'name')
+    .sort({ createdAt: -1 })
+    .lean(); // Dùng .lean() để trả về JS object thuần, giúp sort nhanh hơn
   }
 
   async getById(requestId) {

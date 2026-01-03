@@ -42,7 +42,7 @@ router.use(
 router.post('/:restaurantId/report', reportController.sendReport);
 
 // update
-router.patch("/:restaurantId/banner", requireRestaurantOwner, upload.single("logo"), RestaurantsController.uploadBanner);
+router.patch("/:restaurantId/banner", requireRestaurantOwner, upload.single("file"), RestaurantsController.uploadBanner);
 
 // menu
 router.post('/:restaurantId/menu-item', requireRestaurantOwner, MenuItemController.createMenuItem);

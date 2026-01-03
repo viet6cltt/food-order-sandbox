@@ -2,6 +2,7 @@ const RestaurantService = require('@/services/app/restaurant.service');
 const ERR = require('@/constants/errorCodes');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const SUCCESS_RESPONSE = require('@/utils/successResponse');
+const mongoose = require('mongoose');
 
 class RestaurantController {
   /**
@@ -42,6 +43,10 @@ class RestaurantController {
       const { restaurantId } = req.params;
       if (!restaurantId) {
         throw new ERR_RESPONSE.BadRequestError("Missing restaurant ID", ERR.INVALID_INPUT);
+      }
+
+      if (!mongoose.Types.ObjectId.isValid(restaurantId)) {
+        throw new ERR_RESPONSE.BadRequestError("Invalid restaurant ID", ERR.INVALID_INPUT);
       }
 
       const restaurantInfo = await RestaurantService.getRestaurantInfo(restaurantId);
@@ -258,21 +263,21 @@ class RestaurantController {
 
   /**
    * @swagger
-   * /restaurants/owner/restaurant:
-   *  get:
-   *    summary: Get my restaurant (by owner)
-   *    description: Retrieve the restaurant information associated with the authenticated owner
-   *    tags:
-   *      - Restaurants
-   *    security:
-   *      - bearerAuth: []
-   *    responses:
-   *      200:
-   *        description: Restaurant retrieved successfully
-   *      401:
-   *        description: Unauthorized
-   *      403:
-   *        description: Not restaurant owner
+    * /users/owner/restaurant:
+    *   get:
+    *     summary: Get my restaurant (owner)
+    *     description: Retrieve the restaurant associated with the authenticated owner
+    *     tags:
+    *       - Restaurants
+    *     security:
+    *       - bearerAuth: []
+    *     responses:
+    *       200:
+    *         description: Restaurant retrieved successfully
+    *       401:
+    *         description: Unauthorized
+    *       403:
+    *         description: Not restaurant owner
    */
   async getMyRestaurant(req, res, next) {
     try {
@@ -295,44 +300,29 @@ class RestaurantController {
 
   /**
    * @swagger
-   * /restaurants/owner/restaurant:
-   *  post:
-   *    summary: Update my restaurant (by owner)
-   *    description: Update the restaurant information associated with the authenticated owner
-   *    tags:
-   *      - Restaurants
-   *    security:
-   *      - bearerAuth: []
-   *    requestBody:
-   *      required: true
-   *      content:
-   *        application/json:
-   *          schema:
-   *            type: object
-   *            properties:
-   *              name:
-   *                type: string
-   *                description: Name of the restaurant
-   *                example: "My Restaurant"
-   *              address:
-   *                type: string
-   *                description: Address of the restaurant
-   *                example: "123 Main St, City, Country"
-   *              phone:
-   *                type: string
-   *                description: Contact phone number
-   *                example: "+1234567890"
+   * /users/owner/restaurant:
+   *   patch:
+   *     summary: Update my restaurant (owner)
+   *     description: Update the restaurant information associated with the authenticated owner
+   *     tags:
+   *       - Restaurants
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         application/json:
+   *           schema:
+   *             type: object
    *     responses:
    *       200:
    *         description: Restaurant updated successfully
-   *       400:
-   *         description: Invalid input data
    *       401:
    *         description: Unauthorized
    *       403:
    *         description: Not restaurant owner
    */
-  async updateMyRestaurant(req, res, next) {
+  async updateMyRestaurantByOwner(req, res, next) {
     try {
       const userId = req.userId;
       if (!userId) {
@@ -348,35 +338,33 @@ class RestaurantController {
 
   /**
    * @swagger
-   * /restaurants/owner/restaurant/payment-qr:
+   * /users/owner/restaurant/payment-qr:
    *   patch:
-   *    summary: Upload or update restaurant payment QR code (by owner)
-   *    description: Allows restaurant owners to upload or update their restaurant's payment QR code.
-   *    tags:
-   *      - Restaurants
-   *    security:
-   *      - bearerAuth: []
-   *    requestBody:
-   *      required: true
-   *      content:
-   *        multipart/form-data:
-   *          schema:
-   *            type: object
-   *            required:
-   *              - file
-   *            properties:
-   *              file:
-   *                type: string
-   *                format: binary
-   *      responses:
-   *        200:
-   *          description: Payment QR updated successfully
-   *        400:
-   *          description: Missing file
-   *        401:
-   *          description: Unauthorized
+   *     summary: Upload or update restaurant payment QR code (owner)
+   *     description: Allows restaurant owners to upload or update their restaurant's payment QR code.
+   *     tags:
+   *       - Restaurants
+   *     security:
+   *       - bearerAuth: []
+   *     requestBody:
+   *       required: true
+   *       content:
+   *         multipart/form-data:
+   *           schema:
+   *             type: object
+   *             required:
+   *               - file
+   *             properties:
+   *               file:
+   *                 type: string
+   *                 format: binary
+   *     responses:
+   *       200:
+   *         description: Payment QR updated successfully
+   *       401:
+   *         description: Unauthorized
    */
-  async uploadMyPaymentQr(req, res, next) {
+  async uploadMyPaymentQrByOwner(req, res, next) {
     try {
       const userId = req.userId;
       if (!userId) {
@@ -426,6 +414,47 @@ class RestaurantController {
       next(err);
     }
   }
+
+  // [GET] /users/me/restaurants
+  async getMyRestaurants(req, res, next) {
+    try {
+      const userId = req.userId;
+      const restaurants = await RestaurantService.getRestaurantsByOwnerId(userId);
+
+      return SUCCESS_RESPONSE.success(res, 'Fetch My Restaurants Successfully"', restaurants);
+    } catch (err) {
+      next(err);
+    }
+  } 
+
+  // [PATCH] /me/restaurants/:restaurantId
+  async updateMyRestaurant(req, res, next) {
+    try {
+      const { restaurantId } = req.params;
+      const updateData = req.body;
+
+      const result = await RestaurantService.updateMyRestaurant(restaurantId, updateData);
+      return SUCCESS_RESPONSE.success(res, "Update Restaurant Successfully", result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  // [PATCH] /me/restaurant/:restaurantId/payment-qr
+  async uploadMyPaymentQr(req, res, next) {
+    try {
+      if (!req.file) throw new ERR_RESPONSE.BadRequestError("Please upload a QR image");
+
+      const { restaurantId } = req.params;
+      const filePath = req.file.path;
+
+      const result = await RestaurantService.uploadPaymentQr(restaurantId, filePath);
+      return SUCCESS_RESPONSE.success(res, "Upload Payment QR Successfully", result);
+    } catch (err) {
+      next(err);
+    }
+  }
+
 }
 
 module.exports = new RestaurantController();

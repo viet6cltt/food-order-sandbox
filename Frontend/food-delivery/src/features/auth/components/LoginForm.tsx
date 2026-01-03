@@ -94,7 +94,7 @@ const LoginForm: React.FC<{ className?: string }> = ({ className = '' }) => {
           <div className="mb-6">
             <div className="flex justify-between items-center mb-2">
               <label className="block text-sm font-semibold text-gray-700">Mật khẩu</label>
-              <Link to="/reset-password-request" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
+              <Link to="/auth/reset-password-request" className="text-sm text-emerald-600 hover:text-emerald-700 font-medium">
                 Quên mật khẩu?
               </Link>
             </div>

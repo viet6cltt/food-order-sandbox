@@ -1,67 +1,93 @@
 const repoRestaurantRequest = require('@/repositories/restaurantRequest.repository');
 const ERR_RESPONSE = require('@/utils/httpErrors');
 const ERR = require('@/constants/errorCodes');
+const cloudinary = require('@/config/cloudinary.config');
+const fs = require('fs');
 
 class RestaurantRequestService {
   
-  async submitRequest(userId, data) {
-    const exists = await repoRestaurantRequest.getPendingRequestsByUserId(userId);
-    if (exists) {
+  async getMyRequest(userId) {
+    const requests = await repoRestaurantRequest.getByUserId(userId);
+
+    if (!requests || requests.length === 0) return [];
+
+    const statusPriority = {
+      'pending': 1,
+      'rejected': 2,
+      'approved': 3
+    };
+
+    return requests.sort((a, b) => {
+      const priorityA = statusPriority[a.status] || 99;
+      const priorityB = statusPriority[b.status] || 99;
+
+      // 1. Nếu độ ưu tiên khác nhau -> Sắp xếp theo độ ưu tiên
+      if (priorityA !== priorityB) {
+        return priorityA - priorityB;
+      }
+
+      // 2. Nếu cùng độ ưu tiên -> Sắp xếp theo thời gian (Mới nhất lên đầu)
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  }
+
+  async submitRequest(userId, data, files) {
+    // check trùng lặp
+    const hasPending = await repoRestaurantRequest.getPendingRequestsByUserId(userId);
+    if (hasPending) {
+      this._cleanupFiles(files);
       throw new ERR_RESPONSE.UnprocessableEntityError("This user already has a pending request");
     }
 
-    const payload = { ...(data || {}) };
+    const uploadData = { ...data, userId };
 
-    // If requester only provides address text, derive coordinates.
-    if (payload.address && typeof payload.address === 'object') {
-      const coords = payload.address?.geo?.coordinates;
-      const hasValidCoords =
-        Array.isArray(coords) &&
-        coords.length === 2 &&
-        typeof coords[0] === 'number' &&
-        typeof coords[1] === 'number' &&
-        Number.isFinite(coords[0]) &&
-        Number.isFinite(coords[1]);
-
-      const isDefaultPlaceholder = hasValidCoords && coords[0] === 10 && coords[1] === 10;
-
-      if (!hasValidCoords || isDefaultPlaceholder) {
-        const full = typeof payload.address.full === 'string' ? payload.address.full.trim() : '';
-        if (full) {
-          const { lat, lng, formatted } = await geocodeService.geocodeAddress(full);
-          payload.address.geo = {
-            ...(payload.address.geo || {}),
-            type: 'Point',
-            coordinates: [lng, lat],
-          };
-          payload.address.full = formatted || full;
-        }
-      }
-    }
-
-    if (file && file.path) {
-      try {
-        const result = await cloudinary.uploader.upload(file.path, {
-          folder: `food-order/restaurant-requests/${userId}`,
+    try {
+      // upload banner
+      if (files?.banner?.[0]) {
+        const bannerFile = files.banner[0];
+        const bannerRes = await cloudinary.uploader.upload(bannerFile.path, {
+          folder: `food-order/requests/${userId}/banner`,
           public_id: `banner-${Date.now()}`,
           overwrite: true,
         });
 
-        payload.bannerUrl = result.secure_url;
-      } finally {
-        try {
-          fs.unlinkSync(file.path);
-        } catch {
-          // ignore
-        }
-      }
-    }
+        uploadData.bannerUrl = bannerRes.secure_url;  
 
-    return await repoRestaurantRequest.createRequest({ ...data, userId });
+        // delelte temp files
+        fs.unlinkSync(bannerFile.path);
+      }
+
+      // upload documents
+      if (files?.documents?.length > 0) {
+        const uploadPromises = files.documents.map(async (file, index) => {
+          const docRes = await cloudinary.uploader.upload(file.path, {
+            folder: `food-order/requests/${userId}/documents`,
+            public_id: `doc-${index}-${Date.now()}`,
+          });
+          // Xóa file tạm ngay sau khi mỗi file upload thành công
+          fs.unlinkSync(file.path);
+          return docRes.secure_url;
+        });
+
+        uploadData.documents = await Promise.all(uploadPromises);
+      }
+
+      return await repoRestaurantRequest.createRequest(uploadData);
+    } catch (err) {
+      this._cleanupFiles(files);
+      throw err;
+    }
   }
 
-  async getMyRequest(userId) {
-    return await repoRestaurantRequest.getPendingByUserId(userId);
+  // helper để dọn dẹp file
+  _cleanupFiles(files) {
+    if (!files) return;
+    const allFiles = [...(files.banner || []), ...(files.documents || [])];
+    allFiles.forEach(file => {
+      if (fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+    });
   }
   
 }

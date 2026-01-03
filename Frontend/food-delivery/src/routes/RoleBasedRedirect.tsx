@@ -10,7 +10,7 @@ const RoleBasedRedirect: React.FC = () => {
     console.log(user);
     if (isAuthenticated && user) {
       if (user.role === 'restaurant_owner') {
-        navigate('/owner/dashboard', { replace: true });
+        navigate('/owner/restaurant-list', { replace: true });
       } else if (user.role === 'admin') {
         navigate('/admin/dashboard', { replace: true });
       } 

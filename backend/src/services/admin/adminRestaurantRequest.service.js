@@ -21,8 +21,31 @@ class AdminRestaurantRequestService {
       throw new ERR_RESPONSE.NotFoundError("Request not found");
     }
 
+    // If already approved, allow idempotent approve (useful if a previous attempt failed mid-way).
     if (request.status !== 'pending') {
-      throw new ERR_RESPONSE.UnprocessableEntityError("This request was handled");
+      if (request.status === 'approved') {
+        const ownerId = request.userId?._id ?? request.userId;
+        const existing = await serviceRestaurant.getRestaurantByOwnerId(ownerId);
+        if (existing) return { approveReq: request, restaurant: existing };
+        // fall through to create restaurant (recovery)
+      } else {
+        throw new ERR_RESPONSE.UnprocessableEntityError("This request was handled");
+      }
+    }
+
+    const coords = request?.address?.geo?.coordinates;
+    const hasValidCoords =
+      Array.isArray(coords) &&
+      coords.length === 2 &&
+      typeof coords[0] === 'number' &&
+      typeof coords[1] === 'number' &&
+      !Number.isNaN(coords[0]) &&
+      !Number.isNaN(coords[1]);
+
+    if (!hasValidCoords) {
+      throw new ERR_RESPONSE.BadRequestError(
+        'Restaurant request is missing address.geo.coordinates (lng/lat). Please ask the owner to resubmit with a valid address.'
+      );
     }
 
     if (request.userId.role === UserRole.CUSTOMER) {
@@ -33,7 +56,9 @@ class AdminRestaurantRequestService {
       await redisService.setForceRefresh(request.userId._id);
     }
 
-    const approveReq = await repoRestaurantRequest.approve(requestId);
+    const approveReq = request.status === 'pending'
+      ? await repoRestaurantRequest.approve(requestId)
+      : request;
 
     const restaurant = await serviceRestaurant.createRestaurant({
       name: request.restaurantName,
@@ -42,6 +67,7 @@ class AdminRestaurantRequestService {
       address: request.address,
       phone: request.phone,
       categoriesId: request.categoriesId,
+      bannerUrl: request.bannerUrl,
     });
 
     return { approveReq, restaurant };

@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "react-toastify/dist/ReactToastify.css";
 
+@layer utilities {
+  .clickable {
+    @apply cursor-pointer;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+}
+
 /* Áp dụng cho tất cả input, textarea, select */
 input::placeholder,
 textarea::placeholder,

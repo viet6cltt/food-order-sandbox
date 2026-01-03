@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react';
 import AppLayout from "../../layouts/AppLayout";
 import RestaurantForm from "./components/RestaurantForm";
 import { useNavigate } from "react-router-dom";
-import { getCategories, submitRestaurantRequestWithBanner, getMyRestaurantRequest, type NormalizedCategory, type RestaurantRequestResponse } from './api';
+import { getCategories, submitRestaurantRequest, getMyRestaurantRequest, type NormalizedCategory, type RestaurantRequestResponse } from './api';
 import { toast } from 'react-toastify';
+import { geocodeAddress } from '../../services/geocodeApi';
 
 const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' }) => {
     const navigate = useNavigate();
@@ -23,6 +24,7 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
     const [bannerFile, setBannerFile] = useState<File | null>(null);
     const [categories, setCategories] = useState<NormalizedCategory[]>([]);
     const [loadingCategories, setLoadingCategories] = useState(false);
+    const [documentFiles, setDocumentFiles] = useState<File[]>([]);
     const [restaurantErrors, setRestaurantErrors] = useState<{
         name?: string;
         description?: string;
@@ -33,16 +35,17 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [pendingRequest, setPendingRequest] = useState<RestaurantRequestResponse | null>(null);
+    const [requests, setRequests] = useState<RestaurantRequestResponse[]>([]);
     const [checkingRequest, setCheckingRequest] = useState(true);
+    const [activeTab, setActiveTab] = useState<'list' | 'form'>('list');
 
     // Check for pending request on component mount
     useEffect(() => {
         const checkPendingRequest = async () => {
             setCheckingRequest(true);
             try {
-                const request = await getMyRestaurantRequest();
-                setPendingRequest(request);
+                const data = await getMyRestaurantRequest();
+                setRequests(Array.isArray(data) ? data : []);
             } catch (err) {
                 console.error('Error checking pending request:', err);
                 // Nếu lỗi, vẫn cho phép user đăng ký
@@ -96,6 +99,32 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         if (!categoryId.trim()) {
             errors.categoryId = 'Vui lòng chọn danh mục';
         }
+
+        // Validate số lượng documents
+        if (documentFiles.length === 0) {
+            toast.warning('Vui lòng tải lên ít nhất 1 ảnh giấy phép/giấy tờ');
+            return false;
+        }
+
+        if (documentFiles.length > 5) {
+            toast.error('Tối đa chỉ được tải lên 5 ảnh giấy tờ');
+            return false;
+        }
+
+        // const lat = Number(latitude);
+        // const lng = Number(longitude);
+
+        // if (!latitude.trim()) {
+        //     errors.latitude = 'Vui lòng nhập latitude';
+        // } else if (Number.isNaN(lat) || lat < -90 || lat > 90) {
+        //     errors.latitude = 'Latitude phải nằm trong khoảng [-90, 90]';
+        // }
+
+        // if (!longitude.trim()) {
+        //     errors.longitude = 'Vui lòng nhập longitude';
+        // } else if (Number.isNaN(lng) || lng < -180 || lng > 180) {
+        //     errors.longitude = 'Longitude phải nằm trong khoảng [-180, 180]';
+        // }
         
         setRestaurantErrors(errors);
         return Object.keys(errors).length === 0;
@@ -110,6 +139,15 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         setError(null);
 
         try {
+            // Convert address -> lat/lng on FE, then send to BE as GeoJSON Point
+            const geo = await geocodeAddress(address.full);
+            const lat = Number(geo?.lat);
+            const lng = Number(geo?.lng);
+
+            if (Number.isNaN(lat) || Number.isNaN(lng)) {
+                throw new Error('Không thể xác định tọa độ (lat/lng) từ địa chỉ. Vui lòng nhập địa chỉ chi tiết hơn.');
+            }
+
             const payload = {
                 restaurantName: name,
                 description: description || undefined,
@@ -119,12 +157,16 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                     ward: address.ward || undefined,
                     district: address.district || undefined,
                     city: address.city || undefined,
+                    geo: {
+                        type: 'Point' as const,
+                        coordinates: [lng, lat] as [number, number], // Backend cần [Long, Lat]
+                    },
                 },
                 phone: restaurantPhone,
                 categoriesId: [categoryId],
             };
 
-            await submitRestaurantRequestWithBanner(payload, bannerFile);
+            await submitRestaurantRequest(payload, bannerFile || undefined, documentFiles);
             
             toast.success('Yêu cầu đăng ký đã được gửi thành công. Vui lòng chờ xử lý.');
             navigate('/');
@@ -142,6 +184,9 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         }
     };
 
+    // determine whether any request is pending
+    const hasPending = requests.some(r => r.status === 'pending');
+
     // Show loading state while checking for pending request
     if (checkingRequest) {
         return (
@@ -158,94 +203,105 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
         );
     }
 
-    // Show message if user already has a pending request
-    if (pendingRequest) {
-        const requestDate = new Date(pendingRequest.createdAt).toLocaleDateString('vi-VN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-
-        return (
-            <AppLayout>
-                <div className={`min-h-screen flex flex-col justify-center items-center bg-white px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
-                    <div className="w-full max-w-2xl">
-                        <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-8 text-center">
-                            <div className="mb-6">
-                                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-600 mb-4">
-                                    <svg className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                </div>
-                                <h2 className="text-2xl font-bold text-black mb-2">
-                                    Yêu cầu đăng ký đang chờ xử lý
-                                </h2>
-                                <p className="text-black/70 mb-4">
-                                    Bạn đã gửi yêu cầu đăng ký nhà hàng và đang chờ được xác thực.
-                                </p>
-                            </div>
-                            
-                            <div className="bg-white rounded-2xl border border-black/10 p-6 mb-6 text-left">
-                                <h3 className="font-semibold text-black mb-4">Thông tin yêu cầu:</h3>
-                                <div className="space-y-2 text-sm">
-                                    <div className="flex justify-between">
-                                        <span className="text-black/70">Tên nhà hàng:</span>
-                                        <span className="font-medium text-black">{pendingRequest.restaurantName}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-black/70">Địa chỉ:</span>
-                                        <span className="font-medium text-black">{pendingRequest.address.full}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-black/70">Số điện thoại:</span>
-                                        <span className="font-medium text-black">{pendingRequest.phone}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-black/70">Trạng thái:</span>
-                                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-black text-white">
-                                            Đang chờ xử lý
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-black/70">Ngày gửi:</span>
-                                        <span className="font-medium text-black">{requestDate}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="bg-white border border-black/10 rounded-2xl p-4 mb-6">
-                                <p className="text-sm text-black/80">
-                                    <strong>Lưu ý:</strong> Yêu cầu của bạn đang được xem xét bởi quản trị viên.
-                                    Vui lòng chờ thông báo qua email hoặc kiểm tra lại sau.
-                                </p>
-                            </div>
-
-                            <button
-                                onClick={() => navigate('/')}
-                                className="px-6 py-2 bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                            >
-                                Về trang chủ
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </AppLayout>
-        );
-    }
+    
 
     return (
         <AppLayout>
-            <div className={`min-h-screen flex flex-col justify-center items-center bg-white px-4 sm:px-6 lg:px-8 py-12 ${className}`}>
+            <div className={`min-h-screen flex flex-col items-center bg-white px-4 sm:px-6 lg:px-8 py-6 ${className}`}>
                 <div className="w-full max-w-2xl">
+                    <div className="mb-2 flex items-center justify-between">
+                        <div className="flex gap-2">
+                            <button
+                                type="button"
+                                onClick={() => setActiveTab('list')}
+                                className={`px-3 py-1 rounded-md border ${activeTab === 'list' ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-gray-50 border-gray-100 text-black/70'}`}
+                            >
+                                Danh sách yêu cầu
+                            </button>
+                            {!hasPending && (
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveTab('form')}
+                                    className={`px-3 py-1 rounded-md border ${activeTab === 'form' ? 'bg-emerald-600 border-emerald-600 text-white' : 'bg-gray-50 border-gray-100 text-black/70'}`}
+                                >
+                                    Đăng ký mới
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {hasPending && (
+                        <div className="mb-3 p-3 rounded-md bg-amber-50 border border-amber-100 text-amber-800 text-sm">
+                            Yêu cầu của bạn đã được gửi thành công và đang chờ quản trị viên phê duyệt. Chúng mình sẽ phản hồi bạn trong thời gian sớm nhất!
+                        </div>
+                    )}
+
+                    {activeTab === 'list' && (
+                        <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-4 sm:p-6 mt-0">
+                            <h3 className="text-lg font-semibold mb-3">Các yêu cầu đã gửi</h3>
+                            {requests.length === 0 ? (
+                                <p className="text-sm text-black/60">Bạn chưa gửi yêu cầu nào.</p>
+                            ) : (
+                                <div className="space-y-3">
+                                    {requests.map((req) => {
+                                        const statusMap: Record<string, string> = {
+                                            pending: 'Đang chờ duyệt',
+                                            approved: 'Đã duyệt',
+                                            rejected: 'Bị từ chối',
+                                        };
+                                        const statusColor = req.status === 'pending'
+                                            ? 'bg-amber-100 text-amber-800'
+                                            : req.status === 'approved'
+                                                ? 'bg-emerald-100 text-emerald-800'
+                                                : 'bg-red-100 text-red-800';
+
+                                        return (
+                                            <div key={req._id} className="p-3 border rounded-lg flex gap-4 items-center">
+                                                {req.bannerUrl ? (
+                                                    <img src={req.bannerUrl} alt={req.restaurantName} className="w-20 h-20 object-cover rounded-md" />
+                                                ) : (
+                                                    <div className="w-20 h-20 bg-gray-100 rounded-md flex items-center justify-center text-sm text-gray-400">Ảnh</div>
+                                                )}
+
+                                                <div className="flex-1">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="pr-4">
+                                                            <div className="font-semibold text-black">{req.restaurantName}</div>
+                                                            {req.description && <div className="text-sm text-black/60 mt-1">{req.description}</div>}
+                                                            <div className="text-sm text-black/60 mt-2">{req.address?.full}</div>
+                                                            {req.phone && <div className="text-sm text-black/60">SĐT: {req.phone}</div>}
+                                                            {Array.isArray(req.categoriesId) && req.categoriesId.length > 0 && (
+                                                                <div className="text-xs text-black/50 mt-1">Danh mục: {req.categoriesId.join(', ')}</div>
+                                                            )}
+                                                            {Array.isArray(req.documents) && (
+                                                                <div className="text-xs text-black/50 mt-1">Ảnh hồ sơ: {req.documents.length}</div>
+                                                            )}
+                                                        </div>
+
+                                                        <div className="text-right">
+                                                            <div className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
+                                                                {statusMap[req.status] || req.status}
+                                                            </div>
+                                                            <div className="text-xs text-black/50 mt-2">{new Date(req.createdAt).toLocaleString('vi-VN')}</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    )}
+
                     {error && (
                         <div className="mb-4 p-3 bg-white border border-black/10 text-black rounded-2xl">
                             {error}
                         </div>
                     )}
 
-                    <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-6 sm:p-8">
+                    {activeTab === 'form' && (
+                        <div className="bg-white rounded-2xl border border-black/10 shadow-sm p-6 sm:p-8">
                         <div className="mb-6">
                             <h2 className="text-2xl font-bold text-center text-black">
                                 Tạo nhà hàng
@@ -270,6 +326,73 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                             onBannerFileChange={setBannerFile}
                             errors={restaurantErrors}
                         />
+
+                        <div className="mt-6">
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                                Hồ sơ pháp lý (Giấy phép kinh doanh, ATTP...) <span className="text-red-500">*</span>
+                            </label>
+                            <div className="border-2 border-dashed border-gray-200 rounded-xl p-4 hover:border-emerald-500 transition-colors bg-gray-50/50">
+                                <input
+                                    type="file"
+                                    multiple
+                                    accept="image/*"
+                                    onChange={(e) => {
+                                        if (e.target.files) {
+                                            setDocumentFiles(Array.from(e.target.files));
+                                        }
+                                    }}
+                                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                                />
+                                {documentFiles.length > 0 && (
+                                    <div className="mt-3 flex flex-wrap gap-2">
+                                        {documentFiles.map((file, idx) => (
+                                            <div key={idx} className="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded-md border border-emerald-200">
+                                                {file.name.length > 15 ? file.name.substring(0, 15) + '...' : file.name}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                                <p className="mt-2 text-[11px] text-gray-400 italic">Tối đa 5 ảnh, định dạng JPG/PNG</p>
+                            </div>
+                        </div>
+
+                        {/* <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm font-medium text-black mb-1">Latitude</label>
+                                <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={latitude}
+                                    onChange={(e) => setLatitude(e.target.value)}
+                                    className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                                        restaurantErrors.latitude ? 'border-black' : 'border-black/10'
+                                    }`}
+                                    placeholder="VD: 10.8231"
+                                />
+                                {restaurantErrors.latitude && (
+                                    <p className="mt-1 text-sm text-black/70">{restaurantErrors.latitude}</p>
+                                )}
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-black mb-1">Longitude</label>
+                                <input
+                                    type="number"
+                                    inputMode="decimal"
+                                    step="any"
+                                    value={longitude}
+                                    onChange={(e) => setLongitude(e.target.value)}
+                                    className={`w-full px-4 py-2 rounded-xl border focus:outline-none focus:ring-2 focus:ring-emerald-500 ${
+                                        restaurantErrors.longitude ? 'border-black' : 'border-black/10'
+                                    }`}
+                                    placeholder="VD: 106.6297"
+                                />
+                                {restaurantErrors.longitude && (
+                                    <p className="mt-1 text-sm text-black/70">{restaurantErrors.longitude}</p>
+                                )}
+                            </div>
+                        </div> */}
+
                         {loadingCategories && (
                             <div className="text-center text-sm text-black/60 mt-3">
                                 Đang tải danh sách danh mục...
@@ -286,7 +409,8 @@ const OwnerRegisterScreen: React.FC<{ className?: string }> = ({ className = '' 
                                 {loading ? 'Đang xử lý...' : 'Gửi yêu cầu duyệt'}
                             </button>
                         </div>
-                    </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </AppLayout>

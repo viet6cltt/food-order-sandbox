@@ -72,10 +72,10 @@ const OwnerRestaurantInfoScreen: React.FC = () => {
     }, []);
 
     const handleSaveRestaurantInfo = async () => {
-        if (!canSave) return;
+        if (!canSave || !restaurantId) return;
         try {
             setSaving(true);
-            await updateMyRestaurant({
+            await updateMyRestaurant(restaurantId, {
                 name,
                 description,
                 phone: restaurantPhone,

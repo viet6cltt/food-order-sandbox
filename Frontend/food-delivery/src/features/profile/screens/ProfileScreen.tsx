@@ -24,6 +24,7 @@ const ProfileScreen: React.FC = () => {
         setIsEditing(false);
     };
 
+    console.log(user);
     const getAvatarUrl = () => {
         if (user?.avatarUrl) return user.avatarUrl;
         const name = fullName || user?.username || 'User';

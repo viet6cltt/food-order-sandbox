@@ -1,7 +1,7 @@
 // src/features/owner/components/OrderList.tsx
 import { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import { toast } from 'react-toastify';
-import { getMyRestaurant, getRestaurantOrders, confirmOrder, prepareOrder, deliverOrder, cancelOrderByRestaurant, completeOrder } from '../api';
+import { getRestaurantOrders, confirmOrder, prepareOrder, deliverOrder, cancelOrderByRestaurant, completeOrder } from '../api';
 import type { Order, OrderStatus } from '../../../types/order';
 import OrderTable from './OrderTable';
 
@@ -23,38 +23,15 @@ export type OrderListHandle = {
 };
 
 type OrderListProps = {
+    restaurantId: string | null;
     onOrderCompleted?: () => void;
 };
 
-const OrderList = forwardRef<OrderListHandle, OrderListProps>(({ onOrderCompleted }, ref) => {
-    const [restaurantId, setRestaurantId] = useState<string | null>(null);
+const OrderList = forwardRef<OrderListHandle, OrderListProps>(({ onOrderCompleted, restaurantId }, ref) => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-    // Fetch restaurant when component mounts
-    useEffect(() => {
-        const fetchRestaurant = async () => {
-            try {
-                setLoading(true);
-                const restaurant = await getMyRestaurant();
-                if (restaurant) {
-                    setRestaurantId(restaurant._id || restaurant.id || null);
-                } else {
-                    setError('Bạn chưa có nhà hàng. Vui lòng đăng ký nhà hàng trước.');
-                }
-            } catch (err: unknown) {
-                setError(getErrorMessage(err, 'Không thể tải thông tin nhà hàng.'));
-                console.error('Error fetching restaurant:', err);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchRestaurant();
-    }, []);
-
-    // Fetch orders when restaurantId is available
     useEffect(() => {
         if (!restaurantId) return;
 

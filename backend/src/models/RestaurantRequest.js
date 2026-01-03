@@ -9,6 +9,8 @@ const RestaurantRequestSchema = new mongoose.Schema({
 
   restaurantName: { type: String, required: true, trim: true },
   description: { type: String, default: null },
+
+  bannerUrl: { type: String, default: null },
   
   address: {
     full: { type: String, required: true }, 
