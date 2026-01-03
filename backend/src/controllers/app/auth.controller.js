@@ -604,7 +604,7 @@ class AuthController {
                 const st = AuthService.parseAndVerifyState(state);
                 
                 // Chuẩn hóa frontendUrl: bỏ dấu gạch chéo ở cuối nếu có để tránh lỗi //
-                const rawFrontendUrl = st?.returnUrl || 'http://localhost:5173';
+                const rawFrontendUrl = st?.returnUrl  || process.env.APP_URL || 'http://localhost:5173';
                 const frontendUrl = rawFrontendUrl.replace(/\/$/, "");
 
                 // 1. Xử lý lỗi
