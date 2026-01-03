@@ -2,42 +2,35 @@ const orderRepository = require("@/repositories/order.repository");
 
 class AdminOrderService {
   
-  async getWeeklyPerformanceTrend() {
-    const sinceDate = new Date();
-    sinceDate.setDate(sinceDate.getDate() - 7);
+  async getOrderAnalysisReport({ startDate, endDate }) {
+    // Chuẩn hóa ngày (đầu ngày và cuối ngày)
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
 
-    const stats = await orderRepository.getDashboardStats(sinceDate);
-    return stats.map(item => ({
-      date: item._id,
-      completed: item.completed,
-      cancelled: item.cancelled
-    }));
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    const [distributionData, trendData] = await Promise.all([
+        orderRepository.getStatusDistributionSummary({ startDate: start, endDate: end }),
+        orderRepository.getOrderTrend(start, end)
+    ]);
+
+    const result = distributionData[0] || { byStatus: [], revenue: [] };
+
+    return {
+        statusBreakdown: result.byStatus, // Dùng cho các ô Summary
+        totalRevenue: result.revenue[0]?.total || 0, // Dùng cho ô Doanh thu
+        trend: trendData // Dùng cho biểu đồ AreaChart
+    };
   }
 
-  async getOrderAnalysisReport(filters) {
+  async getTopCategoriesReport() {
+    const data = await orderRepository.getTopCategoriesTotalSales();
 
-    const processedFilters = {};
-
-    if (filters.startDate) {
-      const start = new Date(filters.startDate);
-      start.setHours(0, 0, 0, 0); // Đặt về đầu ngày
-      processedFilters.startDate = start;
-    }
-
-    if (filters.endDate) {
-      const end = new Date(filters.endDate);
-      end.setHours(23, 59, 59, 999); // Đặt về cuối ngày
-      processedFilters.endDate = end;
-    }
-
-    const data = await orderRepository.getStatusDistributionSummary(processedFilters);
-
-    const result = data[0];
-    
-    return {
-      statusBreakdown: result.byStatus, // theo trạng thái (Pending, Delivering, ...)
-      totalRevenue: result.revenue[0]?.total || 0 // doanh thu từ các đơn completed
-    };
+    return data.map(item => ({
+      name: item.categoryName,
+      value: item.totalQuantity
+    }));
   }
 }
 

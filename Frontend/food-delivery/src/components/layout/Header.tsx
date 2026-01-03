@@ -14,7 +14,8 @@ const Header: React.FC<Props> = ({ className = '' }) => {
   const { user, isAuthenticated, isLoading } = useUser();
   const [cartCount, setCartCount] = useState(0)
 
-  const shouldShowCart = Boolean(isAuthenticated && user?.role !== 'admin' && user?.role !== 'restaurant_owner')
+  const isAdmin = user?.role === 'admin';
+  const shouldShowCart = Boolean(isAuthenticated && !isAdmin && user?.role !== 'restaurant_owner')
 
   useEffect(() => {
     if (!shouldShowCart) {
@@ -51,7 +52,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
   }, [shouldShowCart])
 
   const handleLogoClick = () => {
-    if (isAuthenticated && user?.role === 'admin') {
+    if (isAuthenticated && isAdmin) {
       navigate('/admin/dashboard');
     } else if (isAuthenticated && user?.role === 'restaurant_owner') {
       navigate('/owner/restaurant-list');
@@ -77,7 +78,8 @@ const Header: React.FC<Props> = ({ className = '' }) => {
     className={`sticky top-0 z-30 bg-white/90 backdrop-blur-xl border-b border-black/5 shadow-sm ${className}`}
   >
     <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
-      <div className="grid grid-cols-2 md:grid-cols-[220px_1fr_auto] items-center h-16 gap-4">
+      {/* Cập nhật grid-cols để cân đối khi không có search */}
+      <div className={`grid items-center h-16 gap-4 ${!isAdmin ? 'grid-cols-2 md:grid-cols-[220px_1fr_auto]' : 'grid-cols-2'}`}>
 
         {/* LOGO */}
         <div className="flex items-center">
@@ -89,12 +91,14 @@ const Header: React.FC<Props> = ({ className = '' }) => {
           </button>
         </div>
 
-        {/* SEARCH (DESKTOP) */}
-        <div className="hidden md:flex justify-center">
-          <div className="w-full max-w-2xl">
-            <SearchButton />
+        {/* SEARCH (DESKTOP) - Ẩn nếu là Admin */}
+        {!isAdmin && (
+          <div className="hidden md:flex justify-center">
+            <div className="w-full max-w-2xl">
+              <SearchButton />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* ACTIONS */}
         <div className="flex items-center justify-end gap-2 sm:gap-3">
@@ -151,7 +155,7 @@ const Header: React.FC<Props> = ({ className = '' }) => {
                 </div>
 
               {/* CART */}
-              {user?.role !== 'admin' && user?.role !== 'restaurant_owner' && (
+              {shouldShowCart && (
                 <button
                   onClick={() => navigate('/cart')}
                   className="relative p-2 rounded-full text-gray-600 hover:bg-gray-100 transition"
@@ -205,10 +209,12 @@ const Header: React.FC<Props> = ({ className = '' }) => {
             </button>
           )}
 
-          {/* SEARCH MOBILE */}
-          <div className="md:hidden">
-            <SearchButton isMobileIconOnly />
-          </div>
+          {/* SEARCH MOBILE - Ẩn nếu là Admin */}
+          {!isAdmin && (
+            <div className="md:hidden">
+              <SearchButton isMobileIconOnly />
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -113,3 +113,19 @@ export const adminRestaurantApi = {
         return response.data;
     }
 };
+
+export const adminOrderApi = {
+    getReport: async (startDate: string, endDate: string) => {
+        const response = await api.get('/admin/orders/statistics', {
+            params: { startDate, endDate }
+        });
+        console.log("Order Report Data:", response.data);
+        return response.data.data; 
+        // Data trả về gồm: { statusBreakdown, totalRevenue, trend }
+    },
+
+    getTopCategories: async () => {
+        const response = await api.get('/admin/orders/categories/top');
+        return response.data.data; // Trả về mảng [{ name: string, value: number }]
+    }
+}

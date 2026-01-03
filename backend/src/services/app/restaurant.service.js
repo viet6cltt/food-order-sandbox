@@ -123,29 +123,31 @@ class RestaurantService {
       status: RestaurantStatus.ACTIVE
     };
 
-    // IMPORTANT: this endpoint uses aggregation ($match / $geoNear).
-    // Aggregation does NOT apply Mongoose's type casting, so we must cast manually
-    // to match against categoriesId: [ObjectId].
-    if (categoryId) {
-      if (mongoose.Types.ObjectId.isValid(categoryId)) {
-        filter.categoriesId = new mongoose.Types.ObjectId(String(categoryId));
-      } else {
-        throw new ERR_RESPONSE.BadRequestError('Invalid categoryId', ERR.INVALID_INPUT);
-      }
-    }
+    if (categoryId) filter.categoriesId = new mongoose.Types.ObjectId(categoryId);
 
     // sort khi không có tọa độ
     // nếu sortBy là newest thì k quan tâm đến rating
     let sortOptions = { rating: -1, createdAt: -1 };
     if (sortBy === 'newest') sortOptions = { createdAt: -1 };
 
+    const hasLocation =
+      lat !== null &&
+      lng !== null &&
+      !isNaN(lat) &&
+      !isNaN(lng);
+
+    console.log(filter, sortOptions, lat, lng)
+
     const { items, total } = await restaurantRepository.findAllWithScore({
       filter,
       sort: sortOptions,
       skip, limit,
-      lat: lat ? Number(lat) : null,
-      lng: lng ? Number(lng) : null,
+      lat: hasLocation ? lat : null,
+      lng: hasLocation ? lat : null,
     });
+
+
+    console.log(items);
 
     // Xử lí giờ đóng cửa 
     const currentTime = new Date().toTimeString().slice(0, 5);

@@ -299,6 +299,21 @@ class UserController {
     }
   }
 
+  async changePassword(req, res, next) {
+    try {
+      const userId = req.userId;
+      const { oldPassword, newPassword } = req.body;
+
+      if (!oldPassword || !newPassword) {
+        throw new ERR_RESPONSE.BadRequestError('Missing password');
+      }
+
+      const updatedUser = await UserService.changePassword(userId, oldPassword, newPassword);
+      return SUCCESS_RESPONSE.success(res, 'Change your password successfully', { updatedUser });
+    } catch (err) {
+      next(err);
+    }
+  }
 }
 
 module.exports = new UserController();

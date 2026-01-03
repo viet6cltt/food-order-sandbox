@@ -1,29 +1,45 @@
 const Report = require('@/models/Report');
 
 class ReportRepository { 
-
   /**
-   * Tạo báo cáo mới (User/Owner)
+   * Tạo báo cáo mới
    */
   async create(reportData) {
     return await Report.create(reportData);
   }
 
   /**
-   * Tìm báo cáo theo ID và populate thông tin người báo cáo
+   * Tìm chi tiết báo cáo
+   * Tối ưu: Populate chi tiết đối tượng bị báo cáo dựa trên targetType
    */
   async findById(reportId) {
-    return await Report.findById(reportId)
-      .populate('reportedBy', 'username phone firstname lastname')
+    const report = await Report.findById(reportId)
+      .populate('reportedBy', 'username phone firstname lastname avatarUrl')
       .populate('resolvedBy', 'username');
+
+    if (!report) return null;
+
+    // Populate động dựa trên targetType để lấy nội dung thực tế
+    const modelMap = {
+      'REVIEW': { path: 'targetId', model: 'Review', populate: { path: 'userId', select: 'username' } },
+      'RESTAURANT': { path: 'targetId', model: 'Restaurant', select: 'name address logo' },
+      'USER': { path: 'targetId', model: 'User', select: 'username email' }
+    };
+
+    const options = modelMap[report.targetType];
+    if (options) {
+      await report.populate(options);
+    }
+
+    return report;
   }
 
   /**
-   * Lấy danh sách báo cáo cho Admin (có lọc, phân trang)
+   * Lấy danh sách báo cáo cho Admin
+   * Hiển thị ở bảng: Cần biết người báo cáo và lý do
    */
   async findAll({ status, targetType, limit = 10, skip = 0 }) {
     const query = {};
-
     if (status) query.status = status;
     if (targetType) query.targetType = targetType;
 
@@ -32,9 +48,20 @@ class ReportRepository {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('reportedBy', 'username'),
-        Report.countDocuments(query)
+        .populate('reportedBy', 'username firstname lastname avatarUrl')
+        // Populate sơ bộ target để hiện tên/nội dung ngắn ở bảng danh sách
+        .lean(), 
+      Report.countDocuments(query)
     ]);
+
+    // Populate nội dung sơ bộ cho danh sách (để hiện "Tên quán" hoặc "Nội dung review" ngắn)
+    for (let report of reports) {
+      if (report.targetType === 'RESTAURANT') {
+        await Report.populate(report, { path: 'targetId', model: 'Restaurant', select: 'name' });
+      } else if (report.targetType === 'REVIEW') {
+        await Report.populate(report, { path: 'targetId', model: 'Review', select: 'comment rating' });
+      }
+    }
 
     return {
       reports,
@@ -42,35 +69,28 @@ class ReportRepository {
     };
   }
 
-  /**
-     * Kiểm tra xem một user đã báo cáo đối tượng này chưa (tránh spam)
-     */
   async findExisting(reportedBy, targetId, targetType) {
-      return await Report.findOne({ reportedBy, targetId, targetType });
+    return await Report.findOne({ reportedBy, targetId, targetType });
   }
 
-/**
-   * Cập nhật trạng thái xử lý báo cáo (Admin)
-   */
   async resolve(reportId, { status, adminNote, resolvedAction, resolvedBy }) {
-      return await Report.findByIdAndUpdate(
-          reportId,
-          {
-            status,
-            adminNote,
-            resolvedAction,
-            resolvedBy,
-            resolvedAt: new Date()
-          },
-          { new: true }
-      );
+    return await Report.findByIdAndUpdate(
+      reportId,
+      {
+        status,
+        adminNote,
+        resolvedAction,
+        resolvedBy,
+        resolvedAt: new Date()
+      },
+      { new: true }
+    ).populate('resolvedBy', 'username');
   }
 
-  /**
-   * Tìm all báo cáo liên quan đến 1 đối tượng cụ thể
-   */
   async findByTarget(targetId) {
-    return await Report.find({ targetId }).sort({ createdAt: -1 });
+    return await Report.find({ targetId })
+      .sort({ createdAt: -1 })
+      .populate('reportedBy', 'username');
   }
 }
 

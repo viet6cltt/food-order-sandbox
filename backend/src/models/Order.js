@@ -94,6 +94,11 @@ const OrderSchema = new mongoose.Schema(
       default: "draft"
     },
 
+    isReviewed: {
+      type: Boolean,
+      default: false
+    },
+
     note: { type: String, default: "" },
   },
   {

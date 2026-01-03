@@ -46,12 +46,19 @@ class AdminOrderController {
    *       403:
    *         description: Forbidden - Admin access required
    */
-  async getDashboardStats(req, res, next) {
+  async getOrderTrends(req, res, next) {
     try {
-      const data = await adminOrderService.getWeeklyPerformanceTrend();
-      return SUCCESS.success(res, 'Get weekly Orders trend succesfully', data);
+        const { startDate, endDate } = req.query;
+        
+        const filters = {
+            startDate: startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+            endDate: endDate || new Date().toISOString()
+        };
+
+        const data = await adminOrderService.getOrderAnalysisReport(filters);
+        return SUCCESS.success(res, "Lấy thống kê chi tiết thành công", data);
     } catch (err) {
-      next(err);
+        next(err);
     }
   }
 
@@ -122,6 +129,16 @@ class AdminOrderController {
       const { startDate, endDate } = req.query;
       const data = await adminOrderService.getOrderAnalysisReport({ startDate, endDate });
       return SUCCESS.success(res, "Lấy thống kê chi tiết thành công", data);
+    } catch (err) {
+      next(err);
+    }
+  }
+
+  async getTopCategoriesStats(req, res, next) {
+    try {
+      const data = await adminOrderService.getTopCategoriesReport();
+
+      return SUCCESS.success(res, "Get top categories successfully", data);
     } catch (err) {
       next(err);
     }

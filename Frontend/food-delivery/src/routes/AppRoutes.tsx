@@ -29,6 +29,8 @@ import RestaurantCategoryScreen from '../features/admin/screens/RestaurantCatego
 import AdminReportHandlingScreen from '../features/admin/screens/AdminReportHandlingScreen';
 import UserStatisticsScreen from '../features/admin/screens/UserStatisticsScreen';
 import AdminRestaurantRequestsScreen from '../features/admin/screens/AdminRestaurantRequestScreen';
+import OrderStatisticsScreen from '../features/admin/screens/OrderStatisticsScreen.tsx';
+
 const AppRoutes: React.FC = () => {
 	return (
 		<BrowserRouter>
@@ -65,7 +67,7 @@ const AppRoutes: React.FC = () => {
 				{/* Customer routes */}
 				<Route path="/" element={
 					
-						<HomeScreen />
+					<HomeScreen />
 
 				} />
 				<Route path="/cart" element={
@@ -80,25 +82,21 @@ const AppRoutes: React.FC = () => {
 						<PaymentScreen />
 					</ProtectedRoute>
 				} />
-                <Route path="/restaurant/:restaurantId/*" element={
-					<ProtectedRoute allowedRoles={['customer']}>
+        <Route path="/restaurant/:restaurantId/*" element={
 						<RestaurantDetailScreen />
-					</ProtectedRoute>
 				} />
 
-                <Route path="/food/:foodId" element={
-					<ProtectedRoute allowedRoles={['customer']}>
+				<Route path="/food/:foodId" element={
 						<FoodDetailScreen />
-					</ProtectedRoute>
 				} />
 
-                <Route path="/owner/register" element={
+				<Route path="/owner/register" element={
 					<ProtectedRoute allowedRoles={['customer', 'restaurant_owner', 'admin']}>
 						<OwnerRegisterScreen />
 					</ProtectedRoute>
 				} />
 
-                <Route path="/order-list" element={
+				<Route path="/order-list" element={
 					<ProtectedRoute allowedRoles={['customer']}>
 						<OrderListScreen />
 					</ProtectedRoute>
@@ -109,28 +107,28 @@ const AppRoutes: React.FC = () => {
 					</ProtectedRoute>
 				} />
 
-                {/* Owner routes */}
-                <Route path="/owner/:restaurantId/dashboard/*" element={
-                    <ProtectedRoute allowedRoles={['restaurant_owner']}>
-                        <OwnerDashboardScreen />
-                    </ProtectedRoute>
-                } />
-                <Route path="/owner/:restaurantId/restaurant-info/*" element={
-                    <ProtectedRoute allowedRoles={['restaurant_owner']}>
-                        <OwnerRestaurantInfoScreen />
-                    </ProtectedRoute>
-                } />
-                <Route path="/owner/add-food/*" element={
-                    <ProtectedRoute allowedRoles={['restaurant_owner']}>
-                        <AddFoodScreen />
-                    </ProtectedRoute>
-                } />
+				{/* Owner routes */}
+				<Route path="/owner/:restaurantId/dashboard/*" element={
+						<ProtectedRoute allowedRoles={['restaurant_owner']}>
+								<OwnerDashboardScreen />
+						</ProtectedRoute>
+				} />
+				<Route path="/owner/:restaurantId/restaurant-info/*" element={
+						<ProtectedRoute allowedRoles={['restaurant_owner']}>
+								<OwnerRestaurantInfoScreen />
+						</ProtectedRoute>
+				} />
+				<Route path="/owner/add-food/*" element={
+						<ProtectedRoute allowedRoles={['restaurant_owner']}>
+								<AddFoodScreen />
+						</ProtectedRoute>
+				} />
 
-								<Route path="/owner/restaurant-list/*" element={
-                    <ProtectedRoute allowedRoles={['restaurant_owner']}>
-                        <OwnerRestaurantListScreen />
-                    </ProtectedRoute>
-                } />
+				<Route path="/owner/restaurant-list/*" element={
+						<ProtectedRoute allowedRoles={['restaurant_owner']}>
+								<OwnerRestaurantListScreen />
+						</ProtectedRoute>
+				} />
 
 
 				<Route path="/owner/:restaurantId/menu-list/*" element={
@@ -169,6 +167,14 @@ const AppRoutes: React.FC = () => {
 								<AdminRestaurantRequestsScreen />
 						</ProtectedRoute>
 				} />
+
+				<Route path="/admin/orders/*" element={
+						<ProtectedRoute allowedRoles={['admin']}>
+								<OrderStatisticsScreen />
+						</ProtectedRoute>
+				} />
+
+
 
 			</Routes>
 		</BrowserRouter>

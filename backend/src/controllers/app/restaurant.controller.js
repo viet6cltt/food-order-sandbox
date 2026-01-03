@@ -124,6 +124,7 @@ class RestaurantController {
     try {
       // 1. lat, lng from query string
       const { categoryId, sortBy, lat, lng } = req.query;
+
       
       const pagination = req.pagination;
 

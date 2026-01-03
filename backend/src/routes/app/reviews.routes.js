@@ -7,7 +7,7 @@ const upload = require('@/middlewares/upload.middleware');
 
 router.post("/", requireAuth, upload.array('reviewImages', 5), reviewController.create);
 
-// Restaurant owner report bad review
+// user report bad review
 router.post("/:reviewId/report", requireAuth, reviewReportController.sendReport);
 
 module.exports = router;

@@ -3,7 +3,8 @@ const ERR = require('@/utils/httpErrors');
 
 class AdminReviewService {
   async hideReview(id) {
-    const review = repo.findById(id);
+    const review = await repo.findById(id);
+
     if (!review) throw new ERR.NotFoundError("Review Not Found");
 
     if (review.status !== "PUBLISHED") {

@@ -30,6 +30,11 @@ class UserRepository {
     return await User.findOne(query);
   }
 
+  async findByIdWithPassword(userId) {
+    // Thêm .select('+passwordHash') nếu bạn để select: false trong Schema
+    return await User.findById(userId).select('+passwordHash');
+  }
+
   async findByPhone(phone) {
     if (!phone) return null;
     
@@ -73,7 +78,7 @@ class UserRepository {
     return await User.findByIdAndUpdate(
       userId,
       { $set: updateFields },
-      { new: true, runValidators: true }
+      { new: true, runValidators: false }
     );
   }
 

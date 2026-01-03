@@ -280,7 +280,7 @@ class ReviewController {
 
       if (!menuItemId) throw new ERR_RESPONSE.BadRequestError("Missing menuItemId");
 
-      const result = await reviewService.getByMenuItem(menuItemId, pagination);
+      const result = await reviewService.findByMenuItem(menuItemId, pagination);
       return SUCCESS.success(res, "Menu item reviews fetched successfully", result);
     } catch (err) {
       next(err);

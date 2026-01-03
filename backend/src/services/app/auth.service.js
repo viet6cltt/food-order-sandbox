@@ -89,7 +89,7 @@ class AuthService {
     // Kiem tra mat khau
     const isMatch = await authHelper.comparePassword(password, user.passwordHash);
     if (!isMatch) {
-      throw new HTTP_ERROR.UnauthorizedError('Wrong password', ERR.AUTH_INVALID_CREDENTIALS);
+      throw new HTTP_ERROR.ConflictError('Wrong password', ERR.AUTH_INVALID_CREDENTIALS);
     }
 
     // Create token

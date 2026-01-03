@@ -3,7 +3,7 @@ import type { AxiosResponse, InternalAxiosRequestConfig, AxiosError } from 'axio
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
-  timeout: 15000,
+  timeout: 30000,
   withCredentials: true,
 });
 
